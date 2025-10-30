@@ -1,0 +1,147 @@
+{
+    "version": "1.0",
+    "description": "Skill activation rules for Claude Code hooks",
+    "skills": [
+      {
+        "skill": "prd-to-tasks",
+        "triggers": [
+          "generate tasks",
+          "parse prd",
+          "create tasks",
+          "task decomposition",
+          "tasks.json",
+          "product requirements",
+          "requirements document",
+          "break down",
+          "decompose"
+        ],
+        "filePatterns": [
+          "PRD.md",
+          "requirements.md",
+          "product-requirements",
+          "REQUIREMENTS.md",
+          "docs/PRD",
+          "docs/requirements"
+        ],
+        "description": "Generates TaskMaster tasks.json from PRD with integration tasks",
+        "priority": 1,
+        "phase": "phase1"
+      },
+      {
+        "skill": "coupling-analysis",
+        "triggers": [
+          "task-master show",
+          "taskmaster show",
+          "tightly coupled",
+          "loosely coupled",
+          "parallel",
+          "coupling",
+          "proposal strategy",
+          "analyze tasks",
+          "task dependencies",
+          "can we parallelize"
+        ],
+        "filePatterns": [
+          ".taskmaster/tasks.json",
+          "tasks.json"
+        ],
+        "description": "Analyzes task coupling to determine OpenSpec strategy (single vs multiple proposals)",
+        "priority": 2,
+        "phase": "phase1-to-phase2"
+      },
+      {
+        "skill": "test-strategy-generator",
+        "triggers": [
+          "openspec proposal",
+          "test strategy",
+          "what tests",
+          "TDD",
+          "test coverage",
+          "write tests",
+          "test plan",
+          "testing approach",
+          "test cases",
+          "coverage requirements"
+        ],
+        "filePatterns": [
+          ".openspec/proposals",
+          "*.proposal.md",
+          ".openspec/"
+        ],
+        "description": "Generates comprehensive test strategies (60/30/10 distribution) from OpenSpec proposals",
+        "priority": 3,
+        "phase": "phase2-to-phase3"
+      },
+      {
+        "skill": "integration-validator",
+        "triggers": [
+          "integration testing",
+          "production ready",
+          "ready to deploy",
+          "Go/No-Go",
+          "Task #24",
+          "Task #25",
+          "Task #26",
+          "integration points",
+          "system integration",
+          "e2e testing",
+          "end-to-end",
+          "production validation",
+          "deployment readiness"
+        ],
+        "filePatterns": [
+          "architecture.md",
+          "TASKMASTER_OPENSPEC_MAP.md",
+          "ARCHITECTURE.md",
+          "docs/architecture"
+        ],
+        "description": "Validates integration points and production readiness scores",
+        "priority": 4,
+        "phase": "phase4-phase5-phase6"
+      }
+    ],
+    "phases": {
+      "pre-init": {
+        "description": "Before tasks.json exists",
+        "recommendedSkills": ["prd-to-tasks"]
+      },
+      "phase1": {
+        "description": "Task decomposition with TaskMaster",
+        "recommendedSkills": ["prd-to-tasks"]
+      },
+      "phase1-to-phase2": {
+        "description": "Transition from tasks to OpenSpec proposals",
+        "recommendedSkills": ["coupling-analysis"]
+      },
+      "phase2": {
+        "description": "OpenSpec proposal generation",
+        "recommendedSkills": ["test-strategy-generator"]
+      },
+      "phase2-to-phase3": {
+        "description": "Transition from specs to implementation",
+        "recommendedSkills": ["test-strategy-generator"]
+      },
+      "phase3": {
+        "description": "TDD implementation (RED-GREEN-REFACTOR)",
+        "recommendedSkills": []
+      },
+      "phase4": {
+        "description": "Component integration testing",
+        "recommendedSkills": ["integration-validator"]
+      },
+      "phase5": {
+        "description": "End-to-end workflow testing",
+        "recommendedSkills": ["integration-validator"]
+      },
+      "phase6": {
+        "description": "Production readiness validation",
+        "recommendedSkills": ["integration-validator"]
+      }
+    },
+    "notes": {
+      "caseSensitivity": "All trigger matching is case-insensitive",
+      "multipleMatches": "Multiple skills can be suggested if multiple patterns match",
+      "fileContext": "File patterns match against files in Claude's context",
+      "priority": "Lower priority number = higher priority (1 is highest)"
+    }
+  }
