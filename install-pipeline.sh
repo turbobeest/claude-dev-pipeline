@@ -31,12 +31,16 @@
 #   --github-org       GitHub org/user for pipeline repo
 #   --github-repo      Repository name
 #   --branch           Branch to use
+#   --path             Specify installation path (non-interactive)
+#   --yes, -y          Non-interactive mode (skip confirmations)
 #   --local            Install from local directory instead of GitHub
 #   --rollback         Rollback previous installation
 #   -h, --help         Show this help message
 #
 # Examples:
-#   ./install-pipeline.sh                    # Full install (project skills)
+#   ./install-pipeline.sh                    # Full install (interactive)
+#   ./install-pipeline.sh --path /my/project # Install to specific path
+#   ./install-pipeline.sh --yes             # Non-interactive (current dir)
 #   ./install-pipeline.sh --global           # Full install (global skills)
 #   ./install-pipeline.sh --no-hooks         # Install without hooks
 #   ./install-pipeline.sh --local            # Install from current directory
@@ -70,6 +74,8 @@ INSTALL_LOCATION="project"  # "global" or "project"
 INSTALL_HOOKS=true
 INSTALL_TOOLS=true
 INSTALL_FROM_LOCAL=false
+INTERACTIVE_MODE=true  # Ask for user confirmation
+PROJECT_ROOT=""  # Can be set via --path for non-interactive
 GITHUB_ORG="${GITHUB_ORG:-turbobeest}"
 GITHUB_REPO="${GITHUB_REPO:-claude-dev-pipeline}"
 GITHUB_BRANCH="${GITHUB_BRANCH:-deploy}"
@@ -382,6 +388,15 @@ while [[ $# -gt 0 ]]; do
             GITHUB_BRANCH="$2"
             shift 2
             ;;
+        --path)
+            PROJECT_ROOT="$2"
+            INTERACTIVE_MODE=false
+            shift 2
+            ;;
+        --yes|-y)
+            INTERACTIVE_MODE=false
+            shift
+            ;;
         --rollback)
             ROLLBACK_MODE=true
             shift
@@ -476,19 +491,122 @@ fi
 
 # Determine installation directory
 if [ "$INSTALL_LOCATION" = "project" ]; then
-    # Use current working directory as project root
-    # This allows installation in subdirectories of larger repos
-    PROJECT_ROOT=$(pwd)
+    # Handle non-interactive mode
+    if [ "$INTERACTIVE_MODE" = false ]; then
+        if [ -n "$PROJECT_ROOT" ]; then
+            # Path was specified via --path
+            PROJECT_ROOT="${PROJECT_ROOT/#\~/$HOME}"  # Expand tilde
+            
+            if [ ! -d "$PROJECT_ROOT" ]; then
+                log_error "Specified directory does not exist: $PROJECT_ROOT"
+                log_error "Use interactive mode or create the directory first"
+                exit 1
+            fi
+            
+            log_info "Using specified installation path: $PROJECT_ROOT"
+        else
+            # No path specified, use current directory
+            PROJECT_ROOT=$(pwd)
+            log_info "Using current directory (non-interactive mode): $PROJECT_ROOT"
+        fi
+    else
+        # Interactive mode - ask user
+        # Get the current directory and potential git root
+        CURRENT_DIR=$(pwd)
+        GIT_ROOT=""
+        
+        # Check if in git repository
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            GIT_ROOT=$(git rev-parse --show-toplevel)
+        fi
+        
+        # Ask user to confirm installation directory
+        echo ""
+        echo -e "${YELLOW}========================================${NC}"
+        echo -e "${YELLOW}  INSTALLATION DIRECTORY CONFIRMATION${NC}"
+        echo -e "${YELLOW}========================================${NC}"
+        echo ""
+        echo "Current directory: $CURRENT_DIR"
+        if [ -n "$GIT_ROOT" ] && [ "$GIT_ROOT" != "$CURRENT_DIR" ]; then
+            echo "Git repository root: $GIT_ROOT"
+        fi
+        echo ""
+        echo -e "${CYAN}Where should the Claude Dev Pipeline be installed?${NC}"
+        echo ""
+        echo "  1) Current directory: $CURRENT_DIR"
+        if [ -n "$GIT_ROOT" ] && [ "$GIT_ROOT" != "$CURRENT_DIR" ]; then
+            echo "  2) Git repository root: $GIT_ROOT"
+        fi
+        echo "  3) Enter a different path"
+        echo "  4) Cancel installation"
+        echo ""
+        
+        read -p "Please select (1-4): " choice
+        
+        case $choice in
+        1)
+            PROJECT_ROOT="$CURRENT_DIR"
+            ;;
+        2)
+            if [ -n "$GIT_ROOT" ] && [ "$GIT_ROOT" != "$CURRENT_DIR" ]; then
+                PROJECT_ROOT="$GIT_ROOT"
+            else
+                log_error "Invalid selection - Git root not available"
+                exit 1
+            fi
+            ;;
+        3)
+            echo ""
+            read -p "Enter the full path to your project root directory: " custom_path
+            
+            # Expand tilde and validate path
+            custom_path="${custom_path/#\~/$HOME}"
+            
+            if [ ! -d "$custom_path" ]; then
+                echo ""
+                echo -e "${YELLOW}Directory does not exist: $custom_path${NC}"
+                read -p "Create this directory? (y/n): " create_dir
+                if [ "$create_dir" = "y" ] || [ "$create_dir" = "Y" ]; then
+                    mkdir -p "$custom_path" || {
+                        log_error "Failed to create directory: $custom_path"
+                        exit 1
+                    }
+                    log_success "Created directory: $custom_path"
+                else
+                    log_error "Installation cancelled - directory does not exist"
+                    exit 1
+                fi
+            fi
+            
+            PROJECT_ROOT="$custom_path"
+            ;;
+        4)
+            log_info "Installation cancelled by user"
+            exit 0
+            ;;
+        *)
+            log_error "Invalid selection"
+            exit 1
+            ;;
+        esac
+        
+        # Final confirmation
+        echo ""
+        echo -e "${GREEN}Pipeline will be installed in: $PROJECT_ROOT${NC}"
+        echo ""
+        read -p "Is this correct? (y/n): " confirm
+        
+        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+            log_info "Installation cancelled by user"
+            exit 0
+        fi
+    fi  # End of interactive mode block
+    
     log_info "Installing in project: $PROJECT_ROOT"
     
     # Check if in git repository (warning only, not required)
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        log_warning "Not in a git repository. Consider running 'git init' if this is a new project."
-    else
-        GIT_ROOT=$(git rev-parse --show-toplevel)
-        if [ "$PROJECT_ROOT" != "$GIT_ROOT" ]; then
-            log_info "Note: Installing in subdirectory of git repo at $GIT_ROOT"
-        fi
+    if ! git -C "$PROJECT_ROOT" rev-parse --git-dir > /dev/null 2>&1; then
+        log_warning "Target directory is not a git repository. Consider running 'git init' if this is a new project."
     fi
 else
     log_info "Installing globally in ~/.claude"
