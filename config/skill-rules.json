@@ -49,10 +49,34 @@
       },
       "outputs": {
         "files": ["tasks.json"],
-        "signals": ["PHASE1_START"],
-        "next_activation": "COUPLING_ANALYSIS_V1"
+        "signals": ["PHASE1_START", "TASKS_GENERATED"],
+        "next_activation": "TASK_REVIEW_GATE_V1"
       },
       "priority": 2
+    },
+    {
+      "skill": "task-review-gate",
+      "activation_code": "TASK_REVIEW_GATE_V1",
+      "phase": 1.2,
+      "trigger_conditions": {
+        "user_patterns": [
+          "review tasks",
+          "check tasks",
+          "modify task",
+          "refine tasks",
+          "approve tasks"
+        ],
+        "signals_detected": ["TASKS_GENERATED"],
+        "phase_state": "tasks_awaiting_review"
+      },
+      "outputs": {
+        "files": ["tasks-reviewed.json"],
+        "signals": ["TASKS_APPROVED", "TASKS_UNDER_REVIEW"],
+        "next_activation": "COUPLING_ANALYSIS_V1"
+      },
+      "priority": 2.5,
+      "interactive": true,
+      "requires_human": true
     },
     {
       "skill": "coupling-analysis",
@@ -70,8 +94,8 @@
           "analyze tasks"
         ],
         "file_patterns": [".taskmaster/tasks.json", "tasks.json"],
-        "signals_detected": ["PHASE1_START"],
-        "phase_state": "tasks_created"
+        "signals_detected": ["TASKS_APPROVED"],
+        "phase_state": "tasks_approved"
       },
       "outputs": {
         "signals": ["COUPLING_ANALYZED"],
@@ -244,9 +268,22 @@
       "delay_seconds": 2
     },
     "PHASE1_START": {
+      "next_activation": "TASK_REVIEW_GATE_V1",
+      "auto_trigger": false,
+      "delay_seconds": 1,
+      "note": "Pauses for human review of generated tasks"
+    },
+    "TASKS_GENERATED": {
+      "next_activation": "TASK_REVIEW_GATE_V1",
+      "auto_trigger": true,
+      "requires_human_review": true,
+      "delay_seconds": 1
+    },
+    "TASKS_APPROVED": {
       "next_activation": "COUPLING_ANALYSIS_V1",
       "auto_trigger": true,
-      "delay_seconds": 2
+      "delay_seconds": 2,
+      "note": "After approval, pipeline runs fully automatic"
     },
     "COUPLING_ANALYZED": {
       "next_activation": "TASK_DECOMPOSER_V1",
@@ -297,9 +334,11 @@
   "notes": {
     "activation_mode": "Codeword-based activation using unique identifiers",
     "signal_flow": "Each skill emits signals that trigger next phase automatically",
-    "human_gates": "FULLY AUTOMATED after initial PRD approval - no manual intervention required",
+    "human_gates": "ONE interactive review after task generation, then FULLY AUTOMATED",
+    "review_gate": "After PRD-to-Tasks: Interactive review/refinement session before automation",
     "priority": "Lower number = higher priority (1 is highest)",
-    "auto_trigger": "All transitions now automatic with 2-second delays",
-    "automation_level": "100% autonomous from Phase 1 through deployment and demo setup"
+    "auto_trigger": "All transitions automatic after task approval",
+    "automation_level": "Interactive task review, then 100% autonomous through deployment",
+    "workflow": "PRD → Tasks → REVIEW GATE → Full Automation (Phases 1-6)"
   }
 }
