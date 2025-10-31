@@ -89,8 +89,9 @@ Phase 5: E2E & Production Validation    │
                 ↓                        │
         [HUMAN APPROVAL GATE]           │
                 ↓                        │
-Phase 6: Deployment                     │
+Phase 6: Deployment & Infrastructure    │
   Skill: Deployment-Orchestrator        │
+  Includes: Docker build & health check  │
   Output: .signals/phase6-complete.json │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                 ↓

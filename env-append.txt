@@ -1,0 +1,25 @@
+# === Claude Dev Pipeline Configuration ===
+# GitHub Repository (full URL - works with enterprise and personal GitHub)
+# For your enterprise GitHub (no token needed with SSO):
+GITHUB_REPO_URL=https://github.enterprise.com/your-org/NOCBOT-POC
+# Or for the pipeline updates from public repo:
+# GITHUB_REPO_URL=https://github.com/turbobeest/claude-dev-pipeline
+GITHUB_BRANCH=main
+
+# GitHub Token (optional - only needed for private repos)
+# Not required for enterprise GitHub with SSO authentication
+# GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+
+# Pipeline Settings (optional - defaults work fine)
+AUTOMATION_LEVEL=95
+USE_WORKTREES=true
+WORKTREE_BASE_DIR=.worktrees
+LOG_LEVEL=INFO
+
+# Hook Configuration (optional)
+HOOK_DEBUG=false
+SKILL_ACTIVATION_DEBUG=false
+
+# Pipeline Monitoring
+PIPELINE_LOG_DIR=.claude/logs
+MONITOR_REFRESH_RATE=2

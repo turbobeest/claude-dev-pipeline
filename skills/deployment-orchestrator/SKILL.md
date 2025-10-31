@@ -58,6 +58,9 @@ cd ./worktrees/phase-6-task-1
 
 Automates Phase 6: Production deployment in isolated worktree
 
+- **Infrastructure validation** (Docker, Kubernetes, services)
+- **Container build and startup** (docker-compose up)
+- **Health check validation** (all services healthy)
 - **Staging deployment** (validate) in isolated environment
 - **Canary deployment** (monitor) with isolated deployment artifacts
 - **Production rollout** (gradual or immediate) from clean workspace
@@ -69,11 +72,16 @@ Automates Phase 6: Production deployment in isolated worktree
 ## Execution Flow
 
 ```
-Stage 1: Pre-Deployment Validation
+Stage 1: Infrastructure Setup
+         - Build Docker containers (docker-compose build)
+         - Start all services (docker-compose up -d)
+         - Validate health checks
+         - Verify connectivity
+Stage 2: Pre-Deployment Validation
          - Verify Phase 5 GO decision
          - Check all tests passing
          - Validate production readiness score
-Stage 2: Staging Deployment
+Stage 3: Staging Deployment
          - Deploy to staging environment
          - Run smoke tests
          - Validate monitoring
@@ -94,6 +102,20 @@ Stage 5: Post-Deployment Validation
 ```
 
 ## Deployment Strategy
+
+### Infrastructure Setup
+```bash
+# Build and start Docker containers
+docker-compose build
+docker-compose up -d
+
+# Wait for services to be healthy
+timeout 300 bash -c 'until docker-compose ps | grep -v "unhealthy\|starting"; do sleep 10; done'
+
+# Verify all services running
+docker-compose ps
+docker-compose logs --tail=50
+```
 
 ### Staging
 ```bash

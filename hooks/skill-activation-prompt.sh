@@ -542,6 +542,46 @@ if [ ${#CODEWORDS_TO_INJECT[@]} -gt 0 ]; then
   echo ""
 fi
 
+# Check for PRD requirements reminder (GENERIC)
+if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
+    
+    # Check if we're in implementation phase
+    if [ "$CURRENT_PHASE" = "PHASE3" ] || [ "$CURRENT_PHASE" = "implementation" ]; then
+        # Check if PRD requirements file exists
+        local req_file="${PROJECT_ROOT}/.prd-requirements.json"
+        if [ -f "$req_file" ]; then
+            local must_use_count=$(jq '.must_use | length' "$req_file" 2>/dev/null || echo "0")
+            local cannot_use_count=$(jq '.cannot_use | length' "$req_file" 2>/dev/null || echo "0")
+            
+            if [ "$must_use_count" -gt 0 ] || [ "$cannot_use_count" -gt 0 ]; then
+                echo "⚠️ **PRD REQUIREMENTS REMINDER**"
+                echo ""
+                
+                if [ "$must_use_count" -gt 0 ]; then
+                    echo "**MUST USE:**"
+                    jq -r '.must_use[]' "$req_file" 2>/dev/null | while IFS= read -r item; do
+                        echo "  ✓ $item"
+                    done
+                    echo ""
+                fi
+                
+                if [ "$cannot_use_count" -gt 0 ]; then
+                    echo "**CANNOT USE:**"
+                    jq -r '.cannot_use[]' "$req_file" 2>/dev/null | while IFS= read -r item; do
+                        echo "  ✗ $item"
+                    done
+                    echo ""
+                fi
+                
+                echo "---"
+                echo ""
+                
+                audit_log "INFO" "PRD requirements reminder injected for implementation phase"
+            fi
+        fi
+    fi
+fi
+
 # Special case: Pipeline status check (secure)
 if matches_pattern "pipeline status\|what phase\|current phase" "$USER_MESSAGE"; then
     echo "📊 **Pipeline Status**"
