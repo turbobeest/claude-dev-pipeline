@@ -239,8 +239,9 @@
   "phase_transitions": {
     "PHASE0_COMPLETE": {
       "next_activation": "PIPELINE_ORCHESTRATION_V1",
-      "auto_trigger": false,
-      "requires_user_confirmation": true
+      "auto_trigger": true,
+      "requires_user_confirmation": false,
+      "delay_seconds": 2
     },
     "PHASE1_START": {
       "next_activation": "COUPLING_ANALYSIS_V1",
@@ -264,8 +265,9 @@
     },
     "TEST_STRATEGY_COMPLETE": {
       "next_activation": "TDD_IMPLEMENTER_V1",
-      "auto_trigger": false,
-      "requires_user_confirmation": true
+      "auto_trigger": true,
+      "requires_user_confirmation": false,
+      "delay_seconds": 2
     },
     "PHASE3_COMPLETE": {
       "next_activation": "INTEGRATION_VALIDATOR_V1",
@@ -279,9 +281,11 @@
     },
     "PHASE5_COMPLETE": {
       "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1",
-      "auto_trigger": false,
-      "requires_user_confirmation": true,
-      "approval_gate": "GO_NO_GO_DECISION"
+      "auto_trigger": true,
+      "requires_user_confirmation": false,
+      "approval_gate": "GO_NO_GO_DECISION",
+      "delay_seconds": 2,
+      "note": "Automatically proceeds to deployment setup and demo mode"
     }
   },
   "error_recovery": {
@@ -293,8 +297,9 @@
   "notes": {
     "activation_mode": "Codeword-based activation using unique identifiers",
     "signal_flow": "Each skill emits signals that trigger next phase automatically",
-    "human_gates": "Three approval gates: Pipeline start, Implementation start, Production deployment",
+    "human_gates": "FULLY AUTOMATED after initial PRD approval - no manual intervention required",
     "priority": "Lower number = higher priority (1 is highest)",
-    "auto_trigger": "When true, next skill activates automatically after signal detection"
+    "auto_trigger": "All transitions now automatic with 2-second delays",
+    "automation_level": "100% autonomous from Phase 1 through deployment and demo setup"
   }
 }
