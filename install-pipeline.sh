@@ -627,8 +627,14 @@ log_success "All ${#SKILLS[@]} skills installed with codeword activation!"
 
 log_info "Installing configuration files..."
 
+# Create config and lib directories
+mkdir -p "$CLAUDE_DIR/config"
+mkdir -p "$CLAUDE_DIR/lib"
+
 # Install skill-rules.json
 if [ -f "$SOURCE_DIR/config/skill-rules.json" ]; then
+    cp "$SOURCE_DIR/config/skill-rules.json" "$CLAUDE_DIR/config/skill-rules.json"
+    # Also keep a copy in the root for backwards compatibility
     cp "$SOURCE_DIR/config/skill-rules.json" "$CLAUDE_DIR/skill-rules.json"
     log_success "  Installed skill-rules.json (codeword mappings)"
 else
@@ -957,11 +963,17 @@ if [ "$INSTALL_HOOKS" = true ]; then
     # Test hooks functionality
     log_info "  Testing hooks functionality..."
     if [ -x "$HOOKS_DIR/skill-activation-prompt.sh" ]; then
-        if timeout 10 bash "$HOOKS_DIR/skill-activation-prompt.sh" "test prompt" >/dev/null 2>&1; then
-            log_success "    ✅ skill-activation-prompt.sh: functional"
+        # Check if timeout command exists (not available on macOS by default)
+        if command -v timeout >/dev/null 2>&1; then
+            if timeout 10 bash "$HOOKS_DIR/skill-activation-prompt.sh" "test prompt" >/dev/null 2>&1; then
+                log_success "    ✅ skill-activation-prompt.sh: functional"
+            else
+                log_warning "    ⚠️  skill-activation-prompt.sh: execution test failed"
+                ((VERIFICATION_WARNINGS++))
+            fi
         else
-            log_warning "    ⚠️  skill-activation-prompt.sh: execution test failed"
-            ((VERIFICATION_WARNINGS++))
+            # On macOS without timeout, just check if hook exists and is executable
+            log_success "    ✅ skill-activation-prompt.sh: installed and executable (test skipped on macOS)"
         fi
     fi
 fi
