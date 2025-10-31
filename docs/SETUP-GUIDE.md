@@ -173,9 +173,140 @@ echo "test pipeline activation" | claude --debug-hooks
 claude --show-config | jq '.hooks'
 ```
 
-## First Pipeline Run
+## Operating the Pipeline
 
-### Step 1: Prepare Your PRD
+Once installation and setup are complete, here's how to use the autonomous development system:
+
+### Understanding the Workflow
+
+The pipeline operates in 6 automated phases:
+1. **Requirements Analysis** - Transforms your PRD into actionable tasks
+2. **Specification Generation** - Creates technical specs and test plans
+3. **Implementation** - Develops code using TDD methodology
+4. **Integration Testing** - Validates component interactions
+5. **E2E Validation** - Tests complete user workflows
+6. **Deployment** - Orchestrates production rollout
+
+### Starting Development
+
+#### Option 1: Natural Language Activation
+Simply describe what you want in Claude Code:
+```
+"I have a PRD ready, please begin the automated development pipeline"
+"Start building the application from my requirements document"
+"Begin full stack development from PRD.md"
+```
+
+#### Option 2: Direct Phase Activation
+Target specific phases when needed:
+```
+"Generate tasks from my PRD" → Activates Phase 1
+"Create OpenSpec proposals" → Activates Phase 2
+"Begin TDD implementation" → Activates Phase 3
+"Run integration tests" → Activates Phase 4
+"Validate E2E workflows" → Activates Phase 5
+"Deploy to production" → Activates Phase 6
+```
+
+### Managing the Pipeline
+
+#### Monitor Progress
+```bash
+# Check current phase
+echo "What's the pipeline status?" | claude
+
+# View workflow state
+cat .claude/.workflow-state.json | jq '.phase'
+
+# List active worktrees
+git worktree list
+```
+
+#### Handle Decision Points
+The system requires approval at 3 strategic points:
+
+1. **Before Starting** (Phase 0→1)
+   ```
+   "Yes, start the pipeline"
+   "Proceed with task decomposition"
+   ```
+
+2. **Before Implementation** (Phase 2→3)
+   ```
+   "Approve implementation"
+   "Specs look good, begin coding"
+   ```
+
+3. **Before Deployment** (Phase 5→6)
+   ```
+   "GO for production"
+   "Approved for deployment"
+   ```
+
+#### Interrupt or Modify
+```
+"Pause the pipeline" - Stops at current phase
+"Skip to integration testing" - Jumps to Phase 4
+"Restart from specifications" - Returns to Phase 2
+```
+
+### Typical Development Session
+
+1. **Prepare Requirements**
+   ```bash
+   # Create or update your PRD
+   vim PRD.md
+   # Or copy existing requirements
+   cp ~/requirements/project-spec.md PRD.md
+   ```
+
+2. **Launch Pipeline**
+   ```
+   "I've prepared the PRD, start the full development pipeline"
+   ```
+
+3. **Monitor Autonomous Progress**
+   - Watch as tasks are generated (Phase 1)
+   - Review specifications being created (Phase 2)
+   - Observe TDD implementation (Phase 3)
+   - See integration tests run (Phase 4)
+   - View E2E validation (Phase 5)
+
+4. **Approve at Gates**
+   - Confirm when prompted at decision points
+   - Review outputs before approving next phase
+
+5. **Deployment Decision**
+   - Review test results and validation reports
+   - Make GO/NO-GO decision for production
+
+### Working with Results
+
+Each phase produces specific outputs:
+
+- **Phase 1**: `tasks.json`, dependency analysis
+- **Phase 2**: `.openspec/proposals/*.md`, test strategies
+- **Phase 3**: Source code in worktrees, unit tests
+- **Phase 4**: Integration test results
+- **Phase 5**: E2E test reports, validation scores
+- **Phase 6**: Deployment logs, rollback plans
+
+Access outputs:
+```bash
+# View tasks
+cat .taskmaster/tasks.json | jq
+
+# Check specifications
+ls .openspec/proposals/
+
+# Review test results
+cat .claude/test-results/phase-*.json
+
+# See deployment status
+cat .claude/deployment/status.json
+```
+
+## First Pipeline Run
 
 Create a Product Requirements Document:
 
