@@ -116,8 +116,13 @@ After installation, configure the pipeline for your project:
 cat .claude/settings.json
 
 # 2. Configure GitHub integration (optional)
-export GITHUB_TOKEN="your_token_here"
-echo "GITHUB_TOKEN=your_token_here" >> .env
+# Create a GitHub Personal Access Token with these permissions:
+#   - repo (Full control of private repositories)
+#   - read:org (Read org and team membership)
+#   - workflow (Update GitHub Action workflows) - if using CI/CD
+# Generate at: https://github.com/settings/tokens
+export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+echo "GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx" >> .env
 
 # 3. Set up project-specific settings
 cp .claude/settings.json .claude/settings.local.json
@@ -137,7 +142,20 @@ CLAUDE_ENVIRONMENT=development
 # GitHub Integration
 GITHUB_ORG=turbobeest
 GITHUB_REPO=your-repo
-GITHUB_TOKEN=your_token
+# Personal Access Token with repo, read:org, workflow permissions
+# Generate at: https://github.com/settings/tokens
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+
+# TaskMaster Configuration
+# Required for TaskMaster GitHub integration
+# Needs: repo, project, issues, pull_requests permissions
+TASKMASTER_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+# Or use same token as above if permissions match:
+# TASKMASTER_GITHUB_TOKEN=${GITHUB_TOKEN}
+
+# Claude API Configuration (for TaskMaster)
+# Get your API key from: https://console.anthropic.com/settings/keys
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx
 
 # Pipeline Settings
 AUTOMATION_LEVEL=95

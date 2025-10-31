@@ -870,6 +870,12 @@ GITHUB_ORG=turbobeest
 GITHUB_REPO=claude-dev-pipeline
 GITHUB_BRANCH=deploy
 
+# TaskMaster Configuration
+# GitHub token with repo, project, issues, pull_requests permissions
+# TASKMASTER_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+# Claude API key from https://console.anthropic.com/settings/keys
+# ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx
+
 # Pipeline Settings (optional - defaults work fine)
 AUTOMATION_LEVEL=95
 USE_WORKTREES=true
