@@ -185,7 +185,32 @@ The entire process from PRD to deployed code is managed autonomously.
 
 ## Real-Time Monitoring
 
-Monitor the pipeline execution in real-time:
+### Option 1: Web Dashboard (Recommended) 🆕
+
+Visual web-based monitoring with live updates:
+
+```bash
+# Start the web dashboard
+python3 .claude/monitor-dashboard.py
+
+# Open browser to: http://localhost:8888
+```
+
+**Features:**
+- 📊 Visual task hierarchy (master tasks → subtasks)
+- 🟢 Real-time status indicators (pending/in-progress/complete)
+- 📝 Live log streaming with color coding
+- 📈 Progress statistics (completion %, task counts)
+- 🎨 VS Code-inspired dark theme
+- ⚡ Auto-updates every 0.5-2 seconds
+
+**No dependencies required** - uses only Python standard library!
+
+See [MONITOR-DASHBOARD.md](MONITOR-DASHBOARD.md) for full documentation.
+
+### Option 2: Command Line Monitor
+
+Traditional CLI monitoring:
 
 ```bash
 # In a separate terminal, run the monitor dashboard
