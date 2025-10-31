@@ -1,17 +1,21 @@
 ---
 activation_code: COUPLING_ANALYSIS_V1
 phase: 1.5
-prerequisites: 
+prerequisites:
   - tasks.json
-outputs: 
+outputs:
   - .signals/coupling-analyzed.json
+optional: true
 description: |
-  Analyzes TaskMaster tasks to determine if subtasks are tightly coupled (share code/models)
-  or loosely coupled (independent modules), enabling optimal OpenSpec proposal strategy and
-  parallelization decisions. Activates via codeword [ACTIVATE:COUPLING_ANALYSIS_V1] injected
-  by hooks after tasks.json creation or task-master show command.
-  
-  Activation trigger: [ACTIVATE:COUPLING_ANALYSIS_V1]
+  OPTIONAL: Analyzes TaskMaster subtasks to determine if they are tightly coupled
+  (share code/models) or loosely coupled (independent modules). This analysis provides
+  RECOMMENDATIONS for implementation order only - it does NOT affect proposal creation.
+
+  All proposals are created 1-per-subtask regardless of coupling. Coupling analysis
+  only recommends whether to implement proposals sequentially (tight coupling) or in
+  parallel (loose coupling) to avoid merge conflicts.
+
+  Activation trigger: [ACTIVATE:COUPLING_ANALYSIS_V1] (optional)
 ---
 
 # Coupling Analysis Skill
@@ -50,18 +54,17 @@ cd ./worktrees/phase-1-task-2
 3. **Merge validation**: Results merged to main only after validation
 4. **Contamination prevention**: No cross-worktree analysis dependencies
 
-## What This Skill Does
+## What This Skill Does (OPTIONAL - Informational Only)
 
-Automatically analyzes task structure in isolated worktree to determine coupling type and recommend:
-- **Tightly Coupled** → One proposal per task (maintain coherence)
-- **Loosely Coupled** → One proposal per subtask (enable 3-4x parallelization speedup)
+Automatically analyzes subtask structure to provide **implementation order recommendations**:
+- **Tightly Coupled** → Implement proposals sequentially (prevent merge conflicts)
+- **Loosely Coupled** → Implement proposals in parallel (safe for 3-4x speedup)
 - Clear rationale with file paths and shared resource analysis
+- **IMPORTANT**: Does NOT affect proposal creation (always 1 proposal per subtask)
+- **IMPORTANT**: Only provides implementation hints for Phase 3
 - **NEW**: Worktree-based isolation for safe analysis
-- **NEW**: Cross-contamination prevention during coupling detection
 
-## What This Skill Does
-
-### 1. Analyzes Task Structure
+### 1. Analyzes Subtask Structure
 Examines:
 - Task title and description
 - Subtask descriptions (if any)
@@ -70,24 +73,16 @@ Examines:
 - Dependencies between subtasks
 - Shared resources (models, utilities, services)
 
-### 2. Determines Coupling Type
+### 2. Determines Coupling Type (For Implementation Order)
 
-**Three Categories:**
-
-#### NO SUBTASKS / SINGLE SUBTASK
-```
-Task has 0 or 1 subtask
-→ Strategy: ONE PROPOSAL per task
-→ Reason: Nothing to decompose
-→ Implementation: Sequential (only one thing to do)
-```
+**ALL subtasks get 1 proposal each. Coupling only affects implementation order:**
 
 #### TIGHTLY COUPLED
 ```
 Subtasks share significant code/data structures
-→ Strategy: ONE PROPOSAL per task
-→ Reason: Must implement together for consistency
-→ Implementation: Sequential (maintain coherence)
+→ Proposals: ONE per subtask (standard)
+→ Implementation Recommendation: Sequential
+→ Reason: Prevent merge conflicts on shared code
 ```
 
 **Indicators:**
@@ -98,12 +93,17 @@ Subtasks share significant code/data structures
 - Sequential dependencies (2.1 → 2.2 → 2.3)
 - Common business logic
 
+**Example:**
+- Master Task: User Authentication (3 subtasks)
+- All modify `User.ts` model
+- Create 3 proposals, implement sequentially (avoid conflicts)
+
 #### LOOSELY COUPLED
 ```
 Subtasks are independent modules
-→ Strategy: ONE PROPOSAL per subtask
-→ Reason: Can develop independently
-→ Implementation: Parallel (3-4x faster)
+→ Proposals: ONE per subtask (standard)
+→ Implementation Recommendation: Parallel
+→ Reason: Safe to implement simultaneously (3-4x speedup)
 ```
 
 **Indicators:**
@@ -113,6 +113,11 @@ Subtasks are independent modules
 - No dependencies between subtasks
 - Different architecture components
 - Can be tested in isolation
+
+**Example:**
+- Master Task: API Endpoints (3 subtasks)
+- Each touches different controller file
+- Create 3 proposals, implement in parallel (safe speedup)
 
 ### 3. Provides Recommendation
 
@@ -136,15 +141,18 @@ COUPLING TYPE: [TIGHTLY COUPLED / LOOSELY COUPLED / NO SUBTASKS]
 RATIONALE:
 [1-2 sentence explanation of why]
 
-RECOMMENDED STRATEGY:
-├─ OpenSpec Proposals: [One proposal / One per subtask]
-├─ Proposal Name(s): [suggest names]
-├─ Implementation: [Sequential / Parallel]
+PROPOSAL CREATION (Standard):
+├─ OpenSpec Proposals: ONE per subtask (always)
+└─ Proposal Name(s): [suggest names]
+
+RECOMMENDED IMPLEMENTATION ORDER:
+├─ Strategy: [Sequential / Parallel]
+├─ Reason: [Prevent conflicts / Safe speedup]
 └─ Estimated Time: [time estimate]
 
 IMPLEMENTATION IMPACT:
 ├─ Sequential: [X] minutes total
-└─ Parallel: [Y] minutes total (if applicable)
+└─ Parallel (if loosely coupled): [Y] minutes total
 ```
 
 ## Analysis Decision Tree

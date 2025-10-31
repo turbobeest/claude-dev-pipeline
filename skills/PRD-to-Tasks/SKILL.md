@@ -3,7 +3,7 @@ activation_code: PRD_TO_TASKS_V1
 phase: 1
 prerequisites: []
 outputs: 
-  - tasks.json
+  - .taskmaster/tasks/tasks.json
   - .signals/phase1-start.json
 description: |
   Generates production-grade TaskMaster tasks.json from Product Requirements Documents (PRD).
@@ -72,10 +72,16 @@ Automatically identifies and extracts:
 
 ### 2. Task Generation Rules
 
-**Task Count Target:**
-- Small projects: 10-15 tasks
-- Medium projects: 15-25 tasks
-- Large projects: 25-35 tasks
+**Task Count Target (Master Tasks Only):**
+- Small projects: 5-8 master tasks (with 3-5 subtasks each)
+- Medium projects: 8-12 master tasks (with 3-5 subtasks each)
+- Large projects: 10-15 master tasks (with 3-5 subtasks each)
+
+**TaskMaster Decomposition Strategy:**
+- Generate 8-12 master tasks maximum
+- Each master task must have 3-8 subtasks
+- Total subtasks: 30-60 (similar to previous flat structure)
+- Use numeric IDs only (no strings like "TASK-001")
 
 **Task Categories (Auto-Generated):**
 ```
@@ -153,54 +159,35 @@ IF Task has NO dependencies:
 
 **Always Generate These Final Tasks:**
 
-**Task #N-2: Component Integration Testing**
+**Final Master Task: Integration & Validation**
 ```json
 {
-  "id": "[N-2]",
-  "title": "Component Integration Testing",
-  "description": "Maps to PRD Section 4.1. Test all integration points between components...",
-  "dependencies": ["1", "2", "3", "...", "[N-3]"],
-  "testStrategy": "Execute comprehensive integration test suite...",
-  "acceptanceCriteria": [
-    "All integration points tested (100%)",
-    "All integration tests passing",
-    "Error scenarios validated"
+  "id": 10,
+  "name": "Integration & Production Validation",
+  "subtasks": [
+    {
+      "id": 1,
+      "title": "Component Integration Testing",
+      "testStrategy": "Execute comprehensive integration test suite covering all component interfaces",
+      "acceptanceCriteria": ["All integration points tested (100%)", "All integration tests passing"]
+    },
+    {
+      "id": 2,
+      "title": "End-to-End Workflow Testing",
+      "testStrategy": "Execute E2E test suite for all critical user journeys",
+      "acceptanceCriteria": ["All critical user journeys tested", "All E2E tests passing"]
+    },
+    {
+      "id": 3,
+      "title": "Production Readiness Validation",
+      "testStrategy": "Execute comprehensive validation checklist",
+      "acceptanceCriteria": ["All tests passing (100%)", "Coverage thresholds met", "Production readiness complete"]
+    }
   ]
 }
 ```
 
-**Task #N-1: End-to-End Workflow Testing**
-```json
-{
-  "id": "[N-1]",
-  "title": "End-to-End Workflow Testing",
-  "description": "Maps to PRD Section 4.2. Test complete user journeys...",
-  "dependencies": ["[N-2]"],
-  "testStrategy": "Execute E2E test suite for all critical user journeys...",
-  "acceptanceCriteria": [
-    "All critical user journeys tested",
-    "All E2E tests passing",
-    "Tests passing in all browsers"
-  ]
-}
-```
-
-**Task #N: Production Readiness Validation**
-```json
-{
-  "id": "[N]",
-  "title": "Production Readiness Validation",
-  "description": "Maps to PRD Section 4.3. Complete production readiness checklist...",
-  "dependencies": ["[N-1]"],
-  "testStrategy": "Execute comprehensive validation checklist...",
-  "acceptanceCriteria": [
-    "All tests passing (100%)",
-    "Coverage thresholds met (≥80%/70%)",
-    "All stakeholder sign-offs obtained",
-    "Production readiness checklist 100% complete"
-  ]
-}
-```
+**Note:** Integration tasks are now consolidated into the final master task above with proper TaskMaster subtask structure.
 
 ### 5. Quality Checks
 
@@ -215,37 +202,37 @@ IF Task has NO dependencies:
 - [ ] OpenSpec mapping defined per task
 - [ ] Task count within target range (15-25 typical)
 
-## Task Structure Template
+## TaskMaster Schema Requirements
+
+**CRITICAL: Use ONLY this structure:**
 
 ```json
 {
-  "id": "string",
-  "title": "[Action Verb] + [Object]",
-  "description": "Maps to PRD Feature [ID], Requirements FR-[ID].1-[ID].N. [2-3 sentences]. Architecture Component: [name]",
-  "status": "pending",
-  "priority": "critical|high|medium|low",
-  "dependencies": ["array of task IDs"],
-  "details": "## Implementation Scope\n[Detailed description]\n\n## Architecture Integration\n[Components, integration points]\n\n## OpenSpec Preparation\n[Proposal strategy]\n\n## Security Considerations\n[Security implications]\n\n## Performance Considerations\n[Performance implications]",
-  "testStrategy": "## Test Requirements\n\n### Unit Tests\n[Specifics]\n\n### Integration Tests\n[Specifics]\n\n### E2E Tests\n[Specifics if applicable]\n\n### Validation Commands\n[Commands to run]",
-  "acceptanceCriteria": [
-    "Functional code implements PRD FR-[ID].X",
-    "Unit tests pass with ≥80% line coverage, ≥70% branch coverage",
-    "Integration tests pass",
-    "Code review completed",
-    "Lint/static analysis passing",
-    "Performance benchmarks met"
-  ],
-  "subtasks": [],
-  "tags": ["feature:[name]", "component:[name]", "type:[backend|frontend|infrastructure]"],
-  "estimatedComplexity": null,
-  "architectureComponent": "[Component from architecture.md]",
-  "openspecMapping": {
-    "proposalStrategy": "tightly-coupled|loosely-coupled|single-task",
-    "specFiles": ["[spec-file].md"],
-    "relatedTasks": ["array of related task IDs"]
+  "master": {
+    "tasks": [
+      {
+        "id": 1,                          // ✅ Numeric ID
+        "name": "[Action Verb] + [Object]", // ✅ 'name' for master task
+        "subtasks": [                     // ✅ Required subtasks array
+          {
+            "id": 1,                      // ✅ Numeric subtask ID
+            "title": "Specific action",    // ✅ 'title' for subtask
+            "testStrategy": "How to test this subtask",
+            "acceptanceCriteria": ["Criteria 1", "Criteria 2"],
+            "details": "Implementation details"
+          }
+        ]
+      }
+    ]
   }
 }
 ```
+
+**Field Mapping (TaskMaster Standard):**
+- Master task: `id` (number), `name` (string), `subtasks` (array)
+- Subtask: `id` (number), `title` (string), `testStrategy` (string)
+- NO custom fields like `status`, `priority`, `dependencies`
+- NO string IDs like "TASK-001"
 
 ## OpenSpec Mapping Strategy
 
@@ -269,21 +256,32 @@ ELSE IF requirements are independent:
 
 ## Output Format
 
-**Generate complete tasks.json with:**
+**CRITICAL: Generate TaskMaster-compliant format only:**
 
 ```json
 {
-  "meta": {
-    "projectName": "[from PRD]",
-    "version": "[from PRD]",
-    "prdSource": ".taskmaster/docs/prd.txt",
-    "createdAt": "[ISO-8601 timestamp]",
-    "generatedBy": "Claude Projects + PRD-to-Tasks Skill",
-    "architectureRef": "docs/architecture.md"
-  },
-  "tasks": [
-    { /* task objects */ }
-  ]
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "name": "Docker Environment Setup",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Docker Compose file",
+            "testStrategy": "Validate with docker-compose config",
+            "acceptanceCriteria": ["Docker services start successfully"]
+          },
+          {
+            "id": 2,
+            "title": "Configure environment variables",
+            "testStrategy": "Test variable loading",
+            "acceptanceCriteria": ["All variables loaded correctly"]
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
