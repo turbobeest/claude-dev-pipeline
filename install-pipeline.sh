@@ -13,9 +13,9 @@
 # - High-performance optimization libraries
 #
 # Environment Variables:
-#   GITHUB_ORG         GitHub organization/user [default: YOUR_ORG]
+#   GITHUB_ORG         GitHub organization/user [default: turbobeest]
 #   GITHUB_REPO        Repository name [default: claude-dev-pipeline]
-#   GITHUB_BRANCH      Branch to use [default: main]
+#   GITHUB_BRANCH      Branch to use [default: deploy]
 #   GITHUB_TOKEN       GitHub token for private repos (optional)
 #   INSTALL_LOG        Log file path [default: install.log]
 #   MAX_RETRIES        Network retry attempts [default: 3]
@@ -70,9 +70,9 @@ INSTALL_LOCATION="project"  # "global" or "project"
 INSTALL_HOOKS=true
 INSTALL_TOOLS=true
 INSTALL_FROM_LOCAL=false
-GITHUB_ORG="${GITHUB_ORG:-YOUR_ORG}"
+GITHUB_ORG="${GITHUB_ORG:-turbobeest}"
 GITHUB_REPO="${GITHUB_REPO:-claude-dev-pipeline}"
-GITHUB_BRANCH="${GITHUB_BRANCH:-main}"
+GITHUB_BRANCH="${GITHUB_BRANCH:-deploy}"
 GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 
 # All 10 skills with their activation codes (bash 3.2 compatible)

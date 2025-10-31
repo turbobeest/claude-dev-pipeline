@@ -9,7 +9,7 @@ A complete end-to-end development automation system that takes your Product Requ
 ## Quick Installation
 
 ```bash
-# Clone the repository
+# Clone the repository (use deploy branch for production-ready code)
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 
 # Navigate to your project

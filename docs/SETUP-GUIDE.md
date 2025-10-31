@@ -64,7 +64,7 @@ The fastest way to get started:
 cd /path/to/your/project
 
 # 2. Download and run the installer
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/claude-dev-pipeline/main/install-pipeline.sh | bash
+curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
 
 # 3. Verify installation
 ls -la .claude/
@@ -76,7 +76,7 @@ For more control over the installation process:
 
 ```bash
 # 1. Clone the pipeline repository
-git clone https://github.com/YOUR_ORG/claude-dev-pipeline.git
+git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 cd claude-dev-pipeline
 
 # 2. Navigate to your project
@@ -95,7 +95,7 @@ For pipeline development and customization:
 
 ```bash
 # 1. Clone and enter the pipeline repository
-git clone https://github.com/YOUR_ORG/claude-dev-pipeline.git
+git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 cd claude-dev-pipeline
 
 # 2. Set up for local development
@@ -135,7 +135,7 @@ CLAUDE_MAIN_BRANCH=main
 CLAUDE_ENVIRONMENT=development
 
 # GitHub Integration
-GITHUB_ORG=your-org
+GITHUB_ORG=turbobeest
 GITHUB_REPO=your-repo
 GITHUB_TOKEN=your_token
 
@@ -661,8 +661,8 @@ After successful setup:
 
 - **Documentation**: See other files in `docs/`
 - **Issues**: Check [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-- **Community**: [GitHub Discussions](https://github.com/YOUR_ORG/claude-dev-pipeline/discussions)
-- **Bug Reports**: [GitHub Issues](https://github.com/YOUR_ORG/claude-dev-pipeline/issues)
+- **Community**: [GitHub Discussions](https://github.com/turbobeest/claude-dev-pipeline/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/turbobeest/claude-dev-pipeline/issues)
 
 ## Quick Reference
 

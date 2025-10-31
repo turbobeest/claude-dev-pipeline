@@ -585,7 +585,7 @@ curl -I https://api.github.com/rate_limit
 # Test with proxy
 export HTTP_PROXY=http://proxy:8080
 export HTTPS_PROXY=http://proxy:8080
-./install-pipeline.sh --github-org YOUR_ORG
+./install-pipeline.sh --github-org turbobeest
 ```
 
 ## Log Analysis Guide
