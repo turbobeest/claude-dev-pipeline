@@ -118,28 +118,32 @@ bash ~/dev/claude-dev-pipeline/install-pipeline.sh --local
 After installation, configure the pipeline for your project:
 
 ```bash
-# 1. Review default settings
+# 1. Review hook settings (no changes needed for tokens)
 cat .claude/settings.json
+# Note: settings.json only contains hook configurations, NOT tokens or API keys
 
-# 2. Configure GitHub integration (optional)
-# Create a GitHub Personal Access Token with these permissions:
-#   - repo (Full control of private repositories)
-#   - read:org (Read org and team membership)
-#   - workflow (Update GitHub Action workflows) - if using CI/CD
-# Generate at: https://github.com/settings/tokens
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
-echo "GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx" >> .env
-
-# 3. Set up project-specific settings
-cp .claude/settings.json .claude/settings.local.json
-# Edit .claude/settings.local.json as needed
+# 2. Configure API keys and tokens in .env file (in project root)
+# The .env file is where ALL tokens and API keys go, NOT settings.json
 ```
 
-### Environment Configuration
-
-Create a `.env` file in your project root:
+**Important**: API keys and tokens go in `.env` file in your project root, NOT in `settings.json`:
+- `.env` = API keys, tokens, environment variables (project root)
+- `.claude/settings.json` = Hook configurations only (no secrets)
 
 ```bash
+# Add GitHub token to .env file:
+echo "GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx" >> .env
+
+# Add TaskMaster API key to .env file:
+echo "ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx" >> .env
+```
+
+### Environment Configuration (.env File)
+
+Create or edit the `.env` file in your PROJECT ROOT directory (not in .claude/):
+
+```bash
+# Location: /path/to/your/project/.env (NOT .claude/.env)
 # Core Configuration
 CLAUDE_PIPELINE_ROOT=/path/to/your/project
 CLAUDE_MAIN_BRANCH=main
@@ -181,6 +185,19 @@ MANUAL_GATE_TIMEOUT=1800
 SLACK_WEBHOOK_URL=your_webhook_url
 EMAIL_NOTIFICATIONS=false
 ```
+
+### Configuration File Reference
+
+**What goes where:**
+
+| Configuration Type | File Location | Purpose |
+|-------------------|---------------|---------|
+| API Keys & Tokens | `.env` (project root) | GitHub tokens, Anthropic API key, sensitive data |
+| Hook Configuration | `.claude/settings.json` | UserPromptSubmit, PostToolUse hook definitions |
+| Skill Rules | `.claude/config/skill-rules.json` | Skill activation patterns and triggers |
+| Workflow State | `.claude/.workflow-state.json` | Current pipeline phase and progress |
+
+**Never put API keys or tokens in settings.json!** They belong in `.env` only.
 
 ### Claude Code Integration
 
