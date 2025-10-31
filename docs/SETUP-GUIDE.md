@@ -60,14 +60,16 @@ chmod 755 /path/to/your/project
 The fastest way to get started:
 
 ```bash
-# 1. Navigate to your project directory
-cd /path/to/your/project
+# 1. Navigate to YOUR intended project root directory
+# ⚠️ This is where .claude/ will be created!
+cd /path/to/your/project  # <-- Run Claude from here later
 
 # 2. Download and run the installer
 curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
 
 # 3. Verify installation
 ls -la .claude/
+ls -la .env  # Should be in project root, not in .claude/
 ```
 
 ### Method 2: Manual Installation
@@ -75,18 +77,20 @@ ls -la .claude/
 For more control over the installation process:
 
 ```bash
-# 1. Clone the pipeline repository
+# 1. Clone the pipeline repository TO A TEMPORARY LOCATION
+# ⚠️ Do NOT clone this inside your project directory!
+cd /tmp
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
-cd claude-dev-pipeline
 
-# 2. Navigate to your project
-cd /path/to/your/project
+# 2. Navigate to YOUR intended project root
+cd /path/to/your/project  # <-- This becomes your project root
 
-# 3. Run the installer with options
-bash /path/to/claude-dev-pipeline/install-pipeline.sh --project
+# 3. Run the installer (it will install HERE in current directory)
+bash /tmp/claude-dev-pipeline/install-pipeline.sh --project
 
 # 4. Verify installation
-./install-pipeline.sh --verify
+ls -la .claude/
+ls -la .env
 ```
 
 ### Method 3: Local Development Installation
@@ -94,15 +98,17 @@ bash /path/to/claude-dev-pipeline/install-pipeline.sh --project
 For pipeline development and customization:
 
 ```bash
-# 1. Clone and enter the pipeline repository
+# 1. Clone pipeline repository for development (outside your project)
+cd ~/dev  # Or any location OUTSIDE your project
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 cd claude-dev-pipeline
 
 # 2. Set up for local development
 ./setup.sh --dev-mode
 
-# 3. Install to target project
-./install-pipeline.sh --local --target /path/to/your/project
+# 3. Navigate to your project and install
+cd /path/to/your/project  # <-- Your project root
+bash ~/dev/claude-dev-pipeline/install-pipeline.sh --local
 ```
 
 ## Configuration

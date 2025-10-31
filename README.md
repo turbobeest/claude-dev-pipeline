@@ -9,19 +9,27 @@ A complete end-to-end development automation system that takes your Product Requ
 ## Quick Installation
 
 ```bash
-# Option 1: Install from any location (RECOMMENDED)
-# Clone the installer to a temporary location
+# Option 1: Install from temporary location (RECOMMENDED)
+# Clone the installer to a temporary location OUTSIDE your project
 cd /tmp
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
-cd /path/to/your-project  # Navigate to YOUR project directory
+
+# Navigate to YOUR intended project root directory
+# This is where you want .claude/ to be created
+cd /path/to/your-project  # <-- This becomes your project root!
 bash /tmp/claude-dev-pipeline/install-pipeline.sh
 
 # Option 2: Direct download and install
-# From your project root directory
+# First, navigate to YOUR intended project root directory
+cd /path/to/your-project  # <-- This becomes your project root!
 curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
 ```
 
-**Important**: Run the installer FROM your project root directory. The installer will create a `.claude/` folder with all pipeline components. Do NOT keep the cloned `claude-dev-pipeline` directory in your project.
+**⚠️ CRITICAL**: 
+- Run the installer FROM your intended project root directory (where you want `.claude/` created)
+- Do NOT clone `claude-dev-pipeline` inside your project directory
+- The installer creates `.claude/` in your CURRENT directory when you run it
+- If you're in a subdirectory of a git repo, the pipeline will be installed in that subdirectory, not the git root
 
 ## Prerequisites
 
@@ -36,20 +44,25 @@ curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/depl
 
 After installation, your project will have:
 ```
-your-project/              # Your project root (run 'claude' from here)
+your-project/              # Your project root (run 'claude' from HERE)
 ├── .claude/              # Pipeline system (created by installer)
 │   ├── skills/          # 10 autonomous skills
 │   ├── hooks/           # 3 automation hooks
-│   ├── config/          # Configuration files
+│   ├── config/          # Configuration files (skill-rules.json)
 │   ├── lib/             # Support libraries
-│   └── settings.json    # Claude Code settings
+│   └── settings.json    # Claude Code hook configuration
+├── .env                 # Environment variables (in project root, not .claude/)
 ├── .taskmaster/         # TaskMaster workspace (created when used)
 ├── .openspec/           # OpenSpec proposals (created when used)
 ├── src/                 # Your source code
 └── PRD.md              # Your requirements document
 ```
 
-**Where to run Claude Code**: Always from your project root directory (e.g., `/Users/you/dev/your-project`), NOT from `.claude/` or `claude-dev-pipeline/`.
+**⚠️ IMPORTANT File Locations**:
+- `.env` goes in your PROJECT ROOT (not in `.claude/`)
+- `settings.json` goes in `.claude/` (hooks reference `.claude/hooks/`)
+- Always run `claude` from your project root directory
+- The hooks use relative paths from your project root
 
 ## Configuration
 
