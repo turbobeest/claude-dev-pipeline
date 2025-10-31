@@ -1,0 +1,18 @@
+{
+  "worktrees": {},
+  "active_worktree": null,
+  "last_updated": "",
+  "configuration": {
+    "base_directory": "./worktrees",
+    "main_branch": "main",
+    "auto_cleanup": true,
+    "isolation_enforced": true,
+    "max_concurrent_worktrees": 10
+  },
+  "statistics": {
+    "total_created": 0,
+    "total_merged": 0,
+    "total_cleaned": 0,
+    "average_duration_minutes": 0
+  }
+}

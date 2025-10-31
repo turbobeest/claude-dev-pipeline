@@ -1,0 +1,40 @@
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+install.log
+test-*.log
+
+# Runtime files
+.cache/
+.profiler/
+.workflow-state.json
+.signals/
+*.bak
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+
+# Test outputs
+coverage/
+test-results/
+
+# Temporary files
+temp/
+tmp/
+*.temp

@@ -68,10 +68,11 @@ claude-dev-pipeline/
 │       └── examples/
 │           └── orchestration-examples.md
 │
-├── hooks/                              # 3 AUTOMATION HOOKS
+├── hooks/                              # 4 AUTOMATION HOOKS
 │   ├── skill-activation-prompt.sh     # UserPromptSubmit hook
 │   ├── post-tool-use-tracker.sh       # PostToolUse hook
 │   ├── pre-implementation-validator.sh # PreToolUse hook (TDD enforcer)
+│   ├── worktree-enforcer.sh           # Worktree isolation enforcer
 │   └── README.md                       # Hooks documentation
 │
 ├── config/                             # CONFIGURATION FILES
@@ -81,7 +82,7 @@ claude-dev-pipeline/
 │
 ├── docs/                               # DOCUMENTATION
 │   ├── HOOKS-INTEGRATION-GUIDE.md     # Complete hooks guide
-│   ├── PIPELINE-SETUP.md              # Setup guide
+│   ├── SETUP-GUIDE.md                 # Setup guide
 │   ├── DEVELOPMENT-WORKFLOW.md        # Workflow documentation
 │   ├── TROUBLESHOOTING.md             # Common issues and solutions
 │   ├── QUICK-REFERENCE.md             # Quick reference card
@@ -238,7 +239,7 @@ claude-dev-pipeline/
 - [ ] `README.md` - Create with overview
 - [ ] `CONTRIBUTING.md` - Create guidelines
 - [ ] `hooks/README.md` - Create hooks documentation
-- [ ] `docs/PIPELINE-SETUP.md` - Create setup guide
+- [x] `docs/SETUP-GUIDE.md` - Setup guide created
 - [ ] `docs/TROUBLESHOOTING.md` - Create troubleshooting guide
 
 **Tests:**

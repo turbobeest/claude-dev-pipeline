@@ -1,0 +1,176 @@
+{
+  "user_prompt_submit": {
+    "valid": [
+      {
+        "name": "basic_message",
+        "input": {
+          "message": "Hello, please generate tasks from the PRD",
+          "contextFiles": ["PRD.md"]
+        }
+      },
+      {
+        "name": "empty_context",
+        "input": {
+          "message": "Start the pipeline",
+          "contextFiles": []
+        }
+      },
+      {
+        "name": "multiple_files",
+        "input": {
+          "message": "Review these files",
+          "contextFiles": ["tasks.json", "architecture.md", "test-results.txt"]
+        }
+      },
+      {
+        "name": "pipeline_status_check",
+        "input": {
+          "message": "What is the current pipeline status?",
+          "contextFiles": []
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "name": "missing_message",
+        "input": {
+          "contextFiles": ["PRD.md"]
+        }
+      },
+      {
+        "name": "malformed_json",
+        "input": "{\"message\": \"incomplete"
+      },
+      {
+        "name": "wrong_types",
+        "input": {
+          "message": 123,
+          "contextFiles": "should-be-array"
+        }
+      }
+    ]
+  },
+  "post_tool_use": {
+    "valid": [
+      {
+        "name": "write_tasks_json",
+        "input": {
+          "tool": "Write",
+          "input": {
+            "file_path": "/path/to/tasks.json",
+            "content": "{\"tasks\": []}"
+          }
+        }
+      },
+      {
+        "name": "bash_test_command",
+        "input": {
+          "tool": "Bash",
+          "input": {
+            "command": "npm test --coverage"
+          }
+        }
+      },
+      {
+        "name": "read_architecture",
+        "input": {
+          "tool": "Read",
+          "input": {
+            "file_path": "/path/to/architecture.md"
+          }
+        }
+      },
+      {
+        "name": "user_message_go_decision",
+        "input": {
+          "tool": "UserMessage",
+          "input": {
+            "message": "GO for production deployment"
+          }
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "name": "missing_tool",
+        "input": {
+          "input": {
+            "file_path": "/path/to/file"
+          }
+        }
+      },
+      {
+        "name": "unknown_tool",
+        "input": {
+          "tool": "UnknownTool",
+          "input": {}
+        }
+      },
+      {
+        "name": "malformed_json",
+        "input": "{\"tool\": \"Write\""
+      }
+    ]
+  },
+  "pre_tool_use": {
+    "valid": [
+      {
+        "name": "read_operation",
+        "input": {
+          "tool": "Read",
+          "input": {
+            "file_path": "/path/to/file.js"
+          }
+        }
+      },
+      {
+        "name": "bash_command",
+        "input": {
+          "tool": "Bash",
+          "input": {
+            "command": "npm install"
+          }
+        }
+      },
+      {
+        "name": "write_test_file",
+        "input": {
+          "tool": "Write",
+          "input": {
+            "path": "/src/components/Button.test.js"
+          }
+        }
+      }
+    ],
+    "tdd_violations": [
+      {
+        "name": "write_implementation_without_tests",
+        "input": {
+          "tool": "Write", 
+          "input": {
+            "path": "/src/components/Button.js"
+          }
+        }
+      },
+      {
+        "name": "create_lib_file_without_tests",
+        "input": {
+          "tool": "Create",
+          "input": {
+            "path": "/lib/utils.py"
+          }
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "name": "missing_tool",
+        "input": {
+          "input": {
+            "path": "/path/to/file"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,35 +1,65 @@
 {
-    "version": "1.0",
-    "description": "Skill activation rules for Claude Code hooks",
-    "skills": [
-      {
-        "skill": "prd-to-tasks",
-        "triggers": [
+  "version": "2.0",
+  "activation_mode": "codeword",
+  "description": "Codeword-based skill activation rules for Claude Code hooks",
+  "skills": [
+    {
+      "skill": "pipeline-orchestration",
+      "activation_code": "PIPELINE_ORCHESTRATION_V1",
+      "phase": 0,
+      "trigger_conditions": {
+        "user_patterns": [
+          "begin automated development",
+          "start pipeline",
+          "automate development",
+          "run full pipeline",
+          "phase 0 complete"
+        ],
+        "file_exists": ["PRD.md", ".taskmaster/docs/phase0-signoff.md"],
+        "phase_state": "phase0_complete"
+      },
+      "outputs": {
+        "signals": ["PIPELINE_STARTED"],
+        "next_activation": "PRD_TO_TASKS_V1"
+      },
+      "priority": 1
+    },
+    {
+      "skill": "prd-to-tasks",
+      "activation_code": "PRD_TO_TASKS_V1",
+      "phase": 1,
+      "trigger_conditions": {
+        "user_patterns": [
           "generate tasks",
           "parse prd",
           "create tasks",
           "task decomposition",
           "tasks.json",
           "product requirements",
-          "requirements document",
-          "break down",
-          "decompose"
+          "requirements document"
         ],
-        "filePatterns": [
+        "file_patterns": [
           "PRD.md",
           "requirements.md",
           "product-requirements",
-          "REQUIREMENTS.md",
           "docs/PRD",
           "docs/requirements"
         ],
-        "description": "Generates TaskMaster tasks.json from PRD with integration tasks",
-        "priority": 1,
-        "phase": "phase1"
+        "phase_state": "ready_for_phase1"
       },
-      {
-        "skill": "coupling-analysis",
-        "triggers": [
+      "outputs": {
+        "files": ["tasks.json"],
+        "signals": ["PHASE1_START"],
+        "next_activation": "COUPLING_ANALYSIS_V1"
+      },
+      "priority": 2
+    },
+    {
+      "skill": "coupling-analysis",
+      "activation_code": "COUPLING_ANALYSIS_V1",
+      "phase": 1.5,
+      "trigger_conditions": {
+        "user_patterns": [
           "task-master show",
           "taskmaster show",
           "tightly coupled",
@@ -37,111 +67,234 @@
           "parallel",
           "coupling",
           "proposal strategy",
-          "analyze tasks",
-          "task dependencies",
-          "can we parallelize"
+          "analyze tasks"
         ],
-        "filePatterns": [
-          ".taskmaster/tasks.json",
-          "tasks.json"
-        ],
-        "description": "Analyzes task coupling to determine OpenSpec strategy (single vs multiple proposals)",
-        "priority": 2,
-        "phase": "phase1-to-phase2"
+        "file_patterns": [".taskmaster/tasks.json", "tasks.json"],
+        "signals_detected": ["PHASE1_START"],
+        "phase_state": "tasks_created"
       },
-      {
-        "skill": "test-strategy-generator",
-        "triggers": [
+      "outputs": {
+        "signals": ["COUPLING_ANALYZED"],
+        "next_activation": "TASK_DECOMPOSER_V1"
+      },
+      "priority": 3
+    },
+    {
+      "skill": "task-decomposer",
+      "activation_code": "TASK_DECOMPOSER_V1",
+      "phase": 1,
+      "trigger_conditions": {
+        "user_patterns": [
+          "expand task",
+          "analyze complexity",
+          "generate subtasks",
+          "break down task",
+          "decompose task"
+        ],
+        "signals_detected": ["COUPLING_ANALYZED"],
+        "phase_state": "coupling_complete"
+      },
+      "outputs": {
+        "files": ["updated tasks.json"],
+        "signals": ["PHASE1_COMPLETE"],
+        "next_activation": "SPEC_GEN_V1"
+      },
+      "priority": 4
+    },
+    {
+      "skill": "spec-gen",
+      "activation_code": "SPEC_GEN_V1",
+      "phase": 2,
+      "trigger_conditions": {
+        "user_patterns": [
           "openspec proposal",
+          "create spec",
+          "generate proposal",
+          "specification",
+          "requirements spec"
+        ],
+        "signals_detected": ["PHASE1_COMPLETE"],
+        "phase_state": "ready_for_phase2"
+      },
+      "outputs": {
+        "files": [".openspec/proposals/*.md"],
+        "signals": ["PHASE2_SPECS_CREATED"],
+        "next_activation": "TEST_STRATEGY_V1"
+      },
+      "priority": 5
+    },
+    {
+      "skill": "test-strategy",
+      "activation_code": "TEST_STRATEGY_V1",
+      "phase": 2.5,
+      "trigger_conditions": {
+        "user_patterns": [
           "test strategy",
-          "what tests",
+          "test plan",
           "TDD",
           "test coverage",
           "write tests",
-          "test plan",
-          "testing approach",
-          "test cases",
-          "coverage requirements"
+          "testing approach"
         ],
-        "filePatterns": [
-          ".openspec/proposals",
-          "*.proposal.md",
-          ".openspec/"
-        ],
-        "description": "Generates comprehensive test strategies (60/30/10 distribution) from OpenSpec proposals",
-        "priority": 3,
-        "phase": "phase2-to-phase3"
+        "file_patterns": [".openspec/proposals", "*.proposal.md"],
+        "signals_detected": ["PHASE2_SPECS_CREATED"],
+        "phase_state": "specs_created"
       },
-      {
-        "skill": "integration-validator",
-        "triggers": [
+      "outputs": {
+        "signals": ["TEST_STRATEGY_COMPLETE"],
+        "next_activation": "TDD_IMPLEMENTER_V1"
+      },
+      "priority": 6
+    },
+    {
+      "skill": "tdd-implementer",
+      "activation_code": "TDD_IMPLEMENTER_V1",
+      "phase": 3,
+      "trigger_conditions": {
+        "user_patterns": [
+          "implement",
+          "write code",
+          "TDD cycle",
+          "red green refactor",
+          "start coding",
+          "build feature"
+        ],
+        "signals_detected": ["TEST_STRATEGY_COMPLETE"],
+        "phase_state": "ready_for_phase3"
+      },
+      "outputs": {
+        "files": ["src/**", "tests/**"],
+        "signals": ["PHASE3_COMPLETE"],
+        "next_activation": "INTEGRATION_VALIDATOR_V1"
+      },
+      "priority": 7
+    },
+    {
+      "skill": "integration-validator",
+      "activation_code": "INTEGRATION_VALIDATOR_V1",
+      "phase": 4,
+      "trigger_conditions": {
+        "user_patterns": [
           "integration testing",
-          "production ready",
-          "ready to deploy",
-          "Go/No-Go",
-          "Task #24",
-          "Task #25",
-          "Task #26",
+          "task #24",
+          "task 24",
           "integration points",
           "system integration",
+          "component integration"
+        ],
+        "file_patterns": ["architecture.md", "ARCHITECTURE.md"],
+        "signals_detected": ["PHASE3_COMPLETE"],
+        "phase_state": "implementation_complete"
+      },
+      "outputs": {
+        "signals": ["PHASE4_COMPLETE"],
+        "next_activation": "E2E_VALIDATOR_V1"
+      },
+      "priority": 8
+    },
+    {
+      "skill": "e2e-validator",
+      "activation_code": "E2E_VALIDATOR_V1",
+      "phase": 5,
+      "trigger_conditions": {
+        "user_patterns": [
           "e2e testing",
           "end-to-end",
-          "production validation",
-          "deployment readiness"
+          "task #25",
+          "task 25",
+          "user workflows",
+          "workflow testing"
         ],
-        "filePatterns": [
-          "architecture.md",
-          "TASKMASTER_OPENSPEC_MAP.md",
-          "ARCHITECTURE.md",
-          "docs/architecture"
-        ],
-        "description": "Validates integration points and production readiness scores",
-        "priority": 4,
-        "phase": "phase4-phase5-phase6"
-      }
-    ],
-    "phases": {
-      "pre-init": {
-        "description": "Before tasks.json exists",
-        "recommendedSkills": ["prd-to-tasks"]
+        "signals_detected": ["PHASE4_COMPLETE"],
+        "phase_state": "integration_complete"
       },
-      "phase1": {
-        "description": "Task decomposition with TaskMaster",
-        "recommendedSkills": ["prd-to-tasks"]
+      "outputs": {
+        "signals": ["PHASE5_COMPLETE", "GO_NO_GO_DECISION"],
+        "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1"
       },
-      "phase1-to-phase2": {
-        "description": "Transition from tasks to OpenSpec proposals",
-        "recommendedSkills": ["coupling-analysis"]
-      },
-      "phase2": {
-        "description": "OpenSpec proposal generation",
-        "recommendedSkills": ["test-strategy-generator"]
-      },
-      "phase2-to-phase3": {
-        "description": "Transition from specs to implementation",
-        "recommendedSkills": ["test-strategy-generator"]
-      },
-      "phase3": {
-        "description": "TDD implementation (RED-GREEN-REFACTOR)",
-        "recommendedSkills": []
-      },
-      "phase4": {
-        "description": "Component integration testing",
-        "recommendedSkills": ["integration-validator"]
-      },
-      "phase5": {
-        "description": "End-to-end workflow testing",
-        "recommendedSkills": ["integration-validator"]
-      },
-      "phase6": {
-        "description": "Production readiness validation",
-        "recommendedSkills": ["integration-validator"]
-      }
+      "priority": 9
     },
-    "notes": {
-      "caseSensitivity": "All trigger matching is case-insensitive",
-      "multipleMatches": "Multiple skills can be suggested if multiple patterns match",
-      "fileContext": "File patterns match against files in Claude's context",
-      "priority": "Lower priority number = higher priority (1 is highest)"
+    {
+      "skill": "deployment-orchestrator",
+      "activation_code": "DEPLOYMENT_ORCHESTRATOR_V1",
+      "phase": 6,
+      "trigger_conditions": {
+        "user_patterns": [
+          "deploy",
+          "production ready",
+          "task #26",
+          "task 26",
+          "deployment",
+          "go live"
+        ],
+        "signals_detected": ["PHASE5_COMPLETE", "GO_DECISION"],
+        "phase_state": "approved_for_production"
+      },
+      "outputs": {
+        "signals": ["PHASE6_COMPLETE", "DEPLOYED_TO_PRODUCTION"]
+      },
+      "priority": 10
     }
+  ],
+  "phase_transitions": {
+    "PHASE0_COMPLETE": {
+      "next_activation": "PIPELINE_ORCHESTRATION_V1",
+      "auto_trigger": false,
+      "requires_user_confirmation": true
+    },
+    "PHASE1_START": {
+      "next_activation": "COUPLING_ANALYSIS_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "COUPLING_ANALYZED": {
+      "next_activation": "TASK_DECOMPOSER_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "PHASE1_COMPLETE": {
+      "next_activation": "SPEC_GEN_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "PHASE2_SPECS_CREATED": {
+      "next_activation": "TEST_STRATEGY_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "TEST_STRATEGY_COMPLETE": {
+      "next_activation": "TDD_IMPLEMENTER_V1",
+      "auto_trigger": false,
+      "requires_user_confirmation": true
+    },
+    "PHASE3_COMPLETE": {
+      "next_activation": "INTEGRATION_VALIDATOR_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "PHASE4_COMPLETE": {
+      "next_activation": "E2E_VALIDATOR_V1",
+      "auto_trigger": true,
+      "delay_seconds": 2
+    },
+    "PHASE5_COMPLETE": {
+      "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1",
+      "auto_trigger": false,
+      "requires_user_confirmation": true,
+      "approval_gate": "GO_NO_GO_DECISION"
+    }
+  },
+  "error_recovery": {
+    "max_retries": 3,
+    "retry_delay_seconds": 5,
+    "fallback_to_manual": true,
+    "error_signals": ["PHASE_ERROR", "SKILL_FAILURE"]
+  },
+  "notes": {
+    "activation_mode": "Codeword-based activation using unique identifiers",
+    "signal_flow": "Each skill emits signals that trigger next phase automatically",
+    "human_gates": "Three approval gates: Pipeline start, Implementation start, Production deployment",
+    "priority": "Lower number = higher priority (1 is highest)",
+    "auto_trigger": "When true, next skill activates automatically after signal detection"
   }
+}

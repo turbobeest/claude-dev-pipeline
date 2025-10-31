@@ -1,0 +1,58 @@
+{
+  "version": "3.0",
+  "hooks": {
+    "UserPromptSubmit": {
+      "enabled": true,
+      "script": "skill-activation-prompt.sh",
+      "description": "Injects skill activation codewords based on message analysis"
+    },
+    "PostToolUse": {
+      "enabled": true,
+      "script": "post-tool-use-tracker.sh",
+      "description": "Tracks workflow progress and emits phase transition signals"
+    },
+    "PreToolUse": {
+      "enabled": true,
+      "script": "pre-implementation-validator.sh",
+      "description": "Validates implementation readiness and prevents premature execution"
+    }
+  },
+  "pipeline": {
+    "automationLevel": 95,
+    "manualGates": {
+      "requireApprovalFor": [
+        "deployment",
+        "destructive-operations",
+        "external-api-calls"
+      ],
+      "autoApprove": [
+        "testing",
+        "code-generation",
+        "documentation",
+        "analysis"
+      ]
+    },
+    "phaseTransitions": {
+      "autoAdvance": true,
+      "requireSignals": true,
+      "timeoutMinutes": 30
+    },
+    "skillActivation": {
+      "mode": "codeword-injection",
+      "fallbackToKeywords": false,
+      "debugMode": false
+    }
+  },
+  "workflow": {
+    "trackProgress": true,
+    "persistState": true,
+    "signalEmission": true,
+    "codewordInjection": true
+  },
+  "logging": {
+    "level": "info",
+    "hookExecution": true,
+    "skillActivation": true,
+    "phaseTransitions": true
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "phase": "pre-init",
+  "completedTasks": [],
+  "signals": {
+    "init": null,
+    "requirements-analysis": null,
+    "specification": null,
+    "task-decomposition": null,
+    "implementation": null,
+    "testing": null,
+    "validation": null,
+    "deployment": null
+  },
+  "lastActivation": "",
+  "lastSignal": "",
+  "metadata": {
+    "version": "3.0",
+    "createdAt": "{{CREATION_TIMESTAMP}}",
+    "lastUpdated": "{{LAST_UPDATE_TIMESTAMP}}",
+    "projectType": "{{PROJECT_TYPE}}",
+    "automationLevel": 95,
+    "skillsActivated": [],
+    "phaseHistory": [
+      {
+        "phase": "pre-init",
+        "startTime": "{{CREATION_TIMESTAMP}}",
+        "endTime": null,
+        "duration": null,
+        "tasksCompleted": 0,
+        "signalsEmitted": []
+      }
+    ]
+  },
+  "context": {
+    "currentGoal": "",
+    "activeSkills": [],
+    "pendingValidations": [],
+    "blockers": [],
+    "environment": {
+      "workingDirectory": "{{WORKING_DIRECTORY}}",
+      "gitRepo": "{{GIT_REPO_STATUS}}",
+      "platform": "{{PLATFORM}}",
+      "claudeVersion": "{{CLAUDE_VERSION}}"
+    }
+  },
+  "statistics": {
+    "totalPhases": 8,
+    "completedPhases": 0,
+    "totalTasks": 0,
+    "completedTasks": 0,
+    "averagePhaseTime": null,
+    "skillActivations": 0,
+    "signalEmissions": 0
+  }
+}

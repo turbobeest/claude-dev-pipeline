@@ -1,0 +1,934 @@
+{
+  "project": "user-authentication-system",
+  "generated_from": "sample-prd.md",
+  "total_tasks": 26,
+  "estimated_hours": 120,
+  "phases": {
+    "phase1": "Task Decomposition & Planning",
+    "phase2": "Specification & Design", 
+    "phase3": "Implementation",
+    "phase4": "Integration Testing",
+    "phase5": "E2E Testing",
+    "phase6": "Deployment"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Database Schema Design",
+      "description": "Design and create database schema for users, sessions, and roles",
+      "phase": 2,
+      "priority": "high",
+      "estimated_hours": 4,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "1.1",
+          "title": "Users table schema",
+          "description": "Define users table with all required fields"
+        },
+        {
+          "id": "1.2", 
+          "title": "Sessions table schema",
+          "description": "Define sessions table for JWT management"
+        },
+        {
+          "id": "1.3",
+          "title": "Prisma migrations",
+          "description": "Create and test database migrations"
+        }
+      ],
+      "acceptance_criteria": [
+        "Users table includes all required fields",
+        "Sessions table supports JWT token storage",
+        "Database migrations run successfully",
+        "Foreign key relationships are properly defined"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 2,
+      "title": "User Registration API",
+      "description": "Implement user registration endpoint with validation",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 6,
+      "dependencies": [1],
+      "subtasks": [
+        {
+          "id": "2.1",
+          "title": "Input validation",
+          "description": "Validate email format and password strength"
+        },
+        {
+          "id": "2.2",
+          "title": "Password hashing", 
+          "description": "Implement bcrypt password hashing"
+        },
+        {
+          "id": "2.3",
+          "title": "Email verification",
+          "description": "Send verification email on registration"
+        }
+      ],
+      "acceptance_criteria": [
+        "POST /api/auth/register endpoint created",
+        "Email validation rejects invalid formats",
+        "Password strength requirements enforced",
+        "Verification email sent on successful registration"
+      ],
+      "coupling": "tight",
+      "coupled_with": [3, 4]
+    },
+    {
+      "id": 3,
+      "title": "User Login API",
+      "description": "Implement secure user login with JWT tokens",
+      "phase": 3,
+      "priority": "high", 
+      "estimated_hours": 5,
+      "dependencies": [1, 2],
+      "subtasks": [
+        {
+          "id": "3.1",
+          "title": "Credential validation",
+          "description": "Validate email and password against database"
+        },
+        {
+          "id": "3.2",
+          "title": "JWT token generation",
+          "description": "Generate JWT tokens on successful login"
+        },
+        {
+          "id": "3.3",
+          "title": "Rate limiting",
+          "description": "Implement rate limiting for login attempts"
+        }
+      ],
+      "acceptance_criteria": [
+        "POST /api/auth/login endpoint created",
+        "Valid credentials return JWT token",
+        "Invalid credentials return 401 error",
+        "Rate limiting prevents brute force attacks"
+      ],
+      "coupling": "tight",
+      "coupled_with": [2, 4]
+    },
+    {
+      "id": 4,
+      "title": "Password Reset API",
+      "description": "Implement password reset functionality via email",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 4,
+      "dependencies": [2, 3],
+      "subtasks": [
+        {
+          "id": "4.1",
+          "title": "Reset token generation",
+          "description": "Generate secure reset tokens"
+        },
+        {
+          "id": "4.2",
+          "title": "Reset email service",
+          "description": "Send password reset emails"
+        },
+        {
+          "id": "4.3",
+          "title": "Password update",
+          "description": "Allow password update via reset token"
+        }
+      ],
+      "acceptance_criteria": [
+        "POST /api/auth/forgot-password endpoint created",
+        "POST /api/auth/reset-password endpoint created",
+        "Reset emails contain valid token links",
+        "Tokens expire after configured time"
+      ],
+      "coupling": "tight",
+      "coupled_with": [2, 3]
+    },
+    {
+      "id": 5,
+      "title": "Role-Based Access Control",
+      "description": "Implement RBAC system for different user types",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 6,
+      "dependencies": [1, 3],
+      "subtasks": [
+        {
+          "id": "5.1",
+          "title": "Role definitions",
+          "description": "Define admin, user, and guest roles"
+        },
+        {
+          "id": "5.2",
+          "title": "Permission middleware",
+          "description": "Create middleware to check permissions"
+        },
+        {
+          "id": "5.3",
+          "title": "Admin endpoints",
+          "description": "Create admin-only user management endpoints"
+        }
+      ],
+      "acceptance_criteria": [
+        "Role field added to user model",
+        "Middleware checks user permissions",
+        "Admin endpoints require admin role",
+        "Unauthorized access returns 403 error"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 6,
+      "title": "Frontend Registration Form",
+      "description": "Create React registration form with validation",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 5,
+      "dependencies": [2],
+      "subtasks": [
+        {
+          "id": "6.1",
+          "title": "Form components",
+          "description": "Create registration form with Material-UI"
+        },
+        {
+          "id": "6.2",
+          "title": "Client-side validation",
+          "description": "Implement Formik validation"
+        },
+        {
+          "id": "6.3",
+          "title": "API integration",
+          "description": "Connect form to registration API"
+        }
+      ],
+      "acceptance_criteria": [
+        "Registration form renders correctly",
+        "Client-side validation works",
+        "Form submission calls API",
+        "Success/error messages displayed"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 7,
+      "title": "Frontend Login Form",
+      "description": "Create React login form with session management",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 4,
+      "dependencies": [3, 6],
+      "subtasks": [
+        {
+          "id": "7.1",
+          "title": "Login form component",
+          "description": "Create login form with Material-UI"
+        },
+        {
+          "id": "7.2",
+          "title": "JWT storage",
+          "description": "Store JWT tokens securely"
+        },
+        {
+          "id": "7.3",
+          "title": "Authenticated routes",
+          "description": "Protect routes requiring authentication"
+        }
+      ],
+      "acceptance_criteria": [
+        "Login form renders correctly",
+        "Successful login stores JWT token",
+        "Protected routes require authentication",
+        "Automatic redirect after login"
+      ],
+      "coupling": "tight",
+      "coupled_with": [6, 8]
+    },
+    {
+      "id": 8,
+      "title": "User Profile Management",
+      "description": "Allow users to view and edit their profiles",
+      "phase": 3,
+      "priority": "low",
+      "estimated_hours": 4,
+      "dependencies": [3, 7],
+      "subtasks": [
+        {
+          "id": "8.1",
+          "title": "Profile API endpoints",
+          "description": "Create GET/PUT /api/users/profile"
+        },
+        {
+          "id": "8.2",
+          "title": "Profile form component",
+          "description": "Create profile editing form"
+        },
+        {
+          "id": "8.3",
+          "title": "Avatar upload",
+          "description": "Add avatar upload functionality"
+        }
+      ],
+      "acceptance_criteria": [
+        "Users can view their profile",
+        "Users can edit profile information",
+        "Avatar upload works correctly",
+        "Changes are saved to database"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 9,
+      "title": "Email Service Integration",
+      "description": "Set up email service for verification and password reset",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 3,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "9.1",
+          "title": "Nodemailer configuration",
+          "description": "Configure email service provider"
+        },
+        {
+          "id": "9.2",
+          "title": "Email templates",
+          "description": "Create HTML email templates"
+        },
+        {
+          "id": "9.3",
+          "title": "Email queue",
+          "description": "Implement email sending queue"
+        }
+      ],
+      "acceptance_criteria": [
+        "Email service configured correctly",
+        "Verification emails sent",
+        "Password reset emails sent",
+        "Email templates render properly"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 10,
+      "title": "Session Management",
+      "description": "Implement JWT token refresh and session handling",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 4,
+      "dependencies": [3],
+      "subtasks": [
+        {
+          "id": "10.1",
+          "title": "Token refresh API",
+          "description": "Create token refresh endpoint"
+        },
+        {
+          "id": "10.2",
+          "title": "Session cleanup",
+          "description": "Clean up expired sessions"
+        },
+        {
+          "id": "10.3",
+          "title": "Logout functionality",
+          "description": "Implement secure logout"
+        }
+      ],
+      "acceptance_criteria": [
+        "Token refresh works automatically",
+        "Expired sessions are cleaned up",
+        "Logout invalidates tokens",
+        "Session persistence across browser refresh"
+      ],
+      "coupling": "tight",
+      "coupled_with": [3, 7]
+    },
+    {
+      "id": 11,
+      "title": "Security Middleware",
+      "description": "Implement security middleware for CSRF, CORS, etc.",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 3,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "11.1",
+          "title": "CORS configuration",
+          "description": "Configure CORS for frontend"
+        },
+        {
+          "id": "11.2",
+          "title": "CSRF protection",
+          "description": "Add CSRF token validation"
+        },
+        {
+          "id": "11.3",
+          "title": "Security headers",
+          "description": "Add security-related HTTP headers"
+        }
+      ],
+      "acceptance_criteria": [
+        "CORS allows frontend requests",
+        "CSRF protection prevents attacks",
+        "Security headers are set",
+        "Rate limiting prevents abuse"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 12,
+      "title": "Input Validation & Sanitization",
+      "description": "Comprehensive input validation for all endpoints",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 4,
+      "dependencies": [2, 3, 4],
+      "subtasks": [
+        {
+          "id": "12.1",
+          "title": "Validation middleware",
+          "description": "Create reusable validation functions"
+        },
+        {
+          "id": "12.2",
+          "title": "Sanitization",
+          "description": "Sanitize all user inputs"
+        },
+        {
+          "id": "12.3",
+          "title": "Error handling",
+          "description": "Consistent error responses"
+        }
+      ],
+      "acceptance_criteria": [
+        "All inputs are validated",
+        "Malicious inputs are sanitized",
+        "Validation errors return proper messages",
+        "SQL injection prevented"
+      ],
+      "coupling": "tight",
+      "coupled_with": [2, 3, 4]
+    },
+    {
+      "id": 13,
+      "title": "Unit Tests - Backend",
+      "description": "Write comprehensive unit tests for backend logic",
+      "phase": 3,
+      "priority": "high",
+      "estimated_hours": 8,
+      "dependencies": [2, 3, 4, 5],
+      "subtasks": [
+        {
+          "id": "13.1",
+          "title": "Authentication tests",
+          "description": "Test registration, login, password reset"
+        },
+        {
+          "id": "13.2",
+          "title": "Authorization tests",
+          "description": "Test role-based access control"
+        },
+        {
+          "id": "13.3",
+          "title": "Validation tests",
+          "description": "Test input validation and sanitization"
+        }
+      ],
+      "acceptance_criteria": [
+        "All authentication functions tested",
+        "Authorization logic tested",
+        "Edge cases covered",
+        "Test coverage > 90%"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 14,
+      "title": "Unit Tests - Frontend",
+      "description": "Write unit tests for React components",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 6,
+      "dependencies": [6, 7, 8],
+      "subtasks": [
+        {
+          "id": "14.1",
+          "title": "Form component tests",
+          "description": "Test registration and login forms"
+        },
+        {
+          "id": "14.2",
+          "title": "Validation tests",
+          "description": "Test client-side validation"
+        },
+        {
+          "id": "14.3",
+          "title": "State management tests",
+          "description": "Test authentication state"
+        }
+      ],
+      "acceptance_criteria": [
+        "All components have tests",
+        "Form validation tested",
+        "State changes tested",
+        "Test coverage > 80%"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 15,
+      "title": "API Documentation",
+      "description": "Create comprehensive API documentation",
+      "phase": 2,
+      "priority": "medium",
+      "estimated_hours": 3,
+      "dependencies": [2, 3, 4, 5],
+      "subtasks": [
+        {
+          "id": "15.1",
+          "title": "OpenAPI specification",
+          "description": "Create OpenAPI/Swagger documentation"
+        },
+        {
+          "id": "15.2",
+          "title": "Example requests",
+          "description": "Add example requests and responses"
+        },
+        {
+          "id": "15.3",
+          "title": "Authentication guide",
+          "description": "Document authentication flow"
+        }
+      ],
+      "acceptance_criteria": [
+        "All endpoints documented",
+        "Examples provided",
+        "Authentication flow explained",
+        "Interactive documentation available"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 16,
+      "title": "Error Handling & Logging",
+      "description": "Implement comprehensive error handling and logging",
+      "phase": 3,
+      "priority": "medium",
+      "estimated_hours": 4,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "16.1",
+          "title": "Error middleware",
+          "description": "Create global error handling middleware"
+        },
+        {
+          "id": "16.2",
+          "title": "Logging system",
+          "description": "Implement structured logging"
+        },
+        {
+          "id": "16.3",
+          "title": "Error monitoring",
+          "description": "Set up error tracking"
+        }
+      ],
+      "acceptance_criteria": [
+        "All errors handled gracefully",
+        "Structured logs generated",
+        "Error monitoring alerts",
+        "Debug information available"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 17,
+      "title": "Performance Optimization",
+      "description": "Optimize application performance and response times",
+      "phase": 3,
+      "priority": "low",
+      "estimated_hours": 5,
+      "dependencies": [10, 11, 12],
+      "subtasks": [
+        {
+          "id": "17.1",
+          "title": "Database indexing",
+          "description": "Add database indexes for performance"
+        },
+        {
+          "id": "17.2",
+          "title": "Caching strategy",
+          "description": "Implement Redis caching"
+        },
+        {
+          "id": "17.3",
+          "title": "Query optimization",
+          "description": "Optimize database queries"
+        }
+      ],
+      "acceptance_criteria": [
+        "Response times < 200ms",
+        "Database queries optimized",
+        "Caching improves performance",
+        "Performance metrics tracked"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 18,
+      "title": "Integration Tests - API",
+      "description": "End-to-end API integration tests",
+      "phase": 4,
+      "priority": "high",
+      "estimated_hours": 6,
+      "dependencies": [13, 16],
+      "subtasks": [
+        {
+          "id": "18.1",
+          "title": "Authentication flow tests",
+          "description": "Test complete authentication workflows"
+        },
+        {
+          "id": "18.2",
+          "title": "Database integration",
+          "description": "Test database operations"
+        },
+        {
+          "id": "18.3",
+          "title": "Email integration",
+          "description": "Test email sending functionality"
+        }
+      ],
+      "acceptance_criteria": [
+        "All API endpoints tested together",
+        "Database transactions tested",
+        "Email service integration tested",
+        "Error scenarios covered"
+      ],
+      "coupling": "tight",
+      "coupled_with": [19, 20]
+    },
+    {
+      "id": 19,
+      "title": "Integration Tests - Frontend",
+      "description": "Frontend integration with backend APIs",
+      "phase": 4,
+      "priority": "high",
+      "estimated_hours": 5,
+      "dependencies": [14, 18],
+      "subtasks": [
+        {
+          "id": "19.1",
+          "title": "API integration tests",
+          "description": "Test frontend API calls"
+        },
+        {
+          "id": "19.2",
+          "title": "Form submission tests",
+          "description": "Test form submissions end-to-end"
+        },
+        {
+          "id": "19.3",
+          "title": "Authentication flow",
+          "description": "Test complete authentication flow"
+        }
+      ],
+      "acceptance_criteria": [
+        "Frontend integrates with backend",
+        "Forms submit successfully",
+        "Authentication flow works",
+        "Error handling tested"
+      ],
+      "coupling": "tight",
+      "coupled_with": [18, 20]
+    },
+    {
+      "id": 20,
+      "title": "Security Testing",
+      "description": "Comprehensive security testing and vulnerability assessment",
+      "phase": 4,
+      "priority": "high",
+      "estimated_hours": 6,
+      "dependencies": [11, 12, 18],
+      "subtasks": [
+        {
+          "id": "20.1",
+          "title": "Penetration testing",
+          "description": "Test for common vulnerabilities"
+        },
+        {
+          "id": "20.2",
+          "title": "Authentication security",
+          "description": "Test authentication security"
+        },
+        {
+          "id": "20.3",
+          "title": "Input validation security",
+          "description": "Test input validation security"
+        }
+      ],
+      "acceptance_criteria": [
+        "No critical vulnerabilities found",
+        "Authentication is secure",
+        "Input validation prevents attacks",
+        "Security scan passes"
+      ],
+      "coupling": "tight",
+      "coupled_with": [18, 19]
+    },
+    {
+      "id": 21,
+      "title": "Load Testing",
+      "description": "Performance testing under load",
+      "phase": 4,
+      "priority": "medium",
+      "estimated_hours": 4,
+      "dependencies": [17, 18],
+      "subtasks": [
+        {
+          "id": "21.1",
+          "title": "Load test scenarios",
+          "description": "Create realistic load test scenarios"
+        },
+        {
+          "id": "21.2",
+          "title": "Performance benchmarks",
+          "description": "Establish performance baselines"
+        },
+        {
+          "id": "21.3",
+          "title": "Bottleneck identification",
+          "description": "Identify and fix performance bottlenecks"
+        }
+      ],
+      "acceptance_criteria": [
+        "System handles 10,000 concurrent users",
+        "Response times under load < 500ms",
+        "No memory leaks under load",
+        "Database performs well under load"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 22,
+      "title": "E2E User Journey Tests",
+      "description": "End-to-end testing of complete user journeys",
+      "phase": 5,
+      "priority": "high",
+      "estimated_hours": 6,
+      "dependencies": [19, 20],
+      "subtasks": [
+        {
+          "id": "22.1",
+          "title": "Registration journey",
+          "description": "Test complete registration flow"
+        },
+        {
+          "id": "22.2",
+          "title": "Login journey",
+          "description": "Test complete login flow"
+        },
+        {
+          "id": "22.3",
+          "title": "Password reset journey",
+          "description": "Test complete password reset flow"
+        }
+      ],
+      "acceptance_criteria": [
+        "User can complete registration",
+        "User can login and access features",
+        "Password reset works end-to-end",
+        "All user journeys successful"
+      ],
+      "coupling": "tight",
+      "coupled_with": [23, 24]
+    },
+    {
+      "id": 23,
+      "title": "Cross-Browser Testing",
+      "description": "Test application across different browsers",
+      "phase": 5,
+      "priority": "medium",
+      "estimated_hours": 4,
+      "dependencies": [22],
+      "subtasks": [
+        {
+          "id": "23.1",
+          "title": "Chrome testing",
+          "description": "Test on Chrome browser"
+        },
+        {
+          "id": "23.2",
+          "title": "Firefox testing",
+          "description": "Test on Firefox browser"
+        },
+        {
+          "id": "23.3",
+          "title": "Safari testing",
+          "description": "Test on Safari browser"
+        }
+      ],
+      "acceptance_criteria": [
+        "Works correctly on Chrome",
+        "Works correctly on Firefox", 
+        "Works correctly on Safari",
+        "No browser-specific issues"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 24,
+      "title": "Mobile Responsiveness Testing",
+      "description": "Test mobile responsiveness and functionality",
+      "phase": 5,
+      "priority": "medium",
+      "estimated_hours": 3,
+      "dependencies": [22],
+      "subtasks": [
+        {
+          "id": "24.1",
+          "title": "Mobile layout testing",
+          "description": "Test layouts on mobile devices"
+        },
+        {
+          "id": "24.2",
+          "title": "Touch interaction testing",
+          "description": "Test touch interactions"
+        },
+        {
+          "id": "24.3",
+          "title": "Performance on mobile",
+          "description": "Test performance on mobile devices"
+        }
+      ],
+      "acceptance_criteria": [
+        "Responsive design works on mobile",
+        "Touch interactions work correctly",
+        "Performance acceptable on mobile",
+        "No mobile-specific issues"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 25,
+      "title": "Production Environment Setup",
+      "description": "Set up production environment and deployment pipeline",
+      "phase": 6,
+      "priority": "high",
+      "estimated_hours": 8,
+      "dependencies": [21, 22],
+      "subtasks": [
+        {
+          "id": "25.1",
+          "title": "Docker containerization",
+          "description": "Create Docker containers for application"
+        },
+        {
+          "id": "25.2",
+          "title": "CI/CD pipeline",
+          "description": "Set up automated deployment pipeline"
+        },
+        {
+          "id": "25.3",
+          "title": "Environment configuration",
+          "description": "Configure production environment variables"
+        }
+      ],
+      "acceptance_criteria": [
+        "Application containerized with Docker",
+        "CI/CD pipeline deploys automatically",
+        "Environment variables configured",
+        "Health checks working"
+      ],
+      "coupling": "loose"
+    },
+    {
+      "id": 26,
+      "title": "Production Deployment & Monitoring",
+      "description": "Deploy to production and set up monitoring",
+      "phase": 6,
+      "priority": "high",
+      "estimated_hours": 6,
+      "dependencies": [25],
+      "subtasks": [
+        {
+          "id": "26.1",
+          "title": "Production deployment",
+          "description": "Deploy application to production"
+        },
+        {
+          "id": "26.2",
+          "title": "Monitoring setup",
+          "description": "Set up application monitoring"
+        },
+        {
+          "id": "26.3",
+          "title": "Backup procedures",
+          "description": "Set up database backup procedures"
+        }
+      ],
+      "acceptance_criteria": [
+        "Application deployed to production",
+        "Monitoring and alerting active",
+        "Backup procedures in place",
+        "Production health checks passing"
+      ],
+      "coupling": "loose"
+    }
+  ],
+  "coupling_analysis": {
+    "tightly_coupled_groups": [
+      {
+        "group_id": "auth-core",
+        "tasks": [2, 3, 4],
+        "reason": "Core authentication functionality must be implemented together"
+      },
+      {
+        "group_id": "frontend-forms",
+        "tasks": [6, 7],
+        "reason": "Registration and login forms share common validation and styling"
+      },
+      {
+        "group_id": "testing-integration",
+        "tasks": [18, 19, 20],
+        "reason": "Integration tests must be coordinated across frontend and backend"
+      },
+      {
+        "group_id": "e2e-testing",
+        "tasks": [22, 23, 24],
+        "reason": "E2E tests need to be run together for complete validation"
+      }
+    ],
+    "loosely_coupled_groups": [
+      {
+        "group_id": "infrastructure",
+        "tasks": [1, 9, 11, 16, 17],
+        "reason": "Infrastructure tasks can be worked on independently"
+      },
+      {
+        "group_id": "documentation",
+        "tasks": [15],
+        "reason": "Documentation can be created independently"
+      },
+      {
+        "group_id": "testing-unit",
+        "tasks": [13, 14],
+        "reason": "Unit tests can be written independently for each component"
+      }
+    ]
+  },
+  "parallel_execution_plan": {
+    "wave_1": [1, 9, 11, 15, 16],
+    "wave_2": [2, 3, 4, 6],
+    "wave_3": [5, 7, 8, 10, 12],
+    "wave_4": [13, 14, 17],
+    "wave_5": [18, 19, 20, 21],
+    "wave_6": [22, 23, 24],
+    "wave_7": [25, 26]
+  }
+}
