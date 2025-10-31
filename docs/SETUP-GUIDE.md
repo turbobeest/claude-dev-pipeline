@@ -151,11 +151,15 @@ CLAUDE_MAIN_BRANCH=main
 CLAUDE_ENVIRONMENT=development
 
 # GitHub Integration
-GITHUB_ORG=turbobeest
-GITHUB_REPO=your-repo
+# Full repository URL (supports enterprise and personal GitHub)
+GITHUB_REPO_URL=https://github.com/your-username/your-repo
+# For enterprise: GITHUB_REPO_URL=https://github.enterprise.com/org/repo
+
+# GitHub Token (optional - only for private repos)
+# Not needed for enterprise GitHub with SSO authentication
 # Personal Access Token with repo, read:org, workflow permissions
 # Generate at: https://github.com/settings/tokens
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+# GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 
 # TaskMaster Configuration
 # Required for TaskMaster GitHub integration

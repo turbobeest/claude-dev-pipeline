@@ -79,10 +79,15 @@ cd your-project
 cat >> .env << 'EOF'
 
 # === Claude Dev Pipeline Configuration ===
-# GitHub Configuration (optional - for updates)
-GITHUB_ORG=turbobeest
-GITHUB_REPO=claude-dev-pipeline
+# GitHub Repository (full URL - works with enterprise and personal GitHub)
+# Examples: https://github.com/user/repo or https://github.enterprise.com/org/repo
+GITHUB_REPO_URL=https://github.com/turbobeest/claude-dev-pipeline
+# Or for enterprise: GITHUB_REPO_URL=https://github.enterprise.com/org/repo
 GITHUB_BRANCH=deploy
+
+# GitHub Token (optional - only needed for private repos)
+# Not required for enterprise GitHub with SSO authentication
+# GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 
 # TaskMaster Configuration (REQUIRED for TaskMaster features)
 # GitHub token with repo, project, issues, pull_requests permissions
