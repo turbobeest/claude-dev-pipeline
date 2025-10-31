@@ -178,6 +178,28 @@ cp ~/claude-projects/my-app/requirements.md ./docs/PRD.md
 
 The entire process from PRD to deployed code is managed autonomously.
 
+## Real-Time Monitoring
+
+Monitor the pipeline execution in real-time:
+
+```bash
+# In a separate terminal, run the monitor dashboard
+bash /tmp/claude-dev-pipeline/monitor-pipeline.sh
+
+# Or for live log streaming
+bash /tmp/claude-dev-pipeline/monitor-pipeline.sh --live
+
+# Check current phase
+bash /tmp/claude-dev-pipeline/monitor-pipeline.sh --phase
+```
+
+The monitor shows:
+- Current pipeline phase and progress
+- Active signals and skill activations
+- Real-time log streaming with color coding
+- Error tracking and performance metrics
+- Hook executions and codeword injections
+
 ## Documentation
 
 - [Setup Guide](docs/SETUP-GUIDE.md)
