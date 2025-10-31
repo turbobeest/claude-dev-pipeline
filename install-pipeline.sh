@@ -637,7 +637,8 @@ fi
 
 # Initialize workflow state
 if [ ! -f "$CLAUDE_DIR/.workflow-state.json" ]; then
-    cat > "$CLAUDE_DIR/.workflow-state.json" << 'EOF'
+    INSTALL_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    cat > "$CLAUDE_DIR/.workflow-state.json" << EOF
 {
   "phase": "pre-init",
   "completedTasks": [],
@@ -645,7 +646,7 @@ if [ ! -f "$CLAUDE_DIR/.workflow-state.json" ]; then
   "lastActivation": "",
   "lastSignal": "",
   "metadata": {
-    "installedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+    "installedAt": "$INSTALL_TIME",
     "version": "3.0"
   }
 }
