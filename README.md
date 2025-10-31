@@ -26,10 +26,10 @@ curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/depl
 ```
 
 **⚠️ CRITICAL**: 
-- Run the installer FROM your intended project root directory (where you want `.claude/` created)
-- Do NOT clone `claude-dev-pipeline` inside your project directory
-- The installer creates `.claude/` in your CURRENT directory when you run it
-- If you're in a subdirectory of a git repo, the pipeline will be installed in that subdirectory, not the git root
+- Clone `claude-dev-pipeline` to a TEMPORARY location (like `/tmp/`) first
+- Then navigate to your project root and run the installer from there
+- The installer creates `.claude/` in whatever directory you're IN when you run it
+- The `claude-dev-pipeline` folder is just for installation - delete it afterward
 
 ## Prerequisites
 
