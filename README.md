@@ -73,19 +73,36 @@ This pipeline transforms your ideas into deployed, tested, production-ready soft
 - Connection pooling for tools
 - Structured JSON logging
 
+## Prerequisites for Operation
+
+### Required: Product Requirements Document (PRD)
+You must have a properly formatted PRD prepared before starting. Use the provided template to structure your requirements properly (see [PRD Template](templates/PRD-template.md)). This comprehensive template ensures all necessary information is captured for the autonomous pipeline to successfully transform your requirements into production-ready code.
+
 ## Usage
 
-1. Create your PRD:
+### Step 1: Place Your PRD
+Copy your prepared PRD to the project root:
 ```bash
-echo "Your product requirements" > PRD.md
+# Place your completed PRD in the project directory
+cp ~/path/to/your/prepared-PRD.md ./PRD.md
+
+# Or if using Claude Projects, export and place:
+cp ~/claude-projects/my-app/requirements.md ./PRD.md
 ```
 
-2. Start the pipeline:
+### Step 2: Start the Autonomous Pipeline
 ```
 "I've completed my PRD, begin automated development"
 ```
 
-The system will automatically progress through all 6 phases with 95% automation.
+### What Happens Next
+1. **Immediate PRD Processing**: The PRD-to-Tasks skill automatically analyzes your document
+2. **Task Generation**: Creates structured tasks.json with dependencies and coupling analysis
+3. **TaskMaster Activation**: Takes over task orchestration and management
+4. **Autonomous Progression**: Pipeline advances through all 6 phases with 95% automation
+5. **Human Approval**: You're prompted only at 3 strategic decision points
+
+The entire process from PRD to deployed code is managed autonomously.
 
 ## Documentation
 
