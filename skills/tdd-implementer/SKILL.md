@@ -30,6 +30,14 @@ This occurs when:
 - User begins implementation
 - Tests need to be written first
 
+## Anti-Mock Directive
+
+**CRITICAL**: NO MOCK IMPLEMENTATIONS IN OPERATIONAL CODE
+- Do NOT create simulated services or fake deployments
+- Do NOT return hardcoded success responses
+- If cannot implement, raise NotImplementedError
+- Mock code allowed ONLY in test files
+
 ## Worktree Isolation Requirements
 
 **CRITICAL**: This skill MUST operate in dedicated worktrees per subtask `phase-3-task-N`:
@@ -48,6 +56,7 @@ cd ./worktrees/phase-3-task-<subtask_number>
 ### Implementation Isolation Strategy
 1. **One worktree per subtask**: Each subtask gets completely isolated environment
 2. **TDD cycle isolation**: RED-GREEN-REFACTOR happens within worktree boundaries
+3. **NO MOCKS**: Real implementations only, fail if cannot implement
 3. **Test contamination prevention**: Tests don't interfere across subtasks
 4. **Sequential merge**: Subtasks merged in dependency order
 5. **Integration validation**: Each merge tested in isolation before next subtask

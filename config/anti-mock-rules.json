@@ -1,0 +1,111 @@
+{
+  "anti_mock_policy": {
+    "version": "1.0.0",
+    "enforcement": "strict",
+    "principle": "Fail honestly rather than succeed falsely"
+  },
+  
+  "forbidden_patterns": {
+    "operational_code": [
+      {
+        "pattern": "mock.*implementation",
+        "description": "Mock implementations forbidden",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "simulated.*deployment",
+        "description": "Simulated deployments forbidden",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "fake.*service",
+        "description": "Fake services forbidden",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "return.*success.*#.*fake",
+        "description": "Hardcoded fake responses forbidden",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "class.*Mock[A-Z]",
+        "description": "Mock classes forbidden in production",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "def.*simulate_",
+        "description": "Simulation functions forbidden",
+        "severity": "CRITICAL"
+      },
+      {
+        "pattern": "TODO.*implement.*real",
+        "description": "Incomplete implementations",
+        "severity": "WARNING"
+      },
+      {
+        "pattern": "placeholder.*implementation",
+        "description": "Placeholder code forbidden",
+        "severity": "CRITICAL"
+      }
+    ]
+  },
+  
+  "allowed_exceptions": {
+    "test_files": [
+      "*_test.py",
+      "*.test.js",
+      "*.spec.js",
+      "*_test.go",
+      "test_*.py",
+      "test/*.py",
+      "tests/*.py",
+      "__tests__/*",
+      "spec/*"
+    ],
+    "documentation": [
+      "*.md",
+      "docs/*",
+      "examples/*",
+      "README*"
+    ]
+  },
+  
+  "enforcement_actions": {
+    "on_violation": [
+      "stop_pipeline",
+      "generate_violation_report",
+      "require_human_review",
+      "block_deployment"
+    ],
+    "on_warning": [
+      "log_warning",
+      "add_to_report",
+      "continue_with_caution"
+    ]
+  },
+  
+  "replacement_requirements": {
+    "instead_of_mock": "Use real implementation or raise NotImplementedError",
+    "instead_of_simulation": "Connect to actual service or fail explicitly",
+    "instead_of_placeholder": "Complete implementation or raise explicit error",
+    "instead_of_hardcoded": "Return actual results or propagate real errors"
+  },
+  
+  "error_messages": {
+    "mock_detected": "CRITICAL: Mock implementation detected in operational code. Pipeline stopped.",
+    "simulation_detected": "CRITICAL: Simulated service detected. Use real implementation.",
+    "placeholder_detected": "CRITICAL: Placeholder code detected. Complete or remove.",
+    "incomplete_detected": "WARNING: Incomplete implementation detected. Review required."
+  },
+  
+  "validation_hooks": [
+    "anti-mock-enforcer.sh",
+    "pre-code-generation-directive.sh"
+  ],
+  
+  "validation_phases": [
+    "post_generation",
+    "pre_testing",
+    "pre_deployment"
+  ]
+}
