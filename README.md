@@ -9,15 +9,19 @@ A complete end-to-end development automation system that takes your Product Requ
 ## Quick Installation
 
 ```bash
-# Clone the repository (use deploy branch for production-ready code)
+# Option 1: Install from any location (RECOMMENDED)
+# Clone the installer to a temporary location
+cd /tmp
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
+cd /path/to/your-project  # Navigate to YOUR project directory
+bash /tmp/claude-dev-pipeline/install-pipeline.sh
 
-# Navigate to your project
-cd your-project
-
-# Run installer
-bash /path/to/claude-dev-pipeline/install-pipeline.sh
+# Option 2: Direct download and install
+# From your project root directory
+curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
 ```
+
+**Important**: Run the installer FROM your project root directory. The installer will create a `.claude/` folder with all pipeline components. Do NOT keep the cloned `claude-dev-pipeline` directory in your project.
 
 ## Prerequisites
 
@@ -28,17 +32,36 @@ bash /path/to/claude-dev-pipeline/install-pipeline.sh
 - TaskMaster ([installation](https://github.com/eyaltoledano/claude-task-master))
 - OpenSpec ([installation](https://github.com/Fission-AI/OpenSpec))
 
-## Configuration
+## Installation Structure
 
-1. Copy and configure environment:
-```bash
-cp .env.template .env
-# Edit .env with your GitHub organization and preferences
+After installation, your project will have:
+```
+your-project/              # Your project root (run 'claude' from here)
+├── .claude/              # Pipeline system (created by installer)
+│   ├── skills/          # 10 autonomous skills
+│   ├── hooks/           # 3 automation hooks
+│   ├── config/          # Configuration files
+│   ├── lib/             # Support libraries
+│   └── settings.json    # Claude Code settings
+├── .taskmaster/         # TaskMaster workspace (created when used)
+├── .openspec/           # OpenSpec proposals (created when used)
+├── src/                 # Your source code
+└── PRD.md              # Your requirements document
 ```
 
-2. Run setup:
+**Where to run Claude Code**: Always from your project root directory (e.g., `/Users/you/dev/your-project`), NOT from `.claude/` or `claude-dev-pipeline/`.
+
+## Configuration
+
+After installation, optionally configure:
 ```bash
-./setup.sh
+# From your project root
+cd your-project
+
+# Edit settings if needed (optional)
+vim .claude/settings.json
+
+# The pipeline is ready to use - no additional setup required
 ```
 
 ## What This System Does
