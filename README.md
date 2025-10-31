@@ -86,8 +86,7 @@ GITHUB_BRANCH=deploy
 # TaskMaster Configuration (REQUIRED for TaskMaster features)
 # GitHub token with repo, project, issues, pull_requests permissions
 TASKMASTER_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-# Claude API key from https://console.anthropic.com/settings/keys
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx
+# Note: ANTHROPIC_API_KEY should already be at the top of your .env from TaskMaster
 
 # Pipeline Settings (optional - defaults work fine)
 AUTOMATION_LEVEL=95

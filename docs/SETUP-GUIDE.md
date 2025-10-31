@@ -134,8 +134,9 @@ cat .claude/settings.json
 # Add GitHub token to .env file:
 echo "GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx" >> .env
 
-# Add TaskMaster API key to .env file:
-echo "ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx" >> .env
+# Note: ANTHROPIC_API_KEY should already be in your .env from TaskMaster
+# If not, add it at the TOP of .env (TaskMaster expects it there):
+# ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Environment Configuration (.env File)
@@ -163,9 +164,8 @@ TASKMASTER_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 # Or use same token as above if permissions match:
 # TASKMASTER_GITHUB_TOKEN=${GITHUB_TOKEN}
 
-# Claude API Configuration (for TaskMaster)
-# Get your API key from: https://console.anthropic.com/settings/keys
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxx
+# Note: ANTHROPIC_API_KEY should already be at the top of your .env
+# from TaskMaster installation (do not duplicate)
 
 # Pipeline Settings
 AUTOMATION_LEVEL=95
