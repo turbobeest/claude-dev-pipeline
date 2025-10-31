@@ -474,14 +474,22 @@ if [ "$INSTALL_TOOLS" = true ]; then
     log_success "All tool dependencies validated"
 fi
 
-# Check if in git repository (for project install)
+# Determine installation directory
 if [ "$INSTALL_LOCATION" = "project" ]; then
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        log_error "Not in a git repository. Run 'git init' first or use --global"
-        exit 1
-    fi
-    PROJECT_ROOT=$(git rev-parse --show-toplevel)
+    # Use current working directory as project root
+    # This allows installation in subdirectories of larger repos
+    PROJECT_ROOT=$(pwd)
     log_info "Installing in project: $PROJECT_ROOT"
+    
+    # Check if in git repository (warning only, not required)
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        log_warning "Not in a git repository. Consider running 'git init' if this is a new project."
+    else
+        GIT_ROOT=$(git rev-parse --show-toplevel)
+        if [ "$PROJECT_ROOT" != "$GIT_ROOT" ]; then
+            log_info "Note: Installing in subdirectory of git repo at $GIT_ROOT"
+        fi
+    fi
 else
     log_info "Installing globally in ~/.claude"
 fi
