@@ -235,7 +235,7 @@ Simply describe what you want in Claude Code:
 ```
 "I have a PRD ready, please begin the automated development pipeline"
 "Start building the application from my requirements document"
-"Begin full stack development from PRD.md"
+"Begin full stack development from docs/PRD.md"
 ```
 
 #### Option 2: Direct Phase Activation
@@ -295,10 +295,11 @@ The system requires approval at 3 strategic points:
 
 1. **Prepare Requirements**
    ```bash
-   # Create or update your PRD
-   vim PRD.md
+   # Create docs directory and PRD
+   mkdir -p docs
+   vim docs/PRD.md
    # Or copy existing requirements
-   cp ~/requirements/project-spec.md PRD.md
+   cp ~/requirements/project-spec.md docs/PRD.md
    ```
 
 2. **Launch Pipeline**
@@ -353,7 +354,8 @@ Create a Product Requirements Document:
 
 ```bash
 # Create a PRD file
-cat > PRD.md << 'EOF'
+mkdir -p docs
+cat > docs/PRD.md << 'EOF'
 # Sample Product Requirements Document
 
 ## Project Overview

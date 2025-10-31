@@ -54,8 +54,9 @@ your-project/              # Your project root (run 'claude' from HERE)
 ├── .env                 # Environment variables (in project root, not .claude/)
 ├── .taskmaster/         # TaskMaster workspace (created when used)
 ├── .openspec/           # OpenSpec proposals (created when used)
-├── src/                 # Your source code
-└── PRD.md              # Your requirements document
+├── docs/                # Documentation directory
+│   └── PRD.md          # Your requirements document
+└── src/                # Your source code
 ```
 
 **⚠️ IMPORTANT File Locations**:
@@ -149,14 +150,19 @@ You must have a properly formatted PRD prepared before starting. Use the provide
 ## Usage
 
 ### Step 1: Place Your PRD
-Copy your prepared PRD to the project root:
+Copy your prepared PRD to the docs directory for better organization:
 ```bash
-# Place your completed PRD in the project directory
-cp ~/path/to/your/prepared-PRD.md ./PRD.md
+# Create docs directory if it doesn't exist
+mkdir -p docs
+
+# Place your completed PRD in the docs directory
+cp ~/path/to/your/prepared-PRD.md ./docs/PRD.md
 
 # Or if using Claude Projects, export and place:
-cp ~/claude-projects/my-app/requirements.md ./PRD.md
+cp ~/claude-projects/my-app/requirements.md ./docs/PRD.md
 ```
+
+**Note**: We recommend `docs/PRD.md` instead of root to keep your project organized. TaskMaster doesn't use the PRD - it only works with `tasks.json` which the pipeline creates in `.taskmaster/`.
 
 ### Step 2: Start the Autonomous Pipeline
 ```
