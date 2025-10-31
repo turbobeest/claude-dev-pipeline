@@ -53,16 +53,43 @@ your-project/              # Your project root (run 'claude' from here)
 
 ## Configuration
 
-After installation, optionally configure:
+### Environment Variables (.env)
+
+The pipeline can use environment variables for configuration. Since TaskMaster also uses `.env` in the project root, we append pipeline-specific variables to your existing `.env` file:
+
 ```bash
 # From your project root
 cd your-project
 
-# Edit settings if needed (optional)
-vim .claude/settings.json
+# If you have an existing .env (from TaskMaster or other tools), append pipeline config:
+cat >> .env << 'EOF'
 
-# The pipeline is ready to use - no additional setup required
+# === Claude Dev Pipeline Configuration ===
+# GitHub Configuration (optional - for updates)
+GITHUB_ORG=turbobeest
+GITHUB_REPO=claude-dev-pipeline
+GITHUB_BRANCH=deploy
+
+# Pipeline Settings (optional - defaults work fine)
+AUTOMATION_LEVEL=95
+USE_WORKTREES=true
+WORKTREE_BASE_DIR=.worktrees
+LOG_LEVEL=INFO
+
+# Hook Configuration (optional)
+HOOK_DEBUG=false
+SKILL_ACTIVATION_DEBUG=false
+EOF
+
+# Or if you don't have an .env yet, copy the template:
+cp /tmp/claude-dev-pipeline/.env.template .env
+# Then edit .env with your preferences
+
+# Edit Claude Code settings if needed (optional)
+vim .claude/settings.json
 ```
+
+**Note**: The pipeline works without any .env configuration using sensible defaults. Only add these if you need to customize behavior.
 
 ## What This System Does
 

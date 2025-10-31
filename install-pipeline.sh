@@ -851,6 +851,41 @@ if [ "$INSTALL_LOCATION" = "project" ]; then
     # Create required directories
     mkdir -p "$PROJECT_ROOT"/{docs,tests,.taskmaster,.openspec}
     
+    # Handle .env configuration
+    if [ ! -f "$PROJECT_ROOT/.env" ]; then
+        # No existing .env, copy template if available
+        if [ -f "$SOURCE_DIR/.env.template" ]; then
+            cp "$SOURCE_DIR/.env.template" "$PROJECT_ROOT/.env"
+            log_success "  Created .env from template"
+        fi
+    else
+        # Existing .env (probably from TaskMaster), check if pipeline config exists
+        if ! grep -q "Claude Dev Pipeline Configuration" "$PROJECT_ROOT/.env" 2>/dev/null; then
+            # Append pipeline configuration
+            cat >> "$PROJECT_ROOT/.env" << 'EOF'
+
+# === Claude Dev Pipeline Configuration ===
+# GitHub Configuration (optional - for updates)
+GITHUB_ORG=turbobeest
+GITHUB_REPO=claude-dev-pipeline
+GITHUB_BRANCH=deploy
+
+# Pipeline Settings (optional - defaults work fine)
+AUTOMATION_LEVEL=95
+USE_WORKTREES=true
+WORKTREE_BASE_DIR=.worktrees
+LOG_LEVEL=INFO
+
+# Hook Configuration (optional)
+HOOK_DEBUG=false
+SKILL_ACTIVATION_DEBUG=false
+EOF
+            log_success "  Appended pipeline config to existing .env"
+        else
+            log_info "  Pipeline config already exists in .env"
+        fi
+    fi
+    
     # Create reference documents
     if [ -d "$SOURCE_DIR/reference" ]; then
         log_info "  Installing reference documentation..."
