@@ -448,6 +448,119 @@ npm test:integration
 **Current Status:** 🚨 BLOCKED - 2 missing tests, 1 incomplete test
 ```
 
+## Automated Validation Hooks
+
+**CRITICAL: Before Task #26, run automated validation hooks:**
+
+### 1. Security Validation
+```bash
+./hooks/security-validator.sh
+```
+
+**What it validates:**
+- npm/pip dependency vulnerabilities (blocks on critical/high)
+- Container image security (Trivy scan)
+- Secrets detection (Gitleaks)
+- SAST scanning (Semgrep if configured)
+
+**Exit codes:**
+- 0 = PASSED (can proceed)
+- 1 = FAILED (blocks deployment)
+
+**Required tools** (install if missing):
+```bash
+# Node.js security
+npm install -g npm
+
+# Python security (optional)
+pip install pip-audit
+
+# Container scanning (optional but recommended)
+brew install trivy
+
+# Secrets detection (optional but recommended)
+brew install gitleaks
+
+# SAST scanning (optional)
+pip install semgrep
+```
+
+---
+
+### 2. Load Test Validation
+```bash
+./hooks/load-test-validator.sh
+```
+
+**What it validates:**
+- Detects load test framework (k6, Artillery, Locust, npm script)
+- Executes load tests automatically
+- Validates results against PRD requirements
+
+**Supported frameworks:**
+- k6 (recommended): Create `k6-load-test.js`
+- Artillery: Create `artillery.yml`
+- Locust: Create `locustfile.py`
+- npm: Add `"load:test"` script to package.json
+
+**Exit codes:**
+- 0 = PASSED
+- 1 = FAILED or no load tests found
+
+---
+
+### 3. Performance Validation
+```bash
+./hooks/performance-validator.sh
+```
+
+**What it validates:**
+- Extracts performance targets from PRD
+- Runs performance tests
+- Compares actual vs required metrics
+- Validates latency (p95, p99, avg)
+- Validates throughput (req/sec)
+
+**Exit codes:**
+- 0 = PASSED or no requirements in PRD
+- 1 = FAILED (performance targets not met)
+
+---
+
+### Integration into Task #26 Workflow
+
+**UPDATED Production Readiness Validation:**
+
+```bash
+# Step 1: Run automated security validation
+echo "Running security validation..."
+./hooks/security-validator.sh || exit 1
+
+# Step 2: Run load testing
+echo "Running load tests..."
+./hooks/load-test-validator.sh || exit 1
+
+# Step 3: Validate performance
+echo "Validating performance targets..."
+./hooks/performance-validator.sh || exit 1
+
+# Step 4: Manual checks (if automated passes)
+echo "Automated validations PASSED"
+echo "Proceed with manual production readiness checklist..."
+```
+
+**Automated validation replaces manual checklists for:**
+- ✅ Security scanning (was manual checkbox)
+- ✅ Load testing execution (was manual checkbox)
+- ✅ Performance validation (was manual checkbox)
+
+**Manual validation still required for:**
+- Stakeholder sign-offs
+- Documentation review
+- Operational runbook verification
+
+---
+
 ## Task #25 Validation (E2E Workflows)
 
 ```markdown

@@ -72,6 +72,11 @@ Automates Phase 6: Production deployment in isolated worktree
 ## Execution Flow
 
 ```
+Stage 0: Automated Validation (NEW)
+         - Run security validation
+         - Run load testing
+         - Validate performance targets
+         - BLOCK if any validation fails
 Stage 1: Infrastructure Setup
          - Build Docker containers (docker-compose build)
          - Start all services (docker-compose up -d)
@@ -102,6 +107,50 @@ Stage 5: Post-Deployment Validation
 ```
 
 ## Deployment Strategy
+
+### Stage 0: Automated Validation (MUST RUN FIRST)
+
+```bash
+# Run all automated validators - BLOCKS deployment if any fail
+echo "==============================================================================="
+echo "Stage 0: Automated Validation"
+echo "==============================================================================="
+
+# Security validation
+echo ""
+echo "Running security validation..."
+./hooks/security-validator.sh || {
+    echo "❌ Security validation FAILED - deployment blocked"
+    exit 1
+}
+
+# Load testing
+echo ""
+echo "Running load tests..."
+./hooks/load-test-validator.sh || {
+    echo "❌ Load testing FAILED - deployment blocked"
+    exit 1
+}
+
+# Performance validation
+echo ""
+echo "Validating performance targets..."
+./hooks/performance-validator.sh || {
+    echo "⚠️  Performance validation failed but continuing (check PRD requirements)"
+}
+
+echo ""
+echo "✅ All automated validations PASSED"
+echo "Proceeding to infrastructure setup..."
+```
+
+**CRITICAL:**
+- These validators MUST pass before proceeding
+- Security failures = hard block
+- Load test failures = hard block
+- Performance failures = warning (may continue if targets not in PRD)
+
+---
 
 ### Infrastructure Setup
 ```bash
