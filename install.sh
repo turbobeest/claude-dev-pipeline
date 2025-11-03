@@ -212,27 +212,26 @@ install_pipeline() {
 configure_pipeline() {
     log_step "Step 3: Configuring Pipeline"
 
-    # Check if in git repo
-    if git rev-parse --git-dir > /dev/null 2>&1; then
-        log_success "Git repository detected"
+    # Initialize .taskmaster directory (regardless of git status)
+    if [[ ! -d ".taskmaster" ]]; then
+        log_info "Initializing TaskMaster directory..."
+        mkdir -p .taskmaster/tasks
+        mkdir -p .taskmaster/proposals
+        mkdir -p .taskmaster/.checkpoints
+        mkdir -p .taskmaster/.signals
+        log_success "TaskMaster directories created"
+    else
+        log_info "TaskMaster directory already exists"
+    fi
 
-        # Initialize .taskmaster directory if not exists
-        if [[ ! -d ".taskmaster" ]]; then
-            log_info "Initializing TaskMaster directory..."
-            mkdir -p .taskmaster/tasks
-            mkdir -p .taskmaster/proposals
-            mkdir -p .taskmaster/.checkpoints
-            mkdir -p .taskmaster/.signals
-        fi
+    # Initialize openspec directory (regardless of git status)
+    if [[ ! -d "openspec" ]]; then
+        log_info "Initializing OpenSpec directory..."
+        mkdir -p openspec
 
-        # Initialize openspec directory if not exists
-        if [[ ! -d "openspec" ]]; then
-            log_info "Initializing OpenSpec directory..."
-            mkdir -p openspec
-
-            # Create basic project.md if doesn't exist
-            if [[ ! -f "openspec/project.md" ]]; then
-                cat > openspec/project.md << 'EOL'
+        # Create basic project.md if doesn't exist
+        if [[ ! -f "openspec/project.md" ]]; then
+            cat > openspec/project.md << 'EOL'
 # Project Overview
 
 ## Project Description
@@ -244,19 +243,30 @@ configure_pipeline() {
 ## Architecture
 <!-- Describe your architecture here -->
 EOL
-            fi
+            log_success "OpenSpec project.md created"
         fi
-
-        log_success "Project structure initialized"
     else
-        log_warning "Not a git repository - some features may not work"
-        read -p "Initialize git repository? [Y/n] " -n 1 -r
+        log_info "OpenSpec directory already exists"
+    fi
+
+    # Check if in git repo
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        log_success "Git repository detected"
+    else
+        log_warning "Not a git repository"
+        echo ""
+        log_info "The pipeline works best with git for version control"
+        read -p "Initialize git repository now? [Y/n] " -n 1 -r
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
             git init
             log_success "Git repository initialized"
+        else
+            log_info "Continuing without git (you can run 'git init' later)"
         fi
     fi
+
+    log_success "Project structure initialized"
 }
 
 # =============================================================================
