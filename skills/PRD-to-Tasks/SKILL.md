@@ -58,6 +58,39 @@ Automatically generates high-quality TaskMaster tasks.json from Product Requirem
 - Production-grade acceptance criteria
 - **NEW**: Worktree isolation for each task generation phase
 - **NEW**: Cross-worktree contamination prevention
+- **NEW**: Support for large PRD files (>25,000 tokens) via large-file-reader utility
+
+## Reading Large PRD Files
+
+**IMPORTANT:** If your PRD file exceeds Claude Code's Read tool limit (~25,000 tokens or ~100KB):
+
+```bash
+# Use the large-file-reader utility instead of Read tool:
+prd_content=$(./lib/large-file-reader.sh docs/PRD.md)
+
+# The utility will:
+# - Read files of any size (no token limit)
+# - Provide metadata about file size and estimated tokens
+# - Output complete content for atomic analysis
+```
+
+**When to use large-file-reader.sh:**
+- PRD files > 100KB or > 25,000 tokens
+- Comprehensive product requirements documents
+- Multi-section technical specifications
+- Any document that fails with Read tool "token limit exceeded"
+
+**Example usage in skills:**
+```bash
+# Check if file is large first
+if ./lib/large-file-reader.sh docs/PRD.md --metadata | grep -q "exceeds"; then
+  echo "Using large-file-reader for comprehensive PRD..."
+  content=$(./lib/large-file-reader.sh docs/PRD.md)
+else
+  echo "Using standard Read tool..."
+  # Use Read tool normally
+fi
+```
 
 ## What This Skill Does
 
