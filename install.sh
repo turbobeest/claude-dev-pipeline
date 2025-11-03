@@ -243,9 +243,9 @@ configure_pipeline() {
         if [[ ! -d "openspec" ]] || [[ -z "$(ls -A openspec 2>/dev/null)" ]]; then
             log_info "Initializing OpenSpec in project..."
 
-            # Run openspec init with piped input for non-interactive mode
+            # Run openspec init with piped input for non-interactive mode (claude only)
             # The 'echo' provides the Enter keystroke needed by openspec init
-            if echo | openspec init --tools all >/dev/null 2>&1; then
+            if echo | openspec init --tools claude >/dev/null 2>&1; then
                 log_success "OpenSpec initialized"
             else
                 # Fallback: manual initialization
