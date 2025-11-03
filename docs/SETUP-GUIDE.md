@@ -55,21 +55,38 @@ chmod 755 /path/to/your/project
 
 ## Installation Methods
 
-### Method 1: Quick Install (Recommended)
+### Method 1: Automatic Installation (Recommended) ⚡
 
-The fastest way to get started:
+The fastest way to get started - includes automatic prerequisite checking and installation:
 
 ```bash
-# 1. Navigate to YOUR intended project root directory
-# ⚠️ This is where .claude/ will be created!
-cd /path/to/your/project  # <-- Run Claude from here later
+# Step 1: Clone to temporary location
+cd /tmp
+git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 
-# 2. Download and run the installer
-curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
+# Step 2: Navigate to YOUR project directory
+cd /path/to/your-project  # <-- Where you want .claude/ installed
 
-# 3. Verify installation
-ls -la .claude/
-ls -la .env  # Should be in project root, not in .claude/
+# Step 3: Run the installer (auto-checks & installs prerequisites)
+bash /tmp/claude-dev-pipeline/install.sh
+
+# The installer will:
+# - Check all prerequisites (Claude Code, Git, Bash, jq, TaskMaster, OpenSpec)
+# - Auto-install missing tools (jq, TaskMaster, OpenSpec)
+# - Ask for GitHub repository URL
+# - Create .taskmaster/ and openspec/ directories
+# - Copy pipeline files to .claude/
+# - Initialize configuration
+# - Verify installation
+```
+
+**What gets created:**
+```
+your-project/
+├── .claude/              # Pipeline installation
+├── .taskmaster/          # TaskMaster workspace (with subdirectories)
+├── openspec/             # OpenSpec specifications (with project.md)
+└── docs/                 # Your documentation
 ```
 
 ### Method 2: Manual Installation
@@ -85,12 +102,18 @@ git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 # 2. Navigate to YOUR intended project root
 cd /path/to/your/project  # <-- This becomes your project root
 
-# 3. Run the installer (it will install HERE in current directory)
-bash /tmp/claude-dev-pipeline/install-pipeline.sh --project
+# 3. Run the installer
+bash /tmp/claude-dev-pipeline/install.sh
 
-# 4. Verify installation
+# 4. Follow interactive prompts:
+#    - Initialize git? [Y/n]
+#    - Enter GitHub repository URL: (or skip)
+#    - Auto-install missing prerequisites? [Y/n]
+
+# 5. Verify installation
 ls -la .claude/
-ls -la .env
+ls -la .taskmaster/
+ls -la openspec/
 ```
 
 ### Method 3: Local Development Installation
@@ -108,7 +131,7 @@ cd claude-dev-pipeline
 
 # 3. Navigate to your project and install
 cd /path/to/your/project  # <-- Your project root
-bash ~/dev/claude-dev-pipeline/install-pipeline.sh --local
+bash ~/dev/claude-dev-pipeline/install.sh
 ```
 
 ## Configuration
@@ -513,7 +536,7 @@ chmod +x .claude/hooks/*.sh
 
 ```bash
 # Symptoms
-./install-pipeline.sh: line 123: jq: command not found
+./install.sh: jq: command not found
 
 # Solution (macOS)
 brew install jq
@@ -672,8 +695,8 @@ export DEBUG_MODE=true
 export SKILL_ACTIVATION_DEBUG=true
 export LOG_LEVEL=debug
 
-# Use local pipeline
-./install-pipeline.sh --local --dev-mode
+# Reinstall pipeline to pick up new settings
+bash /tmp/claude-dev-pipeline/install.sh
 
 # Monitor debug logs
 tail -f .claude/logs/debug.log
@@ -715,8 +738,8 @@ After successful setup:
 
 ```bash
 # Essential commands
-./install-pipeline.sh                    # Install pipeline
-./lib/state-manager.sh read             # Check pipeline status
+bash /tmp/claude-dev-pipeline/install.sh # Install pipeline
+./.claude/lib/state-manager.sh read      # Check pipeline status
 ./lib/worktree-manager.sh status        # Check worktree status
 ./health-check.sh                       # Run health diagnostics
 ./monitor.sh                           # Monitor pipeline execution
