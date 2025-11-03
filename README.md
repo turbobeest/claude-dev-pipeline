@@ -6,39 +6,53 @@
 
 A complete end-to-end development automation system that takes your Product Requirements Document (PRD) and autonomously handles the entire software development lifecycle - from task decomposition and specification generation through implementation, testing, validation, and deployment. This pipeline achieves 95% automation across all development phases, requiring human intervention only at three strategic decision points.
 
-## Quick Installation
+## ⚡ Fast Installation (< 2 minutes)
+
+The installer **automatically checks and installs** all prerequisites for you!
 
 ```bash
-# Option 1: Install from temporary location (RECOMMENDED)
-# Clone the installer to a temporary location OUTSIDE your project
+# Step 1: Clone to temporary location
 cd /tmp
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 
-# Navigate to YOUR intended project root directory
-# This is where you want .claude/ to be created
-cd /path/to/your-project  # <-- This becomes your project root!
-bash /tmp/claude-dev-pipeline/install-pipeline.sh
+# Step 2: Navigate to YOUR project directory
+cd /path/to/your-project  # <-- Where you want .claude/ installed
 
-# Option 2: Direct download and install
-# First, navigate to YOUR intended project root directory
-cd /path/to/your-project  # <-- This becomes your project root!
-curl -fsSL https://raw.githubusercontent.com/turbobeest/claude-dev-pipeline/deploy/install-pipeline.sh | bash
+# Step 3: Run the installer (auto-checks & installs prerequisites)
+bash /tmp/claude-dev-pipeline/install.sh
 ```
 
-**⚠️ CRITICAL**: 
-- Clone `claude-dev-pipeline` to a TEMPORARY location (like `/tmp/`) first
-- Then navigate to your project root and run the installer from there
-- The installer creates `.claude/` in whatever directory you're IN when you run it
-- The `claude-dev-pipeline` folder is just for installation - delete it afterward
+**What the installer does:**
+- ✅ Checks all prerequisites (Claude Code, Git, Bash, jq, TaskMaster, OpenSpec)
+- ✅ Auto-installs missing tools (jq, TaskMaster, OpenSpec)
+- ✅ Copies pipeline files to `.claude/`
+- ✅ Initializes configuration
+- ✅ Verifies installation
+- ✅ Tests hooks
 
-## Prerequisites
+**Installation takes < 2 minutes with zero manual steps for most prerequisites!**
 
-- Claude Code
-- Git
-- Bash 3.2+
-- jq
-- TaskMaster ([installation](https://github.com/eyaltoledano/claude-task-master))
-- OpenSpec ([installation](https://github.com/Fission-AI/OpenSpec))
+See [Quick Start Guide](docs/QUICK-START.md) for detailed instructions.
+
+## Prerequisites (Auto-Installed)
+
+| Tool | Auto-Install | Notes |
+|------|--------------|-------|
+| Claude Code | ❌ Manual | [Download](https://claude.ai/download) |
+| Git | ✅ Yes | Via brew/apt/yum |
+| Bash 3.2+ | ℹ️ Pre-installed | Typically available |
+| jq | ✅ Yes | JSON processor |
+| TaskMaster | ✅ Yes | [GitHub](https://github.com/eyaltoledano/claude-task-master) |
+| OpenSpec | ✅ Yes | [GitHub](https://github.com/Fission-AI/OpenSpec) |
+
+**Manual prerequisite check:**
+```bash
+# Check what's installed
+./.claude/lib/prerequisites-installer.sh
+
+# Auto-install missing tools
+./.claude/lib/prerequisites-installer.sh --fix-all
+```
 
 ## Installation Structure
 
@@ -135,10 +149,12 @@ This pipeline transforms your ideas into deployed, tested, production-ready soft
 - **Phase 6**: Deployment & Rollout (staged production deployment)
 
 ### 4 Automation Hooks
-- `skill-activation-prompt.sh` - Skill activation via codewords
-- `post-tool-use-tracker.sh` - Phase transition automation
+- `skill-activation-prompt.sh` - Skill activation via codewords (fault-tolerant)
+- `post-tool-use-tracker.sh` - Phase transition automation (simplified version available)
 - `pre-implementation-validator.sh` - TDD enforcement
 - `worktree-enforcer.sh` - Git worktree isolation
+
+**Note:** Hooks include simplified fault-tolerant versions that gracefully degrade if dependencies are missing. See `hooks/README-HOOK-VERSIONS.md` for details.
 
 ### Core Infrastructure
 - Atomic state management
@@ -168,6 +184,20 @@ cp ~/claude-projects/my-app/requirements.md ./docs/PRD.md
 ```
 
 **Note**: We recommend `docs/PRD.md` instead of root to keep your project organized. TaskMaster doesn't use the PRD - it only works with `tasks.json` which the pipeline creates in `.taskmaster/`.
+
+**For Large PRDs (>25,000 tokens / >100KB):**
+
+If your PRD is comprehensive and exceeds Claude Code's Read tool limit:
+
+```bash
+# Check if your PRD is large
+./.claude/lib/large-file-reader.sh docs/PRD.md --metadata
+
+# In Claude Code, use:
+# "Please use .claude/lib/large-file-reader.sh docs/PRD.md to read my PRD"
+```
+
+The large-file-reader utility bypasses the 25,000 token limit and reads files of any size. See [Large File Reader Guide](docs/LARGE-FILE-READER.md) for details.
 
 ### Step 2: Start the Autonomous Pipeline
 ```
@@ -232,19 +262,24 @@ The monitor shows:
 
 ## Documentation
 
-- [Setup Guide](docs/SETUP-GUIDE.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [API Reference](docs/API.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Worktree Strategy](docs/WORKTREE-STRATEGY.md)
+- **[Quick Start Guide](docs/QUICK-START.md)** - Fast installation walkthrough
+- **[Large File Reader](docs/LARGE-FILE-READER.md)** - Read PRDs >25K tokens
+- [Setup Guide](docs/SETUP-GUIDE.md) - Detailed setup instructions
+- [Architecture](docs/ARCHITECTURE.md) - System design overview
+- [API Reference](docs/API.md) - Library and function documentation
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Worktree Strategy](docs/WORKTREE-STRATEGY.md) - Isolation approach
 
 ## Features
 
-✅ **100% Skill Activation Rate** - Guaranteed via codewords  
-✅ **95% Automation** - Only 3 manual approval gates  
-✅ **Complete Isolation** - Git worktrees for parallel development  
-✅ **Production Ready** - Enterprise-grade error handling  
-✅ **Tool Integration** - TaskMaster & OpenSpec ready  
+✅ **Fast Installation** - < 2 minutes with automatic prerequisite setup
+✅ **100% Skill Activation Rate** - Guaranteed via codewords
+✅ **95% Automation** - Only 3 manual approval gates
+✅ **Large File Support** - Read PRDs >25K tokens (35K+ tokens tested)
+✅ **Complete Isolation** - Git worktrees for parallel development
+✅ **Production Ready** - Enterprise-grade error handling
+✅ **Tool Integration** - TaskMaster & OpenSpec ready
+✅ **Fault-Tolerant Hooks** - Simplified hooks never fail
 
 ## License
 
