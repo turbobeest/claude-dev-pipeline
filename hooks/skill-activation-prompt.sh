@@ -547,8 +547,8 @@ if matches_pattern "begin automated development\|completed.*prd\|start pipeline\
     for prd_path in "docs/PRD.md" "PRD.md" "docs/prd.md" ".taskmaster/docs/PRD.md"; do
         if [ -f "$prd_path" ]; then
             # Estimate token count (rough: ~0.75 tokens per character for English text)
-            local file_size=$(wc -c < "$prd_path" 2>/dev/null || echo "0")
-            local estimated_tokens=$((file_size * 3 / 4))
+            file_size=$(wc -c < "$prd_path" 2>/dev/null || echo "0")
+            estimated_tokens=$((file_size * 3 / 4))
 
             # If file is likely >25000 tokens, warn about using large-file-reader
             if [ "$estimated_tokens" -gt 25000 ]; then
@@ -587,10 +587,10 @@ if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
     # Check if we're in implementation phase
     if [ "$CURRENT_PHASE" = "PHASE3" ] || [ "$CURRENT_PHASE" = "implementation" ]; then
         # Check if PRD requirements file exists
-        local req_file="${PROJECT_ROOT}/.prd-requirements.json"
+        req_file="${PROJECT_ROOT}/.prd-requirements.json"
         if [ -f "$req_file" ]; then
-            local must_use_count=$(jq '.must_use | length' "$req_file" 2>/dev/null || echo "0")
-            local cannot_use_count=$(jq '.cannot_use | length' "$req_file" 2>/dev/null || echo "0")
+            must_use_count=$(jq '.must_use | length' "$req_file" 2>/dev/null || echo "0")
+            cannot_use_count=$(jq '.cannot_use | length' "$req_file" 2>/dev/null || echo "0")
 
             if [ "$must_use_count" -gt 0 ] || [ "$cannot_use_count" -gt 0 ]; then
                 echo "⚠️ **PRD REQUIREMENTS REMINDER**"
