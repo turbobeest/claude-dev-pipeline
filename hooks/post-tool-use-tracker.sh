@@ -11,11 +11,8 @@
 # =============================================================================
 
 # Comprehensive error handling and security
-set -euo pipefail
+set -uo pipefail  # Removed -e to allow graceful fallbacks
 set +H  # Disable history expansion
-
-# Timeout for the entire script (60 seconds)
-timeout 60s bash -c 'exec "$0" "$@"' "$0" "$@" 2>/dev/null || exit 1
 
 # Security and validation settings
 readonly SCRIPT_NAME="$(basename "$0")"

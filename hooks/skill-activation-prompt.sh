@@ -12,11 +12,8 @@
 # =============================================================================
 
 # Comprehensive error handling and security
-set -euo pipefail
+set -uo pipefail  # Removed -e to allow graceful fallbacks
 set +H  # Disable history expansion
-
-# Timeout for the entire script (30 seconds)
-timeout 30s bash -c 'exec "$0" "$@"' "$0" "$@" 2>/dev/null || exit 1
 
 # Source performance optimization libraries
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -160,13 +157,12 @@ source "$CLAUDE_DIR/lib/state-manager.sh" 2>/dev/null || {
     audit_log "WARN" "State management system not available, using fallback"
 }
 
-# Validate critical paths
-for critical_path in "$CLAUDE_DIR" "$SKILL_RULES" "$STATE_FILE"; do
-    if ! validate_file_path "$critical_path"; then
-        audit_log "ERROR" "Invalid critical path: $critical_path"
-        exit 1
-    fi
-done
+# Validate critical paths (non-fatal if missing)
+if ! validate_file_path "$CLAUDE_DIR" 2>/dev/null; then
+    audit_log "WARN" "Invalid CLAUDE_DIR: $CLAUDE_DIR, exiting gracefully"
+    echo '{}' # Return empty JSON to not break pipeline
+    exit 0
+fi
 
 # Parse and validate hook event data from stdin
 INPUT=$(timeout 10s cat 2>/dev/null || { audit_log "ERROR" "Input read timeout"; exit 1; })
@@ -199,19 +195,22 @@ audit_log "INFO" "Processing message with ${#USER_MESSAGE} chars and $(echo "$CO
 
 # Read and validate skill rules
 if [ ! -f "$SKILL_RULES" ]; then
-    audit_log "WARN" "Skill rules file not found: $SKILL_RULES"
+    audit_log "WARN" "Skill rules file not found: $SKILL_RULES, exiting gracefully"
+    echo '{}' # Return empty JSON to not break pipeline
     exit 0
 fi
 
 # Validate skill rules file is readable and valid JSON
 if [ ! -r "$SKILL_RULES" ]; then
-    audit_log "ERROR" "Skill rules file not readable: $SKILL_RULES"
-    exit 1
+    audit_log "WARN" "Skill rules file not readable: $SKILL_RULES, exiting gracefully"
+    echo '{}'
+    exit 0
 fi
 
 if ! jq empty < "$SKILL_RULES" 2>/dev/null; then
-    audit_log "ERROR" "Invalid JSON in skill rules file: $SKILL_RULES"
-    exit 1
+    audit_log "WARN" "Invalid JSON in skill rules file: $SKILL_RULES, exiting gracefully"
+    echo '{}'
+    exit 0
 fi
 
 # Initialize state file using state manager
