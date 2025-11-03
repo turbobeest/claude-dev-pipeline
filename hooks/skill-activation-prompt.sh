@@ -3,6 +3,9 @@
 # Skill Activation Hook - Minimal Version with Large PRD Detection
 # =============================================================================
 
+# Debug logging
+echo "[$(date)] Hook called" >> /tmp/claude-hook-debug.log
+
 # Read input from stdin
 INPUT=$(cat 2>/dev/null || echo '{}')
 
