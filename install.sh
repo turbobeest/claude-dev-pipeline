@@ -222,8 +222,8 @@ configure_pipeline() {
             mkdir -p .taskmaster/.checkpoints
             mkdir -p .taskmaster/.signals
 
-            # Run task-master init if available
-            if task-master init --non-interactive >/dev/null 2>&1; then
+            # Run task-master init with -y flag for non-interactive
+            if task-master init -y >/dev/null 2>&1; then
                 log_success "TaskMaster initialized"
             else
                 # Fallback: manual initialization
@@ -243,8 +243,8 @@ configure_pipeline() {
         if [[ ! -d "openspec" ]] || [[ -z "$(ls -A openspec 2>/dev/null)" ]]; then
             log_info "Initializing OpenSpec in project..."
 
-            # Run openspec init if available
-            if openspec init --non-interactive >/dev/null 2>&1; then
+            # Run openspec init with --tools for non-interactive mode
+            if openspec init --tools all >/dev/null 2>&1; then
                 log_success "OpenSpec initialized"
             else
                 # Fallback: manual initialization
@@ -342,8 +342,13 @@ configure_pipeline() {
         local project_name=$(basename "$PWD")
         local repo_url="${github_url:-<add-your-repo-url>}"
 
+        # Bash 3.2 compatible capitalization
+        local first_char=$(echo "${project_name:0:1}" | tr '[:lower:]' '[:upper:]')
+        local rest="${project_name:1}"
+        local project_name_cap="${first_char}${rest}"
+
         cat > openspec/project.md << EOL
-# ${project_name^} Project Overview
+# ${project_name_cap} Project Overview
 
 ## Project Description
 <!-- Add your project description here -->
