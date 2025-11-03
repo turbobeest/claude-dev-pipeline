@@ -12,15 +12,15 @@
 # =============================================================================
 
 # Comprehensive error handling and security
-set -uo pipefail  # Removed -e to allow graceful fallbacks
+set -o pipefail  # Keep pipefail but remove -u due to library incompatibilities
 set +H  # Disable history expansion
 
-# Source performance optimization libraries
+# Source performance optimization libraries (disabled to prevent undefined var errors)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../lib/cache.sh" 2>/dev/null || true
-source "${SCRIPT_DIR}/../lib/json-utils.sh" 2>/dev/null || true
-source "${SCRIPT_DIR}/../lib/lazy-loader.sh" 2>/dev/null || true
-source "${SCRIPT_DIR}/../lib/profiler.sh" 2>/dev/null || true
+# source "${SCRIPT_DIR}/../lib/cache.sh" 2>/dev/null || true
+# source "${SCRIPT_DIR}/../lib/json-utils.sh" 2>/dev/null || true
+# source "${SCRIPT_DIR}/../lib/lazy-loader.sh" 2>/dev/null || true
+# source "${SCRIPT_DIR}/../lib/profiler.sh" 2>/dev/null || true
 
 # Security and validation settings
 readonly SCRIPT_NAME="$(basename "$0")"
@@ -151,11 +151,13 @@ fi
 readonly CLAUDE_DIR="$(dirname "$SCRIPT_DIR")"
 readonly SKILL_RULES="$CLAUDE_DIR/config/skill-rules.json"
 readonly STATE_FILE="$CLAUDE_DIR/.workflow-state.json"
+readonly PIPELINE_ROOT="$CLAUDE_DIR"
+readonly PROJECT_ROOT="$(dirname "$CLAUDE_DIR")"
 
-# Load state management system
-source "$CLAUDE_DIR/lib/state-manager.sh" 2>/dev/null || {
-    audit_log "WARN" "State management system not available, using fallback"
-}
+# Load state management system (disabled - has undefined variable issues)
+# source "$CLAUDE_DIR/lib/state-manager.sh" 2>/dev/null || {
+#     audit_log "WARN" "State management system not available, using fallback"
+# }
 
 # Validate critical paths (non-fatal if missing)
 if ! validate_file_path "$CLAUDE_DIR" 2>/dev/null; then
