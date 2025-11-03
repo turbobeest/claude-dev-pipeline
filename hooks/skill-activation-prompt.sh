@@ -541,9 +541,49 @@ if [ ${#CODEWORDS_TO_INJECT[@]} -gt 0 ]; then
   echo ""
 fi
 
+# Check for large PRD file that needs large-file-reader (CRITICAL)
+if matches_pattern "begin automated development\|completed.*prd\|start pipeline\|prd.*ready" "$USER_MESSAGE"; then
+    # Look for PRD file in common locations
+    for prd_path in "docs/PRD.md" "PRD.md" "docs/prd.md" ".taskmaster/docs/PRD.md"; do
+        if [ -f "$prd_path" ]; then
+            # Estimate token count (rough: ~0.75 tokens per character for English text)
+            local file_size=$(wc -c < "$prd_path" 2>/dev/null || echo "0")
+            local estimated_tokens=$((file_size * 3 / 4))
+
+            # If file is likely >25000 tokens, warn about using large-file-reader
+            if [ "$estimated_tokens" -gt 25000 ]; then
+                echo "⚠️ **LARGE PRD DETECTED**"
+                echo ""
+                echo "The PRD at \`$prd_path\` is approximately $estimated_tokens tokens."
+                echo "This exceeds the 25,000 token Read tool limit."
+                echo ""
+                echo "**CRITICAL:** You MUST use the large-file-reader tool first:"
+                echo "\`\`\`bash"
+                echo "./.claude/lib/large-file-reader.sh $prd_path"
+                echo "\`\`\`"
+                echo ""
+                echo "**Do NOT:**"
+                echo "- Use the Read tool directly on $prd_path"
+                echo "- Invoke TaskMaster until AFTER reading the full PRD with large-file-reader"
+                echo ""
+                echo "**Workflow:**"
+                echo "1. Run large-file-reader.sh to read PRD in chunks"
+                echo "2. Analyze and understand the full requirements"
+                echo "3. THEN invoke TaskMaster to parse and generate tasks"
+                echo ""
+                echo "---"
+                echo ""
+
+                audit_log "INFO" "Large PRD detected ($estimated_tokens tokens), injecting large-file-reader reminder"
+                break
+            fi
+        fi
+    done
+fi
+
 # Check for PRD requirements reminder (GENERIC)
 if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
-    
+
     # Check if we're in implementation phase
     if [ "$CURRENT_PHASE" = "PHASE3" ] || [ "$CURRENT_PHASE" = "implementation" ]; then
         # Check if PRD requirements file exists
@@ -551,11 +591,11 @@ if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
         if [ -f "$req_file" ]; then
             local must_use_count=$(jq '.must_use | length' "$req_file" 2>/dev/null || echo "0")
             local cannot_use_count=$(jq '.cannot_use | length' "$req_file" 2>/dev/null || echo "0")
-            
+
             if [ "$must_use_count" -gt 0 ] || [ "$cannot_use_count" -gt 0 ]; then
                 echo "⚠️ **PRD REQUIREMENTS REMINDER**"
                 echo ""
-                
+
                 if [ "$must_use_count" -gt 0 ]; then
                     echo "**MUST USE:**"
                     jq -r '.must_use[]' "$req_file" 2>/dev/null | while IFS= read -r item; do
@@ -563,7 +603,7 @@ if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
                     done
                     echo ""
                 fi
-                
+
                 if [ "$cannot_use_count" -gt 0 ]; then
                     echo "**CANNOT USE:**"
                     jq -r '.cannot_use[]' "$req_file" 2>/dev/null | while IFS= read -r item; do
@@ -571,10 +611,10 @@ if matches_pattern "implement\|build\|create\|develop" "$USER_MESSAGE"; then
                     done
                     echo ""
                 fi
-                
+
                 echo "---"
                 echo ""
-                
+
                 audit_log "INFO" "PRD requirements reminder injected for implementation phase"
             fi
         fi
