@@ -162,15 +162,6 @@ install_pipeline() {
     log_info "Copying hooks..."
     cp -r "${SCRIPT_DIR}/hooks" .claude/
 
-    # Replace complex hooks with simplified versions for reliability
-    log_info "Installing fault-tolerant hook versions..."
-    if [[ -f "${SCRIPT_DIR}/hooks/skill-activation-prompt-simple.sh" ]]; then
-        cp "${SCRIPT_DIR}/hooks/skill-activation-prompt-simple.sh" .claude/hooks/skill-activation-prompt.sh
-    fi
-    if [[ -f "${SCRIPT_DIR}/hooks/post-tool-use-tracker-simple.sh" ]]; then
-        cp "${SCRIPT_DIR}/hooks/post-tool-use-tracker-simple.sh" .claude/hooks/post-tool-use-tracker.sh
-    fi
-
     log_info "Copying libraries..."
     cp -r "${SCRIPT_DIR}/lib" .claude/
 
@@ -598,8 +589,8 @@ show_next_steps() {
     echo "     Open Claude Code in this directory and say:"
     echo "     \"I've completed my PRD, begin automated development\""
     echo ""
-    echo "  3. For large PRDs (>25K tokens), use:"
-    echo "     \".claude/lib/large-file-reader.sh docs/PRD.md\""
+    echo "     ${YELLOW}Note:${NC} For large PRDs (>25K tokens), the hook will automatically"
+    echo "     guide Claude to use the large-file-reader tool first."
     echo ""
     echo -e "${CYAN}Documentation:${NC}"
     echo "  • Pipeline Architecture: .claude/docs/ARCHITECTURE.md"
