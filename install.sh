@@ -243,14 +243,18 @@ configure_pipeline() {
         if [[ ! -d "openspec" ]] || [[ -z "$(ls -A openspec 2>/dev/null)" ]]; then
             log_info "Initializing OpenSpec in project..."
 
-            # Run openspec init with --tools for non-interactive mode
-            if openspec init --tools all >/dev/null 2>&1; then
+            # Run openspec init with piped input for non-interactive mode
+            # The 'echo' provides the Enter keystroke needed by openspec init
+            if echo | openspec init --tools all >/dev/null 2>&1; then
                 log_success "OpenSpec initialized"
             else
                 # Fallback: manual initialization
-                mkdir -p openspec
-                echo '# OpenSpec Project' > openspec/README.md 2>/dev/null || true
-                log_success "OpenSpec directory created"
+                mkdir -p openspec/specs openspec/changes/archive
+                cat > openspec/project.md << 'EOF'
+# Project Overview
+<!-- Add your project description here -->
+EOF
+                log_success "OpenSpec directory created (manual fallback)"
             fi
         else
             log_info "OpenSpec already initialized"
