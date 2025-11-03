@@ -238,6 +238,132 @@ configure_pipeline() {
         log_info "Install with: npm install -g @anthropic/task-master"
     fi
 
+    # Configure API Keys for TaskMaster
+    if command -v task-master >/dev/null 2>&1; then
+        echo ""
+        log_info "TaskMaster API Configuration"
+        echo ""
+
+        # Copy .env.example if it doesn't exist
+        if [[ ! -f ".env" ]] && [[ -f "${SCRIPT_DIR}/.env.example" ]]; then
+            cp "${SCRIPT_DIR}/.env.example" .env
+        fi
+
+        # Check for existing API key
+        local existing_api_key=""
+        if [[ -f ".env" ]]; then
+            existing_api_key=$(grep "^ANTHROPIC_API_KEY=" .env 2>/dev/null | cut -d'=' -f2 || echo "")
+        fi
+
+        local api_key=""
+        if [[ -n "$existing_api_key" ]]; then
+            # Mask the key for display (show first 7 and last 4 characters)
+            local masked_key="${existing_api_key:0:7}...${existing_api_key: -4}"
+            echo "  Existing API key found: ${CYAN}${masked_key}${NC}"
+            echo ""
+            read -p "Keep this API key? [Y/n] " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+                api_key="$existing_api_key"
+                log_success "Using existing API key"
+            else
+                read -p "Enter your Claude API key: " api_key
+            fi
+        else
+            echo "  TaskMaster requires an Anthropic API key."
+            echo "  Get yours at: ${CYAN}https://console.anthropic.com/settings/keys${NC}"
+            echo ""
+            read -p "Enter your Claude API key (or press Enter to skip): " api_key
+        fi
+
+        # Save API key to .env
+        if [[ -n "$api_key" ]]; then
+            # Create or update .env file
+            if [[ -f ".env" ]]; then
+                # Update existing key or append
+                if grep -q "^ANTHROPIC_API_KEY=" .env 2>/dev/null; then
+                    # Use different sed syntax for macOS vs Linux
+                    if [[ "$OSTYPE" == "darwin"* ]]; then
+                        sed -i '' "s|^ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=$api_key|" .env
+                    else
+                        sed -i "s|^ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=$api_key|" .env
+                    fi
+                else
+                    echo "ANTHROPIC_API_KEY=$api_key" >> .env
+                fi
+            else
+                echo "ANTHROPIC_API_KEY=$api_key" > .env
+            fi
+            log_success "API key saved to .env"
+
+            # Ensure .env is in .gitignore
+            if [[ -f ".gitignore" ]]; then
+                if ! grep -q "^\.env$" .gitignore 2>/dev/null; then
+                    echo ".env" >> .gitignore
+                    log_info "Added .env to .gitignore"
+                fi
+            else
+                echo ".env" > .gitignore
+                log_info "Created .gitignore with .env"
+            fi
+        else
+            log_warning "No API key provided - TaskMaster features will be limited"
+            log_info "You can add it later to .env file: ANTHROPIC_API_KEY=your_key"
+        fi
+
+        # Configure TaskMaster models
+        if [[ -f ".taskmaster/config.json" ]]; then
+            echo ""
+            log_info "TaskMaster Model Configuration"
+            echo ""
+
+            # Check existing model configuration
+            local current_main_model=$(jq -r '.models.main.modelId // "not configured"' .taskmaster/config.json 2>/dev/null)
+            local current_research_model=$(jq -r '.models.research.modelId // "not configured"' .taskmaster/config.json 2>/dev/null)
+
+            if [[ "$current_main_model" != "not configured" ]]; then
+                echo "  Current configuration:"
+                echo "    Main model: ${CYAN}${current_main_model}${NC}"
+                echo "    Research model: ${CYAN}${current_research_model}${NC}"
+                echo ""
+                read -p "Keep these model settings? [Y/n] " -n 1 -r
+                echo ""
+                if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+                    log_success "Using existing model configuration"
+                else
+                    # Prompt for new model selection
+                    echo ""
+                    echo "  Select main model for TaskMaster:"
+                    echo "    ${CYAN}1${NC}) claude-sonnet-4-5-20250929 (73% SWE, \$3/\$15 per 1M tokens) ${GREEN}[Recommended]${NC}"
+                    echo "    ${CYAN}2${NC}) claude-opus-4-20250514 (72.5% SWE, \$15/\$75 per 1M tokens)"
+                    echo "    ${CYAN}3${NC}) claude-3-7-sonnet-20250219 (62% SWE, \$3/\$15 per 1M tokens)"
+                    echo "    ${CYAN}4${NC}) claude-haiku-4-5-20251001 (45% SWE, \$1/\$5 per 1M tokens)"
+                    echo ""
+                    read -p "Choose model [1-4] (default: 1): " model_choice
+                    model_choice=${model_choice:-1}
+
+                    case $model_choice in
+                        1) main_model="claude-sonnet-4-5-20250929" ;;
+                        2) main_model="claude-opus-4-20250514" ;;
+                        3) main_model="claude-3-7-sonnet-20250219" ;;
+                        4) main_model="claude-haiku-4-5-20251001" ;;
+                        *) main_model="claude-sonnet-4-5-20250929" ;;
+                    esac
+
+                    # Update config.json
+                    jq --arg model "$main_model" \
+                        '.models.main.modelId = $model | .models.main.provider = "anthropic" | .models.fallback.modelId = $model' \
+                        .taskmaster/config.json > .taskmaster/config.json.tmp && \
+                        mv .taskmaster/config.json.tmp .taskmaster/config.json
+
+                    log_success "Model configuration updated: $main_model"
+                fi
+            else
+                log_info "Models will use TaskMaster defaults (claude-3-7-sonnet)"
+            fi
+        fi
+    fi
+
     # Initialize OpenSpec if installed
     if command -v openspec >/dev/null 2>&1; then
         if [[ ! -d "openspec" ]] || [[ -z "$(ls -A openspec 2>/dev/null)" ]]; then
