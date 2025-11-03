@@ -163,6 +163,15 @@ install_pipeline() {
     log_info "Copying hooks..."
     cp -r "${SCRIPT_DIR}/hooks" .claude/
 
+    # Replace complex hooks with simplified versions for reliability
+    log_info "Installing fault-tolerant hook versions..."
+    if [[ -f "${SCRIPT_DIR}/hooks/skill-activation-prompt-simple.sh" ]]; then
+        cp "${SCRIPT_DIR}/hooks/skill-activation-prompt-simple.sh" .claude/hooks/skill-activation-prompt.sh
+    fi
+    if [[ -f "${SCRIPT_DIR}/hooks/post-tool-use-tracker-simple.sh" ]]; then
+        cp "${SCRIPT_DIR}/hooks/post-tool-use-tracker-simple.sh" .claude/hooks/post-tool-use-tracker.sh
+    fi
+
     log_info "Copying libraries..."
     cp -r "${SCRIPT_DIR}/lib" .claude/
 
