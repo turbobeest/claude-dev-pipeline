@@ -142,22 +142,21 @@ install_pipeline() {
     cd "$DEST_DIR"
     log_info "Installing to: $DEST_DIR"
 
-    # Create .claude directory
+    # Create or update .claude directory
     if [[ -d ".claude" ]]; then
-        log_warning ".claude directory already exists"
-        read -p "Overwrite existing installation? [y/N] " -n 1 -r
-        echo ""
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log_error "Installation cancelled"
-            exit 1
+        log_info ".claude directory exists - updating installation"
+
+        # Backup only if settings.json or custom configs exist
+        if [[ -f ".claude/settings.json" ]] || [[ -f ".claude/.workflow-state.json" ]]; then
+            log_info "Preserving existing configuration files"
+            mkdir -p .claude/.backup-$(date +%s)
+            cp -p .claude/settings.json .claude/.backup-$(date +%s)/ 2>/dev/null || true
+            cp -p .claude/.workflow-state.json .claude/.backup-$(date +%s)/ 2>/dev/null || true
         fi
-
-        # Backup existing
-        log_info "Backing up existing .claude to .claude.backup.$(date +%s)"
-        mv .claude ".claude.backup.$(date +%s)"
+    else
+        log_info "Creating new .claude installation"
+        mkdir -p .claude
     fi
-
-    mkdir -p .claude
 
     # Copy pipeline files
     log_info "Copying hooks..."
@@ -212,24 +211,53 @@ install_pipeline() {
 configure_pipeline() {
     log_step "Step 3: Configuring Pipeline"
 
-    # Initialize .taskmaster directory (regardless of git status)
-    if [[ ! -d ".taskmaster" ]]; then
-        log_info "Initializing TaskMaster directory..."
-        mkdir -p .taskmaster/tasks
-        mkdir -p .taskmaster/proposals
-        mkdir -p .taskmaster/.checkpoints
-        mkdir -p .taskmaster/.signals
-        log_success "TaskMaster directories created"
+    # Initialize TaskMaster if installed
+    if command -v task-master >/dev/null 2>&1; then
+        if [[ ! -d ".taskmaster" ]] || [[ ! -f ".taskmaster/config.json" ]]; then
+            log_info "Initializing TaskMaster in project..."
+
+            # Create directory structure
+            mkdir -p .taskmaster/tasks
+            mkdir -p .taskmaster/proposals
+            mkdir -p .taskmaster/.checkpoints
+            mkdir -p .taskmaster/.signals
+
+            # Run task-master init if available
+            if task-master init --non-interactive >/dev/null 2>&1; then
+                log_success "TaskMaster initialized"
+            else
+                # Fallback: manual initialization
+                echo '{"version":"1.0","initialized":true}' > .taskmaster/config.json 2>/dev/null || true
+                log_success "TaskMaster directories created"
+            fi
+        else
+            log_info "TaskMaster already initialized"
+        fi
     else
-        log_info "TaskMaster directory already exists"
+        log_warning "TaskMaster not installed - skipping initialization"
+        log_info "Install with: npm install -g @anthropic/task-master"
     fi
 
-    # Initialize openspec directory (regardless of git status)
-    if [[ ! -d "openspec" ]]; then
-        log_info "Initializing OpenSpec directory..."
-        mkdir -p openspec
+    # Initialize OpenSpec if installed
+    if command -v openspec >/dev/null 2>&1; then
+        if [[ ! -d "openspec" ]] || [[ -z "$(ls -A openspec 2>/dev/null)" ]]; then
+            log_info "Initializing OpenSpec in project..."
+
+            # Run openspec init if available
+            if openspec init --non-interactive >/dev/null 2>&1; then
+                log_success "OpenSpec initialized"
+            else
+                # Fallback: manual initialization
+                mkdir -p openspec
+                echo '# OpenSpec Project' > openspec/README.md 2>/dev/null || true
+                log_success "OpenSpec directory created"
+            fi
+        else
+            log_info "OpenSpec already initialized"
+        fi
     else
-        log_info "OpenSpec directory already exists"
+        log_warning "OpenSpec not installed - skipping initialization"
+        log_info "Install with: npm install -g @anthropic/openspec"
     fi
 
     # Check if in git repo and get existing remote
