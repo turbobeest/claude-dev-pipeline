@@ -222,8 +222,8 @@ configure_pipeline() {
             mkdir -p .taskmaster/.checkpoints
             mkdir -p .taskmaster/.signals
 
-            # Run task-master init with -y flag for non-interactive
-            if task-master init -y >/dev/null 2>&1; then
+            # Run task-master init with -y flag for non-interactive (claude rule only)
+            if task-master init -y -r claude >/dev/null 2>&1; then
                 log_success "TaskMaster initialized"
             else
                 # Fallback: manual initialization
