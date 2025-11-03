@@ -228,30 +228,23 @@ configure_pipeline() {
     if [[ ! -d "openspec" ]]; then
         log_info "Initializing OpenSpec directory..."
         mkdir -p openspec
-
-        # Create basic project.md if doesn't exist
-        if [[ ! -f "openspec/project.md" ]]; then
-            cat > openspec/project.md << 'EOL'
-# Project Overview
-
-## Project Description
-<!-- Add your project description here -->
-
-## Technology Stack
-<!-- List your tech stack here -->
-
-## Architecture
-<!-- Describe your architecture here -->
-EOL
-            log_success "OpenSpec project.md created"
-        fi
     else
         log_info "OpenSpec directory already exists"
     fi
 
-    # Check if in git repo
+    # Check if in git repo and get existing remote
+    local existing_remote=""
+    local git_initialized=false
+
     if git rev-parse --git-dir > /dev/null 2>&1; then
         log_success "Git repository detected"
+        git_initialized=true
+
+        # Try to get existing remote URL
+        existing_remote=$(git remote get-url origin 2>/dev/null || echo "")
+        if [[ -n "$existing_remote" ]]; then
+            log_info "Existing remote found: $existing_remote"
+        fi
     else
         log_warning "Not a git repository"
         echo ""
@@ -260,10 +253,109 @@ EOL
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
             git init
+            git_initialized=true
             log_success "Git repository initialized"
         else
             log_info "Continuing without git (you can run 'git init' later)"
         fi
+    fi
+
+    # Ask for GitHub repository URL
+    local github_url=""
+    if [[ "$git_initialized" == "true" ]]; then
+        echo ""
+        log_info "GitHub Repository Configuration"
+        echo ""
+
+        if [[ -n "$existing_remote" ]]; then
+            echo "  Current remote: ${CYAN}$existing_remote${NC}"
+            echo ""
+            read -p "Keep this remote? [Y/n] " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+                github_url="$existing_remote"
+                log_success "Using existing remote"
+            else
+                echo ""
+                read -p "Enter GitHub repository URL: " github_url
+            fi
+        else
+            echo "  No remote configured yet."
+            echo ""
+            read -p "Enter GitHub repository URL (or press Enter to skip): " github_url
+        fi
+
+        # Set remote if URL provided
+        if [[ -n "$github_url" ]]; then
+            # Validate URL format (basic check)
+            if [[ "$github_url" =~ ^https://github\.com/[^/]+/[^/]+$ ]] || \
+               [[ "$github_url" =~ ^git@github\.com:[^/]+/[^/]+\.git$ ]] || \
+               [[ "$github_url" =~ ^https://.*github.*\.com/.+/.+$ ]]; then
+
+                # Set or update remote
+                if git remote get-url origin >/dev/null 2>&1; then
+                    git remote set-url origin "$github_url"
+                    log_success "Remote updated: $github_url"
+                else
+                    git remote add origin "$github_url"
+                    log_success "Remote added: $github_url"
+                fi
+            else
+                log_warning "Invalid GitHub URL format. Skipping remote setup."
+                log_info "You can add it later with: git remote add origin <url>"
+            fi
+        fi
+    fi
+
+    # Create/update openspec/project.md with repo info
+    if [[ ! -f "openspec/project.md" ]] || [[ ! -s "openspec/project.md" ]]; then
+        log_info "Creating OpenSpec project.md..."
+
+        local project_name=$(basename "$PWD")
+        local repo_url="${github_url:-<add-your-repo-url>}"
+
+        cat > openspec/project.md << EOL
+# ${project_name^} Project Overview
+
+## Project Description
+<!-- Add your project description here -->
+
+## Repository
+${repo_url}
+
+## Technology Stack
+<!-- List your tech stack here -->
+
+## Architecture
+<!-- Describe your architecture here -->
+
+## Development Setup
+\`\`\`bash
+# Clone repository
+git clone ${repo_url}
+cd ${project_name}
+
+# Install dependencies
+# npm install  # or your package manager
+
+# Run development
+# npm run dev  # or your dev command
+\`\`\`
+
+## Project Structure
+\`\`\`
+${project_name}/
+├── .claude/              # Claude Dev Pipeline
+├── .taskmaster/          # TaskMaster workspace
+├── openspec/             # OpenSpec specifications
+├── docs/                 # Documentation
+│   └── PRD.md           # Product Requirements
+└── src/                  # Source code
+\`\`\`
+EOL
+        log_success "OpenSpec project.md created"
+    else
+        log_info "OpenSpec project.md already exists (keeping existing content)"
     fi
 
     log_success "Project structure initialized"
