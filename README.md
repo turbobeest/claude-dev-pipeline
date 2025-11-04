@@ -185,6 +185,8 @@ cp ~/claude-projects/my-app/requirements.md ./docs/PRD.md
 
 **Note**: We recommend `docs/PRD.md` instead of root to keep your project organized. TaskMaster doesn't use the PRD - it only works with `tasks.json` which the pipeline creates in `.taskmaster/`.
 
+**Large PRD Handling**: The PRD-to-Tasks skill automatically uses the large-file-reader utility to bypass Claude Code's 25,000 token Read tool limit. Your PRD can be any size.
+
 **For Large PRDs (>25,000 tokens / >100KB):**
 
 If your PRD is comprehensive and exceeds Claude Code's Read tool limit:

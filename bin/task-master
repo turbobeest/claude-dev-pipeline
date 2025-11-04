@@ -1,0 +1,58 @@
+#!/bin/bash
+# =============================================================================
+# Task Master Wrapper Script
+# =============================================================================
+#
+# This wrapper restricts task-master usage to only:
+# - analyze-complexity (for complexity analysis)
+# - expand (for subtask generation)
+# - complexity-report (for viewing reports)
+# - All other commands EXCEPT parse-prd
+#
+# BLOCKED: parse-prd (use PRD-to-Tasks skill instead for large PRDs)
+# =============================================================================
+
+# Path to the real task-master binary
+REAL_TASKMASTER="/opt/homebrew/bin/task-master"
+
+# Check if real task-master exists
+if [ ! -x "$REAL_TASKMASTER" ]; then
+    echo "Error: task-master not found at $REAL_TASKMASTER" >&2
+    echo "Please ensure task-master is installed" >&2
+    exit 1
+fi
+
+# Get the first argument (command)
+COMMAND="${1:-}"
+
+# Block parse-prd command
+if [ "$COMMAND" = "parse-prd" ]; then
+    cat >&2 <<'EOF'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⛔ task-master parse-prd is DISABLED for this project
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+REASON: Large PRDs exceed task-master's context limits and fail to
+        generate quality tasks. This project uses the PRD-to-Tasks
+        skill instead, which handles comprehensive PRDs properly.
+
+✅ ALLOWED task-master commands:
+   - analyze-complexity --research  (analyze task complexity)
+   - expand --id=X --research       (expand high-complexity tasks)
+   - complexity-report              (view complexity reports)
+   - list, set-status, etc.         (task management)
+
+📖 TO GENERATE TASKS FROM PRD:
+   Use the PRD-to-Tasks skill in Claude Code instead:
+
+   1. Place your PRD in docs/PRD.md
+   2. In Claude Code: "Generate tasks from my PRD"
+   3. The PRD-to-Tasks skill will handle large files automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+    exit 1
+fi
+
+# Allow all other commands through to real task-master
+exec "$REAL_TASKMASTER" "$@"

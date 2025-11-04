@@ -48,6 +48,34 @@ cd ./worktrees/phase-1-task-1
 2. **During execution**: All file operations confined to worktree
 3. **Post-execution**: Merge changes to main branch and cleanup
 
+## Execution Steps (MANDATORY)
+
+When this skill activates, follow these steps in order:
+
+### Step 1: Read PRD with large-file-reader
+```bash
+# ALWAYS use large-file-reader - DO NOT use Read tool
+echo "📖 Reading PRD with large-file-reader..."
+prd_content=$(./lib/large-file-reader.sh docs/PRD.md)
+```
+
+### Step 2: Analyze PRD Structure
+Extract from $prd_content:
+- Feature requirements (Section 3)
+- Non-functional requirements
+- Integration requirements (Section 4)
+- Test strategies
+- Architecture components
+
+### Step 3: Generate TaskMaster tasks.json
+Create properly structured master tasks with subtasks
+
+### Step 4: Validate Output
+- All PRD features mapped
+- Integration tasks present
+- No circular dependencies
+- Schema compliance
+
 ## What This Skill Does
 
 Automatically generates high-quality TaskMaster tasks.json from Product Requirements Documents in isolated worktree, ensuring:
@@ -62,35 +90,45 @@ Automatically generates high-quality TaskMaster tasks.json from Product Requirem
 
 ## Reading Large PRD Files
 
-**IMPORTANT:** If your PRD file exceeds Claude Code's Read tool limit (~25,000 tokens or ~100KB):
+**CRITICAL:** This skill ALWAYS uses the large-file-reader utility for PRDs to avoid Claude Code's Read tool 25,000 token limit.
+
+### Automatic Large File Reading
+
+When this skill activates, it MUST use this approach:
 
 ```bash
-# Use the large-file-reader utility instead of Read tool:
+# Step 1: Check file size and get metadata
+echo "📊 Analyzing PRD file size..."
+./lib/large-file-reader.sh docs/PRD.md --metadata
+
+# Step 2: Read PRD using large-file-reader (bypasses 25K token limit)
+echo "📖 Reading comprehensive PRD..."
 prd_content=$(./lib/large-file-reader.sh docs/PRD.md)
 
-# The utility will:
-# - Read files of any size (no token limit)
-# - Provide metadata about file size and estimated tokens
-# - Output complete content for atomic analysis
+# Step 3: Analyze and generate tasks
+echo "🔨 Generating TaskMaster tasks from PRD..."
+# Use $prd_content for analysis
 ```
 
-**When to use large-file-reader.sh:**
-- PRD files > 100KB or > 25,000 tokens
-- Comprehensive product requirements documents
-- Multi-section technical specifications
-- Any document that fails with Read tool "token limit exceeded"
+**Why Always Use large-file-reader:**
+- ✅ No 25,000 token limit (Read tool constraint)
+- ✅ Handles files of any size (35,000+ tokens)
+- ✅ Atomic document analysis (entire PRD in context)
+- ✅ No chunking or pagination needed
+- ✅ Prevents "token limit exceeded" errors
 
-**Example usage in skills:**
-```bash
-# Check if file is large first
-if ./lib/large-file-reader.sh docs/PRD.md --metadata | grep -q "exceeds"; then
-  echo "Using large-file-reader for comprehensive PRD..."
-  content=$(./lib/large-file-reader.sh docs/PRD.md)
-else
-  echo "Using standard Read tool..."
-  # Use Read tool normally
-fi
-```
+**DO NOT use Read tool for PRDs** - it will fail for comprehensive documents.
+
+### File Size Guidelines
+
+| PRD Size | Lines | Tokens | Approach |
+|----------|-------|--------|----------|
+| Small | <500 | <10K | large-file-reader (consistent) |
+| Medium | 500-1000 | 10K-20K | large-file-reader (consistent) |
+| Large | 1000-2000 | 20K-40K | large-file-reader (required) |
+| Very Large | 2000+ | 40K+ | large-file-reader (required) |
+
+**Consistency Rule:** Always use large-file-reader for PRDs regardless of size to ensure reliable operation.
 
 ## What This Skill Does
 
