@@ -4,6 +4,8 @@
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](#)
 [![Automation](https://img.shields.io/badge/Automation-95%25-brightgreen.svg)](#)
 
+> **⚠️ IMPORTANT:** Claude Code v2.0.27-2.0.32 has a [known bug](KNOWN-ISSUES.md#-userpromptsubmit-hooks-broken-in-claude-code-v2027) where UserPromptSubmit hooks don't work. **Workaround is active** - the pipeline will notify you loudly when this is fixed. See [KNOWN-ISSUES.md](KNOWN-ISSUES.md) for details.
+
 A complete end-to-end development automation system that takes your Product Requirements Document (PRD) and autonomously handles the entire software development lifecycle - from task decomposition and specification generation through implementation, testing, validation, and deployment. This pipeline achieves 95% automation across all development phases, requiring human intervention only at three strategic decision points.
 
 ## ⚡ Fast Installation (< 2 minutes)
