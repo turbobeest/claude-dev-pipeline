@@ -208,6 +208,14 @@ configure_pipeline() {
 
     # Initialize TaskMaster if installed
     if command -v task-master >/dev/null 2>&1; then
+        # Clean up old taskmaster data if it exists
+        if [[ -d ".taskmaster" ]]; then
+            log_info "Cleaning up existing TaskMaster data..."
+            rm -rf .taskmaster/tasks/*.json 2>/dev/null || true
+            rm -rf .taskmaster/proposals/*.json 2>/dev/null || true
+            rm -rf .taskmaster/.signals/* 2>/dev/null || true
+        fi
+
         if [[ ! -d ".taskmaster" ]] || [[ ! -f ".taskmaster/config.json" ]]; then
             log_info "Initializing TaskMaster in project..."
 
@@ -226,7 +234,7 @@ configure_pipeline() {
                 log_success "TaskMaster directories created"
             fi
         else
-            log_info "TaskMaster already initialized"
+            log_info "TaskMaster already initialized (data cleaned)"
         fi
     else
         log_warning "TaskMaster not installed - skipping initialization"
