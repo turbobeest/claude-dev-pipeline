@@ -24,7 +24,7 @@ else
 fi
 
 # Paths
-SKILL_RULES="$PROJECT_DIR/config/skill-rules.json"
+SKILL_RULES="$PROJECT_DIR/.claude/config/skill-rules.json"
 WORKFLOW_STATE="$PROJECT_DIR/.claude/.workflow-state.json"
 SIGNALS_DIR="$PROJECT_DIR/.claude/.signals"
 LOG_FILE="$PROJECT_DIR/.claude/logs/skill-activations.log"

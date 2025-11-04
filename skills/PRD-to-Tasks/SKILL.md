@@ -108,32 +108,48 @@ For each PRD section/feature, create multiple focused master tasks:
 - Instead of: "User Authentication System" (1 big task)
 - Create: "User Registration API", "Login/Logout with JWT", "Password Reset Flow", "Session Management" (4 focused tasks)
 
-#### 3b. Create JSON Structure (MASTER TASKS ONLY)
+#### 3b. Create JSON Structure (NATIVE TASK-MASTER SCHEMA)
 
-Construct tasks.json with **NO subtasks field** - just master tasks:
+Construct tasks.json matching task-master's native parse-prd output format:
 
 ```json
 {
-  "master": {
-    "tasks": [
-      {
-        "id": 1,
-        "name": "Specific, focused task name (Action Verb + Object)"
-      },
-      {
-        "id": 2,
-        "name": "Another focused task"
-      }
-    ]
-  }
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Specific, focused task name (Action Verb + Object)",
+      "description": "Detailed explanation of what this task accomplishes",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedEffort": 4,
+      "status": "todo",
+      "subtasks": [],
+      "details": null,
+      "testStrategy": null
+    },
+    {
+      "id": 2,
+      "title": "Another focused task",
+      "description": "Detailed explanation of the next task",
+      "priority": "medium",
+      "dependencies": [1],
+      "estimatedEffort": 3,
+      "status": "todo",
+      "subtasks": [],
+      "details": null,
+      "testStrategy": null
+    }
+  ]
 }
 ```
 
-**CRITICAL:**
-- **DO NOT** include "subtasks" field
-- **DO NOT** generate subtasks
-- Master task IDs: 1, 2, 3, ... (numeric, sequential)
-- Each task name should be granular and focused
+**CRITICAL - Native Task-Master Schema:**
+- **Required**: `id` (integer), `title` (string), `description` (string)
+- **Optional**: `priority` (high/medium/low), `dependencies` (array of IDs), `estimatedEffort` (hours)
+- **Defaulted**: `status` ("todo"), `subtasks` (empty array `[]`), `details` (null), `testStrategy` (null)
+- **IMPORTANT**: `subtasks` MUST be an empty array `[]` - never populate it
+- Task IDs: 1, 2, 3, ... (numeric, sequential)
+- Each title should be granular and focused
 - Last 3 tasks MUST be: Component Integration Testing, E2E Workflow Testing, Production Readiness Validation
 
 #### 3c. Write tasks.json File
@@ -142,17 +158,33 @@ Use the Write tool to create `.taskmaster/tasks/tasks.json`:
 
 ```json
 {
-  "master": {
-    "tasks": [
-      {"id": 1, "name": "Initialize Project Repository with CI/CD Pipeline"},
-      {"id": 2, "name": "Configure PostgreSQL Database and Migrations"},
-      {"id": 3, "name": "Set Up Testing Framework and Coverage Tools"},
-      ... (as many tasks as needed for the project)
-      {"id": N-2, "name": "Component Integration Testing"},
-      {"id": N-1, "name": "End-to-End Workflow Testing"},
-      {"id": N, "name": "Production Readiness Validation"}
-    ]
-  }
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Initialize Project Repository with CI/CD Pipeline",
+      "description": "Set up Git repository, initialize project structure, and configure GitHub Actions for automated testing and deployment",
+      "priority": "high",
+      "dependencies": [],
+      "estimatedEffort": 3,
+      "status": "todo",
+      "subtasks": [],
+      "details": null,
+      "testStrategy": null
+    },
+    {
+      "id": 2,
+      "title": "Configure PostgreSQL Database and Migrations",
+      "description": "Set up PostgreSQL database, create initial schema, and configure migration framework",
+      "priority": "high",
+      "dependencies": [1],
+      "estimatedEffort": 4,
+      "status": "todo",
+      "subtasks": [],
+      "details": null,
+      "testStrategy": null
+    }
+    // ... (as many tasks as needed for the project)
+  ]
 }
 ```
 
@@ -162,8 +194,10 @@ After writing tasks.json, verify:
 - ✅ File exists: `.taskmaster/tasks/tasks.json`
 - ✅ Valid JSON (use `jq . .taskmaster/tasks/tasks.json`)
 - ✅ Task count appropriate for project complexity (not too few, not too many)
-- ✅ **NO subtasks field** on any task
-- ✅ Each task name is specific and focused
+- ✅ **All tasks have `subtasks: []` (empty array, never populated)**
+- ✅ All required fields present: id, title, description
+- ✅ All defaulted fields present: status ("todo"), subtasks ([]), details (null), testStrategy (null)
+- ✅ Each task title is specific and focused
 - ✅ Last 3 tasks are Integration, E2E, Production Validation
 - ✅ All PRD features mapped to tasks
 - ✅ Tasks are granular enough for small LLM context windows
