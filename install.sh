@@ -192,6 +192,10 @@ install_pipeline() {
     chmod +x .claude/hooks/*.sh 2>/dev/null || true
     chmod +x .claude/lib/*.sh 2>/dev/null || true
 
+    # Create symlink for user-prompt-submit hook
+    log_info "Creating hook symlinks..."
+    ln -sf skill-activation-prompt.sh .claude/hooks/user-prompt-submit.sh
+
     log_success "Pipeline files installed"
 }
 
