@@ -1,15 +1,16 @@
 # Known Issues
 
-## 🐛 UserPromptSubmit Hooks Broken in Claude Code v2.0.27+
+## 🐛 UserPromptSubmit Hooks Broken in Claude Code v2.0.26+
 
 ### Issue Description
 
-**Claude Code versions 2.0.27 through 2.0.32 (and possibly later) have a critical bug where UserPromptSubmit hooks are completely non-functional.**
+**Claude Code versions 2.0.26 through 2.0.32 (and possibly later) have a critical bug where UserPromptSubmit hooks are completely non-functional.**
 
-- **Affected Versions:** v2.0.27 - v2.0.32+
+- **Affected Versions:** v2.0.26 - v2.0.32+ (tested and confirmed)
 - **Status:** Reported to Anthropic
 - **GitHub Issue:** https://github.com/anthropics/claude-code/issues/10287
 - **Impact:** Skill activation via user prompts does not work
+- **Discovery:** v2.0.26 testing confirmed bug extends earlier than initially reported
 
 ### Symptoms
 
@@ -26,7 +27,7 @@ This is a **Claude Code bug**, not a configuration issue. After extensive testin
 - ✅ Hook file permissions are correct
 - ✅ Hook script executes successfully when tested manually
 - ✅ PreToolUse/PostToolUse hooks function normally
-- ❌ Claude Code simply doesn't invoke UserPromptSubmit hooks in v2.0.27+
+- ❌ Claude Code simply doesn't invoke UserPromptSubmit hooks in v2.0.26+
 
 ### Workaround (Currently Active)
 
@@ -127,8 +128,8 @@ Some users see "PreToolUse hook error" or "PostToolUse hook returned blocking er
 
 | Claude Code Version | UserPromptSubmit | PreToolUse | PostToolUse | Status |
 |-------------------|------------------|------------|-------------|---------|
-| v2.0.26 and earlier | ✅ Working | ✅ Working | ✅ Working | Recommended if downgrade needed |
-| v2.0.27 - v2.0.32 | ❌ Broken | ✅ Working | ✅ Working | Workaround active |
+| v2.0.25 and earlier | ❓ Unknown | ✅ Working | ✅ Working | Not tested - may work |
+| v2.0.26 - v2.0.32 | ❌ Broken | ✅ Working | ✅ Working | Workaround active (tested) |
 | v2.0.33+ | ❓ Unknown | ✅ Working | ✅ Working | **Test and report!** |
 
 ---

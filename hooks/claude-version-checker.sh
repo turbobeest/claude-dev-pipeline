@@ -20,8 +20,8 @@ ALERT_FILE="$PROJECT_DIR/.claude/.version-alert-shown"
 # Get Claude Code version
 CLAUDE_VERSION=$(claude --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
 
-# Known broken versions (2.0.27 through at least 2.0.32)
-BROKEN_MIN="2.0.27"
+# Known broken versions (2.0.26 through at least 2.0.32)
+BROKEN_MIN="2.0.26"
 BROKEN_MAX="2.0.32"  # Update this when the bug is fixed
 
 # Parse version into comparable format
@@ -41,7 +41,7 @@ if [[ $CURRENT_NUM -ge $BROKEN_MIN_NUM ]] && [[ $CURRENT_NUM -le $BROKEN_MAX_NUM
         echo "║  ⚠️  CLAUDE CODE v$CLAUDE_VERSION - KNOWN BUG ACTIVE           ║"
         echo "╚═══════════════════════════════════════════════════════════════╝"
         echo ""
-        echo "🐛 UserPromptSubmit hooks are BROKEN in Claude Code v2.0.27+"
+        echo "🐛 UserPromptSubmit hooks are BROKEN in Claude Code v2.0.26+"
         echo "   GitHub Issue: https://github.com/anthropics/claude-code/issues/10287"
         echo ""
         echo "✅ WORKAROUND ACTIVE: Using PreToolUse hooks instead"
