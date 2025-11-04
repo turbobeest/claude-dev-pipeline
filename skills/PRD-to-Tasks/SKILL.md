@@ -50,31 +50,205 @@ cd ./worktrees/phase-1-task-1
 
 ## Execution Steps (MANDATORY)
 
+**CRITICAL:** This skill generates tasks.json DIRECTLY using AI analysis. DO NOT call `task-master parse-prd` or any external task generation tools.
+
 When this skill activates, follow these steps in order:
 
 ### Step 1: Read PRD with large-file-reader
 ```bash
 # ALWAYS use large-file-reader - DO NOT use Read tool
 echo "📖 Reading PRD with large-file-reader..."
-prd_content=$(./lib/large-file-reader.sh docs/PRD.md)
+./lib/large-file-reader.sh docs/PRD.md
 ```
 
-### Step 2: Analyze PRD Structure
-Extract from $prd_content:
-- Feature requirements (Section 3)
-- Non-functional requirements
-- Integration requirements (Section 4)
-- Test strategies
-- Architecture components
+**DO NOT** store output in variable - just run the command so PRD content enters your context.
 
-### Step 3: Generate TaskMaster tasks.json
-Create properly structured master tasks with subtasks
+### Step 2: Analyze PRD Structure (AI Analysis)
+
+Using the PRD content now in your context, identify:
+
+1. **Feature Requirements** (typically Section 3):
+   - List each major feature/capability
+   - Extract acceptance criteria per feature
+   - Note architecture components affected
+
+2. **Non-Functional Requirements**:
+   - Performance requirements
+   - Security requirements
+   - Scalability targets
+
+3. **Integration Requirements** (typically Section 4):
+   - Component integration points
+   - E2E testing requirements
+   - Production validation criteria
+
+4. **Dependencies**:
+   - What must be built before what
+   - Shared infrastructure needs
+   - External service integrations
+
+### Step 3: Generate TaskMaster tasks.json (DIRECT AI GENERATION)
+
+**DO NOT call task-master parse-prd!** Instead, YOU will create the tasks.json directly.
+
+#### 3a. Design Master Task Structure
+
+Based on PRD analysis, create 8-12 master tasks:
+- Foundation tasks (setup, infra)
+- Feature tasks (one per major PRD feature)
+- Integration tasks (MUST be last task)
+
+#### 3b. For Each Master Task, Generate Subtasks
+
+Each master task should have 3-8 subtasks that break down implementation:
+- Specific, actionable subtask titles
+- testStrategy for each subtask
+- acceptanceCriteria array for each subtask
+
+#### 3c. Create JSON Structure
+
+Construct tasks.json following this EXACT schema:
+
+```json
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "name": "Master Task Name (Action Verb + Object)",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Specific subtask action",
+            "testStrategy": "How to verify this subtask works",
+            "acceptanceCriteria": ["Criterion 1", "Criterion 2"],
+            "details": "Implementation guidance"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### 3d. Write tasks.json File
+
+Use the Write tool to create `.taskmaster/tasks/tasks.json` with your generated content:
+
+```bash
+# After constructing JSON in your analysis, write it:
+# Use Write tool: .taskmaster/tasks/tasks.json
+# Content: your generated JSON structure
+```
+
+**IMPORTANT:**
+- Master task IDs: 1, 2, 3, ... (numeric, sequential)
+- Subtask IDs: 1, 2, 3, ... (numeric, sequential PER master task)
+- Last master task MUST be "Integration & Production Validation" with integration/E2E/validation subtasks
 
 ### Step 4: Validate Output
-- All PRD features mapped
-- Integration tasks present
-- No circular dependencies
-- Schema compliance
+
+After writing tasks.json, verify:
+- ✅ File exists: `.taskmaster/tasks/tasks.json`
+- ✅ Valid JSON (use `jq . .taskmaster/tasks/tasks.json`)
+- ✅ 8-12 master tasks
+- ✅ Each master has 3-8 subtasks
+- ✅ All subtasks have testStrategy and acceptanceCriteria
+- ✅ Last master task is Integration & Validation
+- ✅ All PRD features mapped to tasks
+
+### Step 5: Generate Summary
+
+Provide user with:
+```
+✅ Tasks generated: X master tasks, Y total subtasks
+📊 Breakdown:
+   - Foundation: X tasks
+   - Features: X tasks
+   - Integration: X tasks
+
+📝 Next: Review tasks with 'task-master list --with-subtasks'
+```
+
+## Common Mistakes to AVOID
+
+### ❌ Mistake #1: Calling task-master parse-prd
+
+**WRONG:**
+```bash
+task-master parse-prd docs/PRD.md
+```
+
+**WHY WRONG:** task-master parse-prd fails on large PRDs (>25K tokens), times out, and produces no output.
+
+**CORRECT:** Generate tasks.json directly using AI analysis as shown in Step 3 above.
+
+### ❌ Mistake #2: Using Read tool for PRD
+
+**WRONG:**
+```
+Read tool: docs/PRD.md
+```
+
+**WHY WRONG:** Read tool has 25,000 token hard limit. Large PRDs will fail with "token limit exceeded."
+
+**CORRECT:**
+```bash
+./lib/large-file-reader.sh docs/PRD.md
+```
+
+### ❌ Mistake #3: Storing large-file-reader output in variable
+
+**WRONG:**
+```bash
+prd_content=$(./lib/large-file-reader.sh docs/PRD.md)
+echo $prd_content  # Then try to use
+```
+
+**WHY WRONG:** Shell variables can't hold 30K+ tokens. Content gets truncated.
+
+**CORRECT:** Just run the command. The output enters your context automatically:
+```bash
+./lib/large-file-reader.sh docs/PRD.md
+# PRD content is now in your context - proceed to analyze
+```
+
+### ❌ Mistake #4: Vague or incomplete subtasks
+
+**WRONG:**
+```json
+{
+  "id": 1,
+  "title": "Set up database",
+  "testStrategy": "Test it",
+  "acceptanceCriteria": ["Works"]
+}
+```
+
+**CORRECT:**
+```json
+{
+  "id": 1,
+  "title": "Configure PostgreSQL database and connection pooling",
+  "testStrategy": "Run connection test, verify pool size=20, test failover",
+  "acceptanceCriteria": [
+    "PostgreSQL 15+ installed and running",
+    "Connection pool configured with min=5, max=20",
+    "Connection failover tested",
+    "Database migrations folder created"
+  ],
+  "details": "Install PostgreSQL, configure pg_pool, set up environment variables"
+}
+```
+
+### ❌ Mistake #5: Missing integration task
+
+**WRONG:** Tasks end with last feature, no integration/E2E/validation tasks.
+
+**CORRECT:** Last master task MUST be "Integration & Production Validation" with 3 subtasks:
+1. Component Integration Testing
+2. End-to-End Workflow Testing
+3. Production Readiness Validation
 
 ## What This Skill Does
 
@@ -429,12 +603,272 @@ Based on coupling analysis:
 **Problem:** 50+ tasks (too granular) or <10 tasks (too coarse)  
 **Solution:** Target 15-25 tasks, let TaskMaster expand high-complexity
 
-## Examples
+## Complete Example: PRD → tasks.json
 
-See `/examples/` directory for:
-- `good-prd-parsing.md` - Ideal PRD → tasks.json transformation
-- `integration-tasks-example.md` - How Tasks #N-2, #N-1, #N should look
-- `dependency-analysis.md` - Proper dependency chain examples
+### Example PRD (Simplified)
+
+```markdown
+# E-Commerce Platform PRD
+
+## 3. Features
+
+### 3.1 User Authentication
+- Login/logout functionality
+- Password reset
+- Session management
+
+### 3.2 Product Catalog
+- Browse products
+- Search functionality
+- Filter by category
+
+### 3.3 Shopping Cart
+- Add/remove items
+- Update quantities
+- Persist across sessions
+
+### 3.4 Checkout
+- Payment processing
+- Order confirmation
+- Email notifications
+
+## 4. Integration Requirements
+- Component integration testing
+- E2E user journey testing
+- Production readiness validation
+```
+
+### Example tasks.json Output
+
+```json
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "name": "Project Foundation Setup",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize project repository with CI/CD",
+            "testStrategy": "Verify GitHub Actions workflow runs successfully",
+            "acceptanceCriteria": [
+              "Repository created with main branch",
+              "CI/CD pipeline configured",
+              "Basic test workflow passes"
+            ],
+            "details": "Set up project structure, configure build tools, establish CI/CD"
+          },
+          {
+            "id": 2,
+            "title": "Configure database and ORM",
+            "testStrategy": "Run migration and verify schema creation",
+            "acceptanceCriteria": [
+              "Database connection established",
+              "ORM configured",
+              "Initial migration runs successfully"
+            ],
+            "details": "Set up PostgreSQL, configure Prisma/TypeORM, create base schema"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "User Authentication System",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement user registration endpoint",
+            "testStrategy": "Unit tests for registration validation, integration test for user creation",
+            "acceptanceCriteria": [
+              "POST /api/auth/register endpoint created",
+              "Email validation working",
+              "Password hashing implemented",
+              "User record created in database"
+            ],
+            "details": "Create User model, implement registration logic, add validation"
+          },
+          {
+            "id": 2,
+            "title": "Implement login/logout with JWT",
+            "testStrategy": "Test token generation, verify token expiration, test logout invalidation",
+            "acceptanceCriteria": [
+              "POST /api/auth/login returns valid JWT",
+              "POST /api/auth/logout invalidates token",
+              "Token includes user claims",
+              "Token expiration configured (24h)"
+            ],
+            "details": "Set up JWT library, create auth middleware, implement token management"
+          },
+          {
+            "id": 3,
+            "title": "Add password reset functionality",
+            "testStrategy": "Test email sending, verify reset token generation and validation",
+            "acceptanceCriteria": [
+              "Password reset email sent successfully",
+              "Reset token expires after 1 hour",
+              "Token validation prevents reuse",
+              "Password update works"
+            ],
+            "details": "Implement password reset flow, integrate email service, add reset token management"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Product Catalog Management",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Product model and CRUD APIs",
+            "testStrategy": "Unit tests for model validation, integration tests for CRUD operations",
+            "acceptanceCriteria": [
+              "Product model with required fields (name, price, description, stock)",
+              "GET /api/products returns paginated list",
+              "POST /api/products creates product (admin only)",
+              "PUT /api/products/:id updates product",
+              "DELETE /api/products/:id soft-deletes product"
+            ],
+            "details": "Design Product schema, implement CRUD endpoints, add admin authorization"
+          },
+          {
+            "id": 2,
+            "title": "Implement search and filtering",
+            "testStrategy": "Test search accuracy, verify filter combinations, check performance",
+            "acceptanceCriteria": [
+              "Search by product name working",
+              "Filter by category functional",
+              "Filter by price range working",
+              "Search results paginated",
+              "Response time < 200ms for 10k products"
+            ],
+            "details": "Add search indexing, implement filter logic, optimize queries"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Shopping Cart Implementation",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Cart model and add/remove APIs",
+            "testStrategy": "Test cart operations, verify item quantity updates, check edge cases",
+            "acceptanceCriteria": [
+              "POST /api/cart/add adds item to cart",
+              "DELETE /api/cart/remove removes item",
+              "PUT /api/cart/update changes quantity",
+              "Cart items persist in database",
+              "Concurrent updates handled correctly"
+            ],
+            "details": "Design Cart and CartItem models, implement cart operations, handle race conditions"
+          },
+          {
+            "id": 2,
+            "title": "Add session persistence and guest cart support",
+            "testStrategy": "Test cart survival across sessions, verify guest-to-user cart merge",
+            "acceptanceCriteria": [
+              "Logged-in user cart persists across sessions",
+              "Guest cart stored in session/cookies",
+              "Guest cart merges to user cart on login",
+              "Cart expires after 30 days of inactivity"
+            ],
+            "details": "Implement session management, add guest cart logic, create merge functionality"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "Checkout and Payment Processing",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Stripe payment processing",
+            "testStrategy": "Test payment flow with Stripe test cards, verify webhook handling",
+            "acceptanceCriteria": [
+              "Stripe SDK integrated",
+              "Payment intent creation working",
+              "Test card payments successful",
+              "Payment webhooks handled correctly",
+              "Failed payments logged"
+            ],
+            "details": "Set up Stripe account, implement payment API, add webhook endpoints"
+          },
+          {
+            "id": 2,
+            "title": "Create order confirmation and email notifications",
+            "testStrategy": "Test order creation, verify email sending, check idempotency",
+            "acceptanceCriteria": [
+              "Order record created after successful payment",
+              "Confirmation email sent to customer",
+              "Email includes order details and tracking",
+              "Duplicate orders prevented",
+              "Order status tracking implemented"
+            ],
+            "details": "Create Order model, implement email templates, add notification service"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "Integration & Production Validation",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Component Integration Testing",
+            "testStrategy": "Execute integration test suite covering all component interactions",
+            "acceptanceCriteria": [
+              "All component interfaces tested (Auth ↔ Cart, Cart ↔ Checkout, etc.)",
+              "API contract tests passing",
+              "Database transaction tests passing",
+              "Integration test coverage > 80%"
+            ],
+            "details": "Create integration test suite, test cross-component workflows, verify data consistency"
+          },
+          {
+            "id": 2,
+            "title": "End-to-End Workflow Testing",
+            "testStrategy": "Execute E2E tests for critical user journeys using Playwright",
+            "acceptanceCriteria": [
+              "E2E test: Browse → Add to Cart → Checkout → Order Success",
+              "E2E test: User Registration → Login → Browse → Purchase",
+              "E2E test: Password Reset Flow",
+              "All E2E tests passing",
+              "E2E tests run in CI/CD"
+            ],
+            "details": "Set up Playwright, create E2E test scenarios, integrate with CI"
+          },
+          {
+            "id": 3,
+            "title": "Production Readiness Validation",
+            "testStrategy": "Execute comprehensive validation checklist",
+            "acceptanceCriteria": [
+              "All unit tests passing (>90% coverage)",
+              "All integration tests passing (>80% coverage)",
+              "All E2E tests passing",
+              "Security scan passed (no critical vulnerabilities)",
+              "Performance benchmarks met (<200ms API response)",
+              "Database migrations tested",
+              "Error handling and logging verified",
+              "Monitoring and alerting configured"
+            ],
+            "details": "Run full test suite, security scan, performance tests, deployment validation"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Key Points from Example
+
+✅ **8-12 Master Tasks**: 6 master tasks (foundation + 4 features + integration)
+✅ **3-8 Subtasks Each**: Each master has 2-3 subtasks
+✅ **Numeric IDs**: Sequential 1, 2, 3...
+✅ **Integration Task Last**: Task 6 is Integration & Validation with 3 critical subtasks
+✅ **Complete Fields**: Every subtask has testStrategy, acceptanceCriteria, details
+✅ **PRD Coverage**: All Section 3 features + Section 4 integration requirements mapped
 
 ## Integration with Workflow
 
