@@ -168,6 +168,12 @@ install_pipeline() {
     log_info "Copying configuration..."
     cp -r "${SCRIPT_DIR}/config" .claude/
 
+    # Copy settings.json to .claude/ root (where Claude Code expects it)
+    if [[ -f "${SCRIPT_DIR}/config/settings.json" ]]; then
+        cp "${SCRIPT_DIR}/config/settings.json" .claude/settings.json
+        log_info "Configured hooks in .claude/settings.json"
+    fi
+
     log_info "Copying skills..."
     cp -r "${SCRIPT_DIR}/skills" .claude/
 
