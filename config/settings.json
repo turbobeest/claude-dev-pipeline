@@ -1,21 +1,39 @@
 {
   "version": "3.0",
   "hooks": {
-    "UserPromptSubmit": {
-      "enabled": true,
-      "script": "skill-activation-prompt.sh",
-      "description": "Injects skill activation codewords based on message analysis"
-    },
-    "PostToolUse": {
-      "enabled": true,
-      "script": "post-tool-use-tracker.sh",
-      "description": "Tracks workflow progress and emits phase transition signals"
-    },
-    "PreToolUse": {
-      "enabled": true,
-      "script": "pre-implementation-validator.sh",
-      "description": "Validates implementation readiness and prevents premature execution"
-    }
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/user-prompt-submit.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-tool-use-tracker.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-implementation-validator.sh"
+          }
+        ]
+      }
+    ]
   },
   "pipeline": {
     "automationLevel": 95,
