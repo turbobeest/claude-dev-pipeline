@@ -188,11 +188,35 @@ cat > .claude/.signals/phase3-complete.json <<EOF
 EOF
 ```
 
-## Next Phase
+## Phase Complete - STOP HERE
 
-After Phase 3 completion:
-- PostToolUse hook should automatically trigger Phase 4 (Integration Testing)
-- Or manually activate with: `/validate-integration`
+When Phase 3 is complete, display this message and STOP:
+
+```
+═══════════════════════════════════════════════════════════
+  🎯 PHASE 3 COMPLETE - TDD Implementation Finished
+═══════════════════════════════════════════════════════════
+
+  ✅ All features implemented
+  ✅ All tests passing
+
+  ⏸️  PIPELINE STOPPED - Awaiting your command
+
+  👉 To proceed to Phase 4 (Integration Testing), type:
+
+     /validate-integration
+
+  📋 Review: npm test --coverage
+
+═══════════════════════════════════════════════════════════
+```
+
+**CRITICAL: DO NOT PROCEED AUTOMATICALLY**
+- ❌ Do NOT start integration testing on your own
+- ❌ Do NOT run test suites automatically
+- ❌ Do NOT be "helpful" and continue
+
+**WAIT FOR USER TO TYPE: /validate-integration**
 
 ## Troubleshooting
 

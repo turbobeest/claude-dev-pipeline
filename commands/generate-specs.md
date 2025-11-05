@@ -102,11 +102,35 @@ Phase 2 complete when:
 - ✅ No coupling conflicts between batches
 - ✅ Signal emitted: `PHASE2_COMPLETE`
 
-## Next Phase
+## Phase Complete - STOP HERE
 
-After Phase 2 completion:
-- PostToolUse hook should automatically trigger Phase 3 (TDD Implementation)
-- Or manually activate with: `/implement-tdd`
+When Phase 2 is complete, display this message and STOP:
+
+```
+═══════════════════════════════════════════════════════════
+  🎯 PHASE 2 COMPLETE - Specification Generation Finished
+═══════════════════════════════════════════════════════════
+
+  ✅ OpenSpec proposals created
+  ✅ Test strategies defined
+
+  ⏸️  PIPELINE STOPPED - Awaiting your command
+
+  👉 To proceed to Phase 3 (TDD Implementation), type:
+
+     /implement-tdd
+
+  📋 Review specs: ls -lh .openspec/proposals/
+
+═══════════════════════════════════════════════════════════
+```
+
+**CRITICAL: DO NOT PROCEED AUTOMATICALLY**
+- ❌ Do NOT start TDD implementation on your own
+- ❌ Do NOT begin writing tests
+- ❌ Do NOT be "helpful" and continue
+
+**WAIT FOR USER TO TYPE: /implement-tdd**
 
 ## Troubleshooting
 

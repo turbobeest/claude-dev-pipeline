@@ -299,11 +299,37 @@ echo "🛑 NO-GO DECISION - Pipeline halted. Review issues and restart when read
 exit 1
 ```
 
-## Next Phase
+## Phase Complete - STOP HERE
 
-After GO decision recorded:
-- PostToolUse hook should automatically trigger Phase 6 (Deployment)
-- Or manually activate with: `/deploy`
+When Phase 5 is complete AND user approves GO decision, display this message and STOP:
+
+```
+═══════════════════════════════════════════════════════════
+  🎯 PHASE 5 COMPLETE - E2E Validation Finished
+  🚦 GO DECISION RECORDED
+═══════════════════════════════════════════════════════════
+
+  ✅ All E2E tests passing
+  ✅ Production readiness verified
+  ✅ GO decision approved
+
+  ⏸️  PIPELINE STOPPED - Awaiting your command
+
+  👉 To proceed to Phase 6 (Production Deployment), type:
+
+     /deploy
+
+  ⚠️  This will deploy to production!
+
+═══════════════════════════════════════════════════════════
+```
+
+**CRITICAL: DO NOT PROCEED AUTOMATICALLY**
+- ❌ Do NOT start deployment on your own
+- ❌ Do NOT deploy to staging or production
+- ❌ Do NOT be "helpful" and continue
+
+**WAIT FOR USER TO TYPE: /deploy**
 
 ## Troubleshooting
 

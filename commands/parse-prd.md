@@ -80,6 +80,39 @@ Once tasks are generated and verified, emit a signal for phase transition:
 echo '{"phase":"TASK_DECOMPOSITION_COMPLETE","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","status":"success"}' > .claude/.signals/phase-complete.json
 ```
 
+### Step 7: STOP HERE - Display Completion Message
+
+**CRITICAL: DO NOT PROCEED AUTOMATICALLY TO NEXT PHASE**
+
+Display this message and STOP:
+
+```
+═══════════════════════════════════════════════════════════
+  🎯 PHASE 1 COMPLETE - Task Decomposition Finished
+═══════════════════════════════════════════════════════════
+
+  ✅ Tasks generated successfully
+  ✅ Dependencies mapped
+
+  ⏸️  PIPELINE STOPPED - Awaiting your command
+
+  👉 To proceed to Phase 2 (Specification Generation), type:
+
+     /generate-specs
+
+  📋 Or review tasks first: task-master list
+
+═══════════════════════════════════════════════════════════
+```
+
+**DO NOT:**
+- ❌ Run analyze-complexity automatically
+- ❌ Run expand tasks automatically
+- ❌ Start Phase 2 on your own
+- ❌ Be "helpful" and continue the workflow
+
+**WAIT FOR THE USER TO TYPE THE NEXT SLASH COMMAND.**
+
 ## Error Handling
 
 ### If PRD Not Found
