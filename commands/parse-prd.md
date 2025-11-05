@@ -43,19 +43,57 @@ Use the Read tool on docs/PRD.md
 
 The large-file-reader bypasses Claude Code's 25,000 token Read tool limit.
 
-### Step 4: Activate Task-Master
+### Step 4: Generate Master Tasks (Direct AI Generation)
 
-Once you've read and understood the PRD, activate TaskMaster:
+**CRITICAL:** Do NOT call `task-master parse-prd`! For initial task generation from a PRD, YOU must generate the master tasks directly through AI analysis.
 
-```bash
-task-master parse-prd docs/PRD.md
+**Why:** The PRD-to-Tasks skill generates MASTER TASKS ONLY (no subtasks). TaskMaster's `parse-prd` command is for appending additional tasks to an existing tasks.json, not for initial generation.
+
+**Process:**
+1. Analyze the PRD structure you just read
+2. Identify major feature areas and epics
+3. Create master tasks (numbered 1, 2, 3, etc.) with:
+   - Unique ID (numeric)
+   - Clear title
+   - Detailed description
+   - Priority (critical/high/medium/low)
+   - Dependencies (if any)
+   - Empty subtasks array (subtasks added in Phase 2)
+4. Generate tasks.json directly with native TaskMaster schema
+
+**Example tasks.json structure:**
+```json
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Core Infrastructure Setup",
+        "description": "Set up development environment, CI/CD, and deployment pipeline",
+        "status": "pending",
+        "priority": "critical",
+        "dependencies": [],
+        "subtasks": []
+      },
+      {
+        "id": "2",
+        "title": "User Authentication System",
+        "description": "Implement JWT-based authentication with OAuth2 providers",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": ["1"],
+        "subtasks": []
+      }
+    ]
+  }
+}
 ```
 
-**Expected Behavior:**
-- TaskMaster will parse the PRD
-- Generate `tasks.json` in `.taskmaster/` directory
-- Create task hierarchy with dependencies
-- Output task summary
+**Save to:**
+```bash
+# Write generated tasks.json to TaskMaster directory
+# Use Write tool: .taskmaster/tasks/tasks.json
+```
 
 ### Step 5: Verify Task Generation
 
@@ -143,8 +181,9 @@ This skill is part of the Claude Dev Pipeline's Phase 1: Task Decomposition & Pl
 
 - This command works around the UserPromptSubmit hook bug (GitHub Issue #10287)
 - When the bug is fixed, this slash command will remain as a convenient explicit activation method
-- The PreToolUse hook may also activate this skill if you naturally run `task-master parse-prd`
-- Keep both methods available for maximum reliability
+- **Important:** `task-master parse-prd` is for APPENDING tasks to existing tasks.json, not initial generation
+- This skill generates master tasks via direct AI analysis, then subtasks are added in Phase 2
+- TaskMaster's complexity analysis and expand commands happen in Phase 2 after master tasks exist
 
 ## Usage Examples
 

@@ -41,6 +41,70 @@ cat .claude/skills/spec-gen/SKILL.md
 
 Then follow the workflow defined there.
 
+## TaskMaster Preparation (Required First)
+
+**Before generating specs, you must prepare subtasks using TaskMaster:**
+
+### Step 1: Analyze Task Complexity
+
+```bash
+# Analyze complexity of all master tasks
+task-master analyze-complexity --research
+
+# Or analyze specific range
+task-master analyze-complexity --from=1 --to=5 --research
+```
+
+This generates `.taskmaster/reports/task-complexity-report.json` with:
+- Complexity scores for each task
+- Recommended subtask counts
+- Technical dependencies
+- Risk assessments
+
+### Step 2: Review Complexity Report
+
+```bash
+# View the report
+task-master complexity-report
+
+# Or read directly
+cat .taskmaster/reports/task-complexity-report.json
+```
+
+Identify which tasks need subtask expansion (typically high/critical complexity tasks).
+
+### Step 3: Expand Tasks into Subtasks
+
+```bash
+# Expand all eligible tasks automatically
+task-master expand --all --research
+
+# Or expand specific tasks
+task-master expand --id=1 --research
+task-master expand --id=2 --research
+
+# Force expansion even if already has subtasks
+task-master expand --id=3 --research --force
+```
+
+This creates subtasks (1.1, 1.2, 2.1, 2.2, etc.) with:
+- Specific implementation steps
+- Technical details
+- Test strategies
+- Dependencies
+
+### Step 4: Verify Task Structure
+
+```bash
+# List all tasks including subtasks
+task-master list
+
+# View specific task with subtasks
+task-master show 1
+```
+
+**Now you're ready for OpenSpec specification generation.**
+
 ## What This Phase Does
 
 1. **Analyze Coupling**: Review coupling analysis from Phase 1
