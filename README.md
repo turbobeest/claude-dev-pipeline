@@ -4,7 +4,7 @@
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](#)
 [![Automation](https://img.shields.io/badge/Automation-95%25-brightgreen.svg)](#)
 
-> **⚠️ IMPORTANT:** Claude Code v2.0.26-2.0.32 has a [known bug](KNOWN-ISSUES.md#-userpromptsubmit-hooks-broken-in-claude-code-v2026) where UserPromptSubmit hooks don't work. **Workaround is active** - the pipeline will notify you loudly when this is fixed. See [KNOWN-ISSUES.md](KNOWN-ISSUES.md) for details.
+> **⚠️ IMPORTANT:** Claude Code v2.0.26-2.0.32 has a [known bug](KNOWN-ISSUES.md#-userpromptsubmit-hooks-broken-in-claude-code-v2026) where UserPromptSubmit hooks don't work. **Comprehensive workaround implemented** - 7 slash commands provide 100% reliable activation for all phases. Use `/orchestrate` to start or individual phase commands (`/parse-prd`, `/generate-specs`, `/implement-tdd`, `/validate-integration`, `/validate-e2e`, `/deploy`). See [COMMANDS.md](COMMANDS.md) for details.
 
 A complete end-to-end development automation system that takes your Product Requirements Document (PRD) and autonomously handles the entire software development lifecycle - from task decomposition and specification generation through implementation, testing, validation, and deployment. This pipeline achieves 95% automation across all development phases, requiring human intervention only at three strategic decision points.
 
@@ -63,9 +63,10 @@ After installation, your project will have:
 your-project/              # Your project root (run 'claude' from HERE)
 ├── .claude/              # Pipeline system (created by installer)
 │   ├── skills/          # 10 autonomous skills
-│   ├── hooks/           # 3 automation hooks
+│   ├── hooks/           # Automation hooks (version checker, skill activator, etc)
+│   ├── commands/        # Slash commands (/parse-prd, etc) - workaround for hook bug
 │   ├── config/          # Configuration files (skill-rules.json)
-│   ├── lib/             # Support libraries
+│   ├── lib/             # Support libraries (large-file-reader, state-manager, etc)
 │   └── settings.json    # Claude Code hook configuration
 ├── .env                 # Environment variables (in project root, not .claude/)
 ├── .taskmaster/         # TaskMaster workspace (created when used)
@@ -204,8 +205,30 @@ If your PRD is comprehensive and exceeds Claude Code's Read tool limit:
 The large-file-reader utility bypasses the 25,000 token limit and reads files of any size. See [Large File Reader Guide](docs/LARGE-FILE-READER.md) for details.
 
 ### Step 2: Start the Autonomous Pipeline
+
+**Recommended: Use Manual Mode for maximum visibility and control:**
+
+```bash
+# Enable manual mode (phase transitions require explicit commands)
+bash /path/to/claude-dev-pipeline/scripts/enable-manual-mode.sh
 ```
-"I've completed my PRD, begin automated development"
+
+Then start Pipeline:
+```
+/parse-prd
+```
+
+**Why Manual Mode?**
+- ⏸️  Pipeline STOPS at each phase completion - you can't miss transitions
+- 🎯 Very obvious terminal banners show exactly what to do next
+- ✅ Review phase outputs before proceeding
+- 🔧 Complete workaround for [Claude Code hook bug](KNOWN-ISSUES.md)
+
+See [Manual Mode Guide](docs/MANUAL-MODE.md) for details.
+
+**Alternative: Auto-transition mode** (may work but transitions can be missed):
+```
+"Please run task-master parse-prd docs/PRD.md"
 ```
 
 ### What Happens Next
@@ -216,6 +239,8 @@ The large-file-reader utility bypasses the 25,000 token limit and reads files of
 5. **Human Approval**: You're prompted only at 3 strategic decision points
 
 The entire process from PRD to deployed code is managed autonomously.
+
+**Note:** The `/parse-prd` slash command is a workaround that bypasses the broken UserPromptSubmit hooks. When the bug is fixed, all three methods will work reliably.
 
 ## Real-Time Monitoring
 
@@ -266,24 +291,34 @@ The monitor shows:
 
 ## Documentation
 
+### Getting Started
 - **[Quick Start Guide](docs/QUICK-START.md)** - Fast installation walkthrough
+- **[Manual Mode](docs/MANUAL-MODE.md)** - Explicit phase control (recommended)
+- **[Slash Commands](COMMANDS.md)** - Complete command reference
+
+### Core Features
 - **[Large File Reader](docs/LARGE-FILE-READER.md)** - Read PRDs >25K tokens
 - [Setup Guide](docs/SETUP-GUIDE.md) - Detailed setup instructions
 - [Architecture](docs/ARCHITECTURE.md) - System design overview
+- [Worktree Strategy](docs/WORKTREE-STRATEGY.md) - Isolation approach
+
+### Reference
 - [API Reference](docs/API.md) - Library and function documentation
 - [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
-- [Worktree Strategy](docs/WORKTREE-STRATEGY.md) - Isolation approach
+- [Known Issues](KNOWN-ISSUES.md) - Current bugs and workarounds
 
 ## Features
 
 ✅ **Fast Installation** - < 2 minutes with automatic prerequisite setup
-✅ **100% Skill Activation Rate** - Guaranteed via codewords
-✅ **95% Automation** - Only 3 manual approval gates
+✅ **Comprehensive Slash Commands** - 7 commands covering all phases (workaround for hook bug)
+✅ **100% Skill Activation Rate** - Guaranteed via codewords or slash commands
+✅ **95% Automation** - Only 3 manual approval gates (GO/NO-GO, Prod deploy, Rollback)
 ✅ **Large File Support** - Read PRDs >25K tokens (35K+ tokens tested)
 ✅ **Complete Isolation** - Git worktrees for parallel development
 ✅ **Production Ready** - Enterprise-grade error handling
 ✅ **Tool Integration** - TaskMaster & OpenSpec ready
 ✅ **Fault-Tolerant Hooks** - Simplified hooks never fail
+✅ **Hybrid Activation** - Slash commands + automatic hooks + natural language
 
 ## License
 

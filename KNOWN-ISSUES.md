@@ -29,26 +29,41 @@ This is a **Claude Code bug**, not a configuration issue. After extensive testin
 - ✅ PreToolUse/PostToolUse hooks function normally
 - ❌ Claude Code simply doesn't invoke UserPromptSubmit hooks in v2.0.26+
 
-### Workaround (Currently Active)
+### Workaround (Hybrid Approach - Currently Active)
 
-This pipeline implements a **PreToolUse hook workaround**:
+This pipeline implements a **three-method workaround strategy**:
 
-1. **Version Checker** (`claude-version-checker.sh`)
+1. **Slash Command (Recommended)** - `/parse-prd`
+   - **Most reliable** - Bypasses broken hook system completely
+   - Explicit activation: Just type `/parse-prd` in Claude Code
+   - Handles large PRDs automatically (>25K tokens)
+   - Works 100% of the time
+   - Location: `commands/parse-prd.md`
+   - **Use this method for guaranteed activation**
+
+2. **PreToolUse Hook (Automatic Fallback)** - `pretooluse-skill-activator.sh`
+   - Detects `task-master parse-prd` commands
+   - Injects skill activation context
+   - Provides PRD size warnings
+   - Less elegant than UserPromptSubmit but functional
+   - **Limitation**: Only fires when Claude naturally chooses Bash tool
+   - Works as automatic backup when you say things like "run task-master parse-prd"
+
+3. **Version Checker** - `claude-version-checker.sh`
    - Runs on SessionStart
    - Alerts when you're running a broken version
    - **LOUDLY notifies** when a new version is available
    - Provides update instructions
 
-2. **PreToolUse Skill Activator** (`pretooluse-skill-activator.sh`)
-   - Detects `task-master parse-prd` commands
-   - Injects skill activation context
-   - Provides PRD size warnings
-   - Less elegant than UserPromptSubmit but functional
+4. **UserPromptSubmit Hook Preserved** (Forward Compatibility)
+   - Kept in configuration for when bug is fixed
+   - Will automatically work when Claude Code is patched
+   - No code changes needed once fixed
 
-3. **UserPromptSubmit Hook Preserved**
-   - Kept in configuration for forward compatibility
-   - Will automatically work when bug is fixed
-   - No code changes needed once Claude Code is patched
+**Usage Recommendation:**
+- **For reliability**: Use `/parse-prd` slash command
+- **For convenience**: Say "run task-master parse-prd docs/PRD.md"
+- **Natural language**: May work if Claude chooses Bash tool, but not guaranteed
 
 ### When Bug is Fixed
 

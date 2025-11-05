@@ -1,0 +1,387 @@
+{
+  "version": "2.1",
+  "activation_mode": "manual-slash-commands",
+  "description": "Manual-control mode - ALL phase transitions require explicit slash commands",
+  "mode_note": "This configuration DISABLES auto-transitions. Each phase stops and waits for user to type the next slash command.",
+  "skills": [
+    {
+      "skill": "pipeline-orchestration",
+      "activation_code": "PIPELINE_ORCHESTRATION_V1",
+      "phase": 0,
+      "slash_command": "/orchestrate",
+      "trigger_conditions": {
+        "user_patterns": [
+          "begin automated development",
+          "start pipeline",
+          "automate development",
+          "run full pipeline",
+          "phase 0 complete"
+        ],
+        "file_exists": ["PRD.md", ".taskmaster/docs/phase0-signoff.md"],
+        "phase_state": "phase0_complete"
+      },
+      "outputs": {
+        "signals": ["PIPELINE_STARTED"],
+        "next_activation": "PRD_TO_TASKS_V1"
+      },
+      "priority": 1
+    },
+    {
+      "skill": "prd-to-tasks",
+      "activation_code": "PRD_TO_TASKS_V1",
+      "phase": 1,
+      "slash_command": "/parse-prd",
+      "trigger_conditions": {
+        "user_patterns": [
+          "generate tasks",
+          "parse prd",
+          "create tasks",
+          "task decomposition",
+          "tasks.json",
+          "product requirements",
+          "requirements document"
+        ],
+        "file_patterns": [
+          "PRD.md",
+          "requirements.md",
+          "product-requirements",
+          "docs/PRD",
+          "docs/requirements"
+        ],
+        "phase_state": "ready_for_phase1"
+      },
+      "outputs": {
+        "files": ["tasks.json"],
+        "signals": ["PHASE1_START", "TASKS_GENERATED"],
+        "next_activation": "TASK_REVIEW_GATE_V1"
+      },
+      "priority": 2
+    },
+    {
+      "skill": "task-review-gate",
+      "activation_code": "TASK_REVIEW_GATE_V1",
+      "phase": 1.2,
+      "slash_command": null,
+      "note": "Task review is interactive within Phase 1, not a separate command",
+      "trigger_conditions": {
+        "user_patterns": [
+          "review tasks",
+          "check tasks",
+          "modify task",
+          "refine tasks",
+          "approve tasks"
+        ],
+        "signals_detected": ["TASKS_GENERATED"],
+        "phase_state": "tasks_awaiting_review"
+      },
+      "outputs": {
+        "files": ["tasks-reviewed.json"],
+        "signals": ["TASKS_APPROVED", "TASKS_UNDER_REVIEW"],
+        "next_activation": "COUPLING_ANALYSIS_V1"
+      },
+      "priority": 2.5,
+      "interactive": true,
+      "requires_human": true
+    },
+    {
+      "skill": "coupling-analysis",
+      "activation_code": "COUPLING_ANALYSIS_V1",
+      "phase": 1.5,
+      "slash_command": null,
+      "note": "Coupling analysis is automatic within Phase 1",
+      "trigger_conditions": {
+        "user_patterns": [
+          "task-master show",
+          "taskmaster show",
+          "tightly coupled",
+          "loosely coupled",
+          "parallel",
+          "coupling",
+          "proposal strategy",
+          "analyze tasks"
+        ],
+        "file_patterns": [".taskmaster/tasks.json", "tasks.json"],
+        "signals_detected": ["TASKS_APPROVED"],
+        "phase_state": "tasks_approved"
+      },
+      "outputs": {
+        "signals": ["COUPLING_ANALYZED"],
+        "next_activation": "TASK_DECOMPOSER_V1"
+      },
+      "priority": 3
+    },
+    {
+      "skill": "task-decomposer",
+      "activation_code": "TASK_DECOMPOSER_V1",
+      "phase": 1,
+      "slash_command": null,
+      "note": "Task decomposition is automatic within Phase 1",
+      "trigger_conditions": {
+        "user_patterns": [
+          "expand task",
+          "analyze complexity",
+          "generate subtasks",
+          "break down task",
+          "decompose task"
+        ],
+        "signals_detected": ["COUPLING_ANALYZED"],
+        "phase_state": "coupling_complete"
+      },
+      "outputs": {
+        "files": ["updated tasks.json"],
+        "signals": ["PHASE1_COMPLETE"],
+        "next_activation": "SPEC_GEN_V1"
+      },
+      "priority": 4
+    },
+    {
+      "skill": "spec-gen",
+      "activation_code": "SPEC_GEN_V1",
+      "phase": 2,
+      "slash_command": "/generate-specs",
+      "trigger_conditions": {
+        "user_patterns": [
+          "openspec proposal",
+          "create spec",
+          "generate proposal",
+          "specification",
+          "requirements spec"
+        ],
+        "signals_detected": ["PHASE1_COMPLETE"],
+        "phase_state": "ready_for_phase2"
+      },
+      "outputs": {
+        "files": [".openspec/proposals/*.md"],
+        "signals": ["PHASE2_SPECS_CREATED"],
+        "next_activation": "TEST_STRATEGY_V1"
+      },
+      "priority": 5
+    },
+    {
+      "skill": "test-strategy",
+      "activation_code": "TEST_STRATEGY_V1",
+      "phase": 2.5,
+      "slash_command": null,
+      "note": "Test strategy is automatic within Phase 2",
+      "trigger_conditions": {
+        "user_patterns": [
+          "test strategy",
+          "test plan",
+          "TDD",
+          "test coverage",
+          "write tests",
+          "testing approach"
+        ],
+        "file_patterns": [".openspec/proposals", "*.proposal.md"],
+        "signals_detected": ["PHASE2_SPECS_CREATED"],
+        "phase_state": "specs_created"
+      },
+      "outputs": {
+        "signals": ["TEST_STRATEGY_COMPLETE", "PHASE2_COMPLETE"],
+        "next_activation": "TDD_IMPLEMENTER_V1"
+      },
+      "priority": 6
+    },
+    {
+      "skill": "tdd-implementer",
+      "activation_code": "TDD_IMPLEMENTER_V1",
+      "phase": 3,
+      "slash_command": "/implement-tdd",
+      "trigger_conditions": {
+        "user_patterns": [
+          "implement",
+          "write code",
+          "TDD cycle",
+          "red green refactor",
+          "start coding",
+          "build feature"
+        ],
+        "signals_detected": ["TEST_STRATEGY_COMPLETE", "PHASE2_COMPLETE"],
+        "phase_state": "ready_for_phase3"
+      },
+      "outputs": {
+        "files": ["src/**", "tests/**"],
+        "signals": ["PHASE3_COMPLETE"],
+        "next_activation": "INTEGRATION_VALIDATOR_V1"
+      },
+      "priority": 7
+    },
+    {
+      "skill": "integration-validator",
+      "activation_code": "INTEGRATION_VALIDATOR_V1",
+      "phase": 4,
+      "slash_command": "/validate-integration",
+      "trigger_conditions": {
+        "user_patterns": [
+          "integration testing",
+          "task #24",
+          "task 24",
+          "integration points",
+          "system integration",
+          "component integration"
+        ],
+        "file_patterns": ["architecture.md", "ARCHITECTURE.md"],
+        "signals_detected": ["PHASE3_COMPLETE"],
+        "phase_state": "implementation_complete"
+      },
+      "outputs": {
+        "signals": ["PHASE4_COMPLETE"],
+        "next_activation": "E2E_VALIDATOR_V1"
+      },
+      "priority": 8
+    },
+    {
+      "skill": "e2e-validator",
+      "activation_code": "E2E_VALIDATOR_V1",
+      "phase": 5,
+      "slash_command": "/validate-e2e",
+      "trigger_conditions": {
+        "user_patterns": [
+          "e2e testing",
+          "end-to-end",
+          "task #25",
+          "task 25",
+          "user workflows",
+          "workflow testing"
+        ],
+        "signals_detected": ["PHASE4_COMPLETE"],
+        "phase_state": "integration_complete"
+      },
+      "outputs": {
+        "signals": ["PHASE5_COMPLETE", "GO_NO_GO_DECISION"],
+        "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1"
+      },
+      "priority": 9
+    },
+    {
+      "skill": "deployment-orchestrator",
+      "activation_code": "DEPLOYMENT_ORCHESTRATOR_V1",
+      "phase": 6,
+      "slash_command": "/deploy",
+      "trigger_conditions": {
+        "user_patterns": [
+          "deploy",
+          "production ready",
+          "task #26",
+          "task 26",
+          "deployment",
+          "go live"
+        ],
+        "signals_detected": ["PHASE5_COMPLETE", "GO_DECISION"],
+        "phase_state": "approved_for_production"
+      },
+      "outputs": {
+        "signals": ["PHASE6_COMPLETE", "DEPLOYED_TO_PRODUCTION"]
+      },
+      "priority": 10
+    }
+  ],
+  "phase_transitions": {
+    "PHASE0_COMPLETE": {
+      "next_activation": "PIPELINE_ORCHESTRATION_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/orchestrate",
+      "delay_seconds": 0
+    },
+    "PHASE1_START": {
+      "next_activation": "TASK_REVIEW_GATE_V1",
+      "auto_trigger": false,
+      "requires_user_command": false,
+      "delay_seconds": 1,
+      "note": "Task review happens automatically within Phase 1"
+    },
+    "TASKS_GENERATED": {
+      "next_activation": "TASK_REVIEW_GATE_V1",
+      "auto_trigger": false,
+      "requires_human_review": true,
+      "delay_seconds": 1,
+      "note": "Pauses for human review within Phase 1"
+    },
+    "TASKS_APPROVED": {
+      "next_activation": "COUPLING_ANALYSIS_V1",
+      "auto_trigger": false,
+      "requires_user_command": false,
+      "delay_seconds": 2,
+      "note": "Coupling analysis automatic within Phase 1"
+    },
+    "COUPLING_ANALYZED": {
+      "next_activation": "TASK_DECOMPOSER_V1",
+      "auto_trigger": false,
+      "requires_user_command": false,
+      "delay_seconds": 2,
+      "note": "Task decomposition automatic within Phase 1"
+    },
+    "PHASE1_COMPLETE": {
+      "next_activation": "SPEC_GEN_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/generate-specs",
+      "delay_seconds": 0,
+      "banner_message": "PHASE 1 COMPLETE - AWAITING COMMAND"
+    },
+    "PHASE2_SPECS_CREATED": {
+      "next_activation": "TEST_STRATEGY_V1",
+      "auto_trigger": false,
+      "requires_user_command": false,
+      "delay_seconds": 2,
+      "note": "Test strategy automatic within Phase 2"
+    },
+    "TEST_STRATEGY_COMPLETE": {
+      "next_activation": "TDD_IMPLEMENTER_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/implement-tdd",
+      "delay_seconds": 0,
+      "banner_message": "PHASE 2 COMPLETE - AWAITING COMMAND"
+    },
+    "PHASE3_COMPLETE": {
+      "next_activation": "INTEGRATION_VALIDATOR_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/validate-integration",
+      "delay_seconds": 0,
+      "banner_message": "PHASE 3 COMPLETE - AWAITING COMMAND"
+    },
+    "PHASE4_COMPLETE": {
+      "next_activation": "E2E_VALIDATOR_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/validate-e2e",
+      "delay_seconds": 0,
+      "banner_message": "PHASE 4 COMPLETE - AWAITING COMMAND"
+    },
+    "PHASE5_COMPLETE": {
+      "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1",
+      "auto_trigger": false,
+      "requires_user_command": true,
+      "slash_command": "/deploy",
+      "approval_gate": "GO_NO_GO_DECISION",
+      "delay_seconds": 0,
+      "banner_message": "PHASE 5 COMPLETE - GO DECISION REQUIRED - AWAITING COMMAND"
+    },
+    "PHASE6_COMPLETE": {
+      "next_activation": null,
+      "auto_trigger": false,
+      "delay_seconds": 0,
+      "banner_message": "PIPELINE COMPLETE - ALL PHASES FINISHED"
+    }
+  },
+  "error_recovery": {
+    "max_retries": 3,
+    "retry_delay_seconds": 5,
+    "fallback_to_manual": true,
+    "error_signals": ["PHASE_ERROR", "SKILL_FAILURE"]
+  },
+  "notes": {
+    "activation_mode": "Manual slash command mode - NO auto-transitions",
+    "signal_flow": "Each skill emits signals that trigger BANNERS, not automatic activation",
+    "human_gates": "EVERY major phase transition requires explicit slash command",
+    "review_gate": "After PRD-to-Tasks: Interactive review/refinement session before moving to Phase 2",
+    "priority": "Lower number = higher priority (1 is highest)",
+    "auto_trigger": "ALL set to false - requires manual slash commands",
+    "automation_level": "Manual control - user types slash command to proceed to next phase",
+    "workflow": "PRD → /parse-prd → PHASE 1 COMPLETE → /generate-specs → PHASE 2 COMPLETE → /implement-tdd → etc",
+    "visibility": "Very obvious terminal banners at each phase completion showing which command to run next"
+  }
+}
