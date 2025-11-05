@@ -175,6 +175,7 @@ install_pipeline() {
     fi
 
     log_info "Copying skills..."
+    # cp -r will overwrite existing files in .claude/skills/ on reinstall
     cp -r "${SCRIPT_DIR}/skills" .claude/
 
     if [[ -d "${SCRIPT_DIR}/commands" ]]; then
@@ -735,6 +736,46 @@ main() {
 
     echo -e "${GREEN}✓ Installation successful!${NC}"
     echo ""
+
+    # Cleanup: Remove install directory
+    cleanup_install_directory
+}
+
+# =============================================================================
+# Cleanup Install Directory
+# =============================================================================
+
+cleanup_install_directory() {
+    # Only cleanup if we're running from a typical install location
+    # (avoid deleting user's working directory)
+
+    local should_cleanup=false
+
+    # Check if in /tmp
+    if [[ "$SCRIPT_DIR" == /tmp/* ]]; then
+        should_cleanup=true
+    # Check if in Downloads
+    elif [[ "$SCRIPT_DIR" == "$HOME"/Downloads/* ]] || [[ "$SCRIPT_DIR" == "$HOME"/downloads/* ]]; then
+        should_cleanup=true
+    # Check if directory name is claude-dev-pipeline in temp locations
+    elif [[ "$(basename "$SCRIPT_DIR")" == "claude-dev-pipeline" ]] && [[ "$SCRIPT_DIR" == /var/tmp/* ]]; then
+        should_cleanup=true
+    fi
+
+    if [[ "$should_cleanup" == "true" ]]; then
+        echo ""
+        log_info "Cleaning up installation files..."
+        cd ..
+        rm -rf "$SCRIPT_DIR"
+        log_success "Installation directory removed: $SCRIPT_DIR"
+        echo ""
+        echo -e "${YELLOW}Note:${NC} You are now in: $(pwd)"
+    else
+        echo ""
+        log_info "Installation directory preserved (not in standard location)"
+        echo -e "${YELLOW}Note:${NC} Installation files remain at: $SCRIPT_DIR"
+        echo -e "${YELLOW}Tip:${NC} You can manually remove with: rm -rf \"$SCRIPT_DIR\""
+    fi
 }
 
 # Execute main
