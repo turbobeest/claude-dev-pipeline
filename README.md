@@ -4,7 +4,7 @@
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](#)
 [![Automation](https://img.shields.io/badge/Automation-95%25-brightgreen.svg)](#)
 
-> **⚠️ IMPORTANT:** Claude Code v2.0.26-2.0.32 has a [known bug](KNOWN-ISSUES.md#-userpromptsubmit-hooks-broken-in-claude-code-v2026) where UserPromptSubmit hooks don't work. **Comprehensive workaround implemented** - 7 slash commands provide 100% reliable activation for all phases. Use `/orchestrate` to start or individual phase commands (`/parse-prd`, `/generate-specs`, `/implement-tdd`, `/validate-integration`, `/validate-e2e`, `/deploy`). See [COMMANDS.md](COMMANDS.md) for details.
+> **⚠️ IMPORTANT:** Claude Code v2.0.26-2.0.32 has critical hook bugs. **ALL HOOKS ARE DISABLED** in this version. Use slash commands exclusively for 100% reliable operation. The pipeline works perfectly without hooks - just type commands like `/parse-prd`, `/generate-specs`, `/implement-tdd`, `/validate-integration`, `/validate-e2e`, `/deploy`. See [COMMANDS.md](COMMANDS.md) for complete reference.
 
 A complete end-to-end development automation system that takes your Product Requirements Document (PRD) and autonomously handles the entire software development lifecycle - from task decomposition and specification generation through implementation, testing, validation, and deployment. This pipeline achieves 95% automation across all development phases, requiring human intervention only at three strategic decision points.
 
@@ -151,13 +151,16 @@ This pipeline transforms your ideas into deployed, tested, production-ready soft
 - **Phase 5**: E2E Production Validation (user workflow testing)
 - **Phase 6**: Deployment & Rollout (staged production deployment)
 
-### 4 Automation Hooks
-- `skill-activation-prompt.sh` - Skill activation via codewords (fault-tolerant)
-- `post-tool-use-tracker.sh` - Phase transition automation (simplified version available)
-- `pre-implementation-validator.sh` - TDD enforcement
-- `worktree-enforcer.sh` - Git worktree isolation
+### Slash Commands (Hooks Disabled)
+**All hooks are disabled due to Claude Code v2.0.26-2.0.32 bugs.** Use slash commands instead:
+- `/parse-prd` - Phase 1: Task decomposition
+- `/generate-specs` - Phase 2: Specification generation
+- `/implement-tdd` - Phase 3: TDD implementation (enforces tests-first)
+- `/validate-integration` - Phase 4: Component integration testing
+- `/validate-e2e` - Phase 5: E2E validation
+- `/deploy` - Phase 6: Production deployment
 
-**Note:** Hooks include simplified fault-tolerant versions that gracefully degrade if dependencies are missing. See `hooks/README-HOOK-VERSIONS.md` for details.
+**Note:** Hooks will be re-enabled when Claude Code bug is fixed. Configuration preserved in `settings.json` with `_DISABLED` suffix.
 
 ### Core Infrastructure
 - Atomic state management
@@ -206,30 +209,26 @@ The large-file-reader utility bypasses the 25,000 token limit and reads files of
 
 ### Step 2: Start the Autonomous Pipeline
 
-**Recommended: Use Manual Mode for maximum visibility and control:**
+**Start the pipeline with slash commands:**
 
-```bash
-# Enable manual mode (phase transitions require explicit commands)
-bash /path/to/claude-dev-pipeline/scripts/enable-manual-mode.sh
-```
-
-Then start Pipeline:
 ```
 /parse-prd
 ```
 
-**Why Manual Mode?**
-- ⏸️  Pipeline STOPS at each phase completion - you can't miss transitions
-- 🎯 Very obvious terminal banners show exactly what to do next
-- ✅ Review phase outputs before proceeding
-- 🔧 Complete workaround for [Claude Code hook bug](KNOWN-ISSUES.md)
+After each phase completes, you'll be prompted to type the next command:
+- Phase 1 complete → `/generate-specs`
+- Phase 2 complete → `/implement-tdd`
+- Phase 3 complete → `/validate-integration`
+- Phase 4 complete → `/validate-e2e`
+- Phase 5 complete → `/deploy`
 
-See [Manual Mode Guide](docs/MANUAL-MODE.md) for details.
+**Why Slash Commands?**
+- ✅ 100% reliable - no hook dependencies
+- ✅ Explicit control - you type each command
+- ✅ No errors - hooks completely bypassed
+- ✅ Clear workflow - you see each phase transition
 
-**Alternative: Auto-transition mode** (may work but transitions can be missed):
-```
-"Please run task-master parse-prd docs/PRD.md"
-```
+See [COMMANDS.md](COMMANDS.md) for complete command reference.
 
 ### What Happens Next
 1. **Immediate PRD Processing**: The PRD-to-Tasks skill automatically analyzes your document
@@ -310,15 +309,15 @@ The monitor shows:
 ## Features
 
 ✅ **Fast Installation** - < 2 minutes with automatic prerequisite setup
-✅ **Comprehensive Slash Commands** - 7 commands covering all phases (workaround for hook bug)
-✅ **100% Skill Activation Rate** - Guaranteed via codewords or slash commands
+✅ **Slash Commands Only** - 7 commands covering all phases, no hook dependencies
+✅ **100% Reliability** - Hooks disabled, slash commands guarantee activation
 ✅ **95% Automation** - Only 3 manual approval gates (GO/NO-GO, Prod deploy, Rollback)
 ✅ **Large File Support** - Read PRDs >25K tokens (35K+ tokens tested)
 ✅ **Complete Isolation** - Git worktrees for parallel development
 ✅ **Production Ready** - Enterprise-grade error handling
 ✅ **Tool Integration** - TaskMaster & OpenSpec ready
-✅ **Fault-Tolerant Hooks** - Simplified hooks never fail
-✅ **Hybrid Activation** - Slash commands + automatic hooks + natural language
+✅ **No Hook Errors** - All hooks disabled until Claude Code bug is fixed
+✅ **Clear Workflow** - Explicit slash command at each phase transition
 
 ## License
 

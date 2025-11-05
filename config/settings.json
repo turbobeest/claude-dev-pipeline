@@ -1,33 +1,41 @@
 {
-  "version": "3.0",
+  "version": "3.1",
+  "_comment_hooks": "ALL HOOKS DISABLED - Claude Code v2.0.26-2.0.32 has hook bugs. Use slash commands instead (/parse-prd, /generate-specs, etc). See COMMANDS.md for details.",
   "hooks": {
-    "SessionStart": [
+    "_disabled_comment": "Hooks cause errors in Claude Code v2.0.26-2.0.32. Re-enable when bug is fixed by uncommenting sections below.",
+
+    "_SessionStart_DISABLED": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/claude-version-checker.sh"
+            "command": ".claude/hooks/claude-version-checker.sh",
+            "_note": "Version checker - can re-enable if needed, usually safe"
           }
         ]
       }
     ],
-    "UserPromptSubmit": [
+
+    "_UserPromptSubmit_DISABLED": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/user-prompt-submit.sh"
+            "command": ".claude/hooks/user-prompt-submit.sh",
+            "_note": "BROKEN in v2.0.26-2.0.32 - does not execute at all"
           }
         ]
       }
     ],
-    "PreToolUse": [
+
+    "_PreToolUse_DISABLED": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pretooluse-skill-activator.sh"
+            "command": ".claude/hooks/pretooluse-skill-activator.sh",
+            "_note": "Workaround hook - causes errors, replaced by slash commands"
           }
         ]
       },
@@ -36,18 +44,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-implementation-validator.sh"
+            "command": ".claude/hooks/pre-implementation-validator.sh",
+            "_note": "TDD validator - may cause errors on every tool use"
           }
         ]
       }
     ],
-    "PostToolUse": [
+
+    "_PostToolUse_DISABLED": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/post-tool-use-tracker.sh"
+            "command": ".claude/hooks/post-tool-use-tracker.sh",
+            "_note": "Phase tracker - causes errors, replaced by manual slash commands"
           }
         ]
       }
@@ -55,6 +66,8 @@
   },
   "pipeline": {
     "automationLevel": 95,
+    "mode": "manual-slash-commands",
+    "_mode_note": "Using slash commands for all phase transitions until hooks are fixed",
     "manualGates": {
       "requireApprovalFor": [
         "deployment",
@@ -69,12 +82,14 @@
       ]
     },
     "phaseTransitions": {
-      "autoAdvance": true,
-      "requireSignals": true,
+      "autoAdvance": false,
+      "_autoAdvance_note": "Set to false - use slash commands for phase transitions",
+      "requireSignals": false,
       "timeoutMinutes": 30
     },
     "skillActivation": {
-      "mode": "codeword-injection",
+      "mode": "slash-commands",
+      "_mode_note": "Changed from codeword-injection to slash-commands",
       "fallbackToKeywords": false,
       "debugMode": false
     }
@@ -82,13 +97,29 @@
   "workflow": {
     "trackProgress": true,
     "persistState": true,
-    "signalEmission": true,
-    "codewordInjection": true
+    "signalEmission": false,
+    "_signalEmission_note": "Disabled - not needed with slash commands",
+    "codewordInjection": false,
+    "_codewordInjection_note": "Disabled - hooks don't work"
   },
   "logging": {
     "level": "info",
-    "hookExecution": true,
+    "hookExecution": false,
+    "_hookExecution_note": "Disabled - no hooks active",
     "skillActivation": true,
     "phaseTransitions": true
+  },
+  "_instructions": {
+    "usage": "Use slash commands to control pipeline phases",
+    "commands": [
+      "/parse-prd - Phase 1: Task Decomposition",
+      "/generate-specs - Phase 2: Specification Generation",
+      "/implement-tdd - Phase 3: TDD Implementation",
+      "/validate-integration - Phase 4: Integration Testing",
+      "/validate-e2e - Phase 5: E2E Validation",
+      "/deploy - Phase 6: Production Deployment"
+    ],
+    "re_enable_hooks": "When Claude Code bug is fixed, rename keys (remove _DISABLED suffix) to re-enable hooks",
+    "documentation": "See COMMANDS.md and MANUAL-MODE.md for details"
   }
 }
