@@ -149,8 +149,9 @@ If Step 2a found explicit tasks (e.g., Section 7.1 with 67 tasks):
 1. **Extract ALL tasks from PRD** - Do not compress or consolidate
 2. **Preserve PRD task structure** - Maintain categories, IDs, titles
 3. **Map 1:1 where possible** - PRD Task 1 → Master Task 1
-4. **Add TaskMaster required fields** - status, subtasks, details, testStrategy
-5. **Capture PRD metadata** - Add `prd_category`, `prd_task_range` fields to description
+4. **Add TaskMaster required fields** - id, title, description, status
+5. **Add optional fields** - priority, dependencies (NO subtasks field yet)
+6. **Capture PRD metadata** - Add `prd_category`, `prd_task_range` to description
 
 **Example mapping:**
 ```
@@ -281,38 +282,32 @@ Construct tasks.json matching task-master's native parse-prd output format:
       "id": 1,
       "title": "Specific, focused task name (Action Verb + Object)",
       "description": "Detailed explanation of what this task accomplishes",
-      "priority": "high",
-      "dependencies": [],
-      "estimatedEffort": 4,
       "status": "todo",
-      "subtasks": [],
-      "details": null,
-      "testStrategy": null
+      "priority": "high",
+      "dependencies": []
     },
     {
       "id": 2,
       "title": "Another focused task",
       "description": "Detailed explanation of the next task",
-      "priority": "medium",
-      "dependencies": [1],
-      "estimatedEffort": 3,
       "status": "todo",
-      "subtasks": [],
-      "details": null,
-      "testStrategy": null
+      "priority": "medium",
+      "dependencies": [1]
     }
   ]
 }
 ```
 
-**CRITICAL - Native Task-Master Schema:**
-- **Required**: `id` (integer), `title` (string), `description` (string)
-- **Optional**: `priority` (high/medium/low), `dependencies` (array of IDs), `estimatedEffort` (hours)
-- **Defaulted**: `status` ("todo"), `subtasks` (empty array `[]`), `details` (null), `testStrategy` (null)
-- **IMPORTANT**: `subtasks` MUST be an empty array `[]` - never populate it
+**CRITICAL - Native Task-Master Schema (Phase 1 - Master Tasks Only):**
+- **Required**: `id` (integer), `title` (string), `description` (string), `status` (string)
+- **Optional**: `priority` (high/medium/low), `dependencies` (array of IDs)
+- **Omit these fields**: `subtasks`, `details`, `testStrategy` (added later by task-master expand)
 - Task IDs: 1, 2, 3, ... (numeric, sequential)
+- Status: Always "todo" for new tasks
 - Each title should be granular and focused
 - Last 3 tasks MUST be: Component Integration Testing, E2E Workflow Testing, Production Readiness Validation
+
+**Note:** The `subtasks`, `details`, and `testStrategy` fields are added in Phase 2/3 when `task-master expand` is run.
 
 #### 3c. Write tasks.json File
 
@@ -325,25 +320,17 @@ Use the Write tool to create `.taskmaster/tasks/tasks.json`:
       "id": 1,
       "title": "Initialize Project Repository with CI/CD Pipeline",
       "description": "Set up Git repository, initialize project structure, and configure GitHub Actions for automated testing and deployment",
-      "priority": "high",
-      "dependencies": [],
-      "estimatedEffort": 3,
       "status": "todo",
-      "subtasks": [],
-      "details": null,
-      "testStrategy": null
+      "priority": "high",
+      "dependencies": []
     },
     {
       "id": 2,
       "title": "Configure PostgreSQL Database and Migrations",
       "description": "Set up PostgreSQL database, create initial schema, and configure migration framework",
-      "priority": "high",
-      "dependencies": [1],
-      "estimatedEffort": 4,
       "status": "todo",
-      "subtasks": [],
-      "details": null,
-      "testStrategy": null
+      "priority": "high",
+      "dependencies": [1]
     }
     // ... (as many tasks as needed for the project)
   ]
@@ -388,14 +375,13 @@ After writing tasks.json, verify:
   - Simple PRDs: 10-20 tasks
   - Medium PRDs: 20-40 tasks
   - Complex PRDs with explicit breakdown: 50-70 tasks
-- ✅ **All tasks have `subtasks: []` (empty array, never populated)**
-- ✅ All required fields present: id, title, description
-- ✅ All defaulted fields present: status ("todo"), subtasks ([]), details (null), testStrategy (null)
+- ✅ All required fields present: id, title, description, status
+- ✅ **NO subtasks, details, or testStrategy fields** (added later in Phase 2/3)
 - ✅ Each task title is specific and focused
 - ✅ Last 3 tasks are Integration, E2E, Production Validation
 - ✅ All PRD features/categories mapped to tasks
 - ✅ Tasks are granular enough for small LLM context windows
-- ✅ Performance targets captured (if specified in PRD)
+- ✅ Performance targets captured in description (if specified in PRD)
 
 ### Step 5: Generate Summary
 
@@ -530,11 +516,12 @@ echo $prd_content  # Then try to use
   "title": "Configure PostgreSQL Database and Migrations",
   "description": "Set up PostgreSQL database, create initial schema, and configure migration framework",
   "status": "todo",
-  "subtasks": []
+  "priority": "high",
+  "dependencies": []
 }
 ```
 
-**WHY:** Subtasks will be added later by `task-master expand` for complex tasks only.
+**WHY:** Phase 1 generates master tasks only. Subtasks added later in Phase 2/3 by `task-master expand`.
 
 ### ❌ Mistake #5: Too few or too coarse tasks
 
@@ -725,10 +712,7 @@ Integration tasks are SEPARATE master tasks (not subtasks of a parent). They sho
   "description": "Test all component interfaces and inter-container communication. Validate API contracts, database queries, and message passing between services.",
   "status": "todo",
   "priority": "critical",
-  "dependencies": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  "details": null,
-  "testStrategy": null,
-  "subtasks": []
+  "dependencies": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 }
 ```
 
@@ -740,10 +724,7 @@ Integration tasks are SEPARATE master tasks (not subtasks of a parent). They sho
   "description": "Execute complete user workflows from start to finish. Test all critical user journeys and workflows defined in PRD success criteria.",
   "status": "todo",
   "priority": "critical",
-  "dependencies": [38],
-  "details": null,
-  "testStrategy": null,
-  "subtasks": []
+  "dependencies": [38]
 }
 ```
 
@@ -755,14 +736,11 @@ Integration tasks are SEPARATE master tasks (not subtasks of a parent). They sho
   "description": "Final validation of all production-ready criteria from PRD. Execute checklist validation, performance benchmarks, security scanning, and deployment readiness checks.",
   "status": "todo",
   "priority": "critical",
-  "dependencies": [39],
-  "details": null,
-  "testStrategy": null,
-  "subtasks": []
+  "dependencies": [39]
 }
 ```
 
-**Note:** These are THREE SEPARATE master tasks with empty `subtasks: []` arrays. They will have subtasks added in Phase 2 by `task-master expand`.
+**Note:** These are THREE SEPARATE master tasks. The `subtasks`, `details`, and `testStrategy` fields will be added in Phase 2/3 by `task-master expand`.
 
 ### 5. Quality Checks
 
@@ -790,10 +768,7 @@ Integration tasks are SEPARATE master tasks (not subtasks of a parent). They sho
       "description": "Detailed explanation of what this task accomplishes",
       "status": "todo",
       "priority": "high",
-      "dependencies": [],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": []
     },
     {
       "id": 2,
@@ -801,19 +776,16 @@ Integration tasks are SEPARATE master tasks (not subtasks of a parent). They sho
       "description": "Detailed explanation of the next task",
       "status": "todo",
       "priority": "medium",
-      "dependencies": [1],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [1]
     }
   ]
 }
 ```
 
-**Field Requirements:**
+**Field Requirements (Phase 1 - Master Tasks Only):**
 - **Required:** `id` (number), `title` (string), `description` (string), `status` (string)
-- **Optional:** `priority` (high/medium/low), `dependencies` (array of task IDs), `details` (string), `testStrategy` (string)
-- **Always include:** `subtasks` (empty array `[]`), `details` (null), `testStrategy` (null)
+- **Optional:** `priority` (high/medium/low), `dependencies` (array of task IDs)
+- **Omit:** `subtasks`, `details`, `testStrategy` (added later by task-master expand)
 - **NO string IDs** like "TASK-001" - use numeric IDs: 1, 2, 3, etc.
 
 **Subtasks added LATER by task-master:**
@@ -890,10 +862,7 @@ ELSE IF requirements are independent:
       "description": "Set up Docker Compose configuration for all 11 containers with networking, volumes, and health checks",
       "status": "todo",
       "priority": "high",
-      "dependencies": [],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": []
     },
     {
       "id": 2,
@@ -901,16 +870,13 @@ ELSE IF requirements are independent:
       "description": "Set up .env files and environment variable management for all containers and services",
       "status": "todo",
       "priority": "high",
-      "dependencies": [1],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [1]
     }
   ]
 }
 ```
 
-**Note:** Master tasks use `"subtasks": []` (empty array). Subtasks will be added later in Phase 2 by `task-master expand`.
+**Note:** Phase 1 master tasks omit `subtasks`, `details`, and `testStrategy` fields. These are added later in Phase 2/3 by `task-master expand`.
 
 **After Generation, Provide:**
 
@@ -1037,10 +1003,7 @@ Based on coupling analysis:
       "description": "Set up Git repository, initialize project structure, and configure GitHub Actions for automated testing and deployment",
       "status": "todo",
       "priority": "high",
-      "dependencies": [],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": []
     },
     {
       "id": 2,
@@ -1048,10 +1011,7 @@ Based on coupling analysis:
       "description": "Set up PostgreSQL database, create initial schema, and configure migration framework for version control",
       "status": "todo",
       "priority": "high",
-      "dependencies": [1],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [1]
     },
     {
       "id": 3,
@@ -1059,10 +1019,7 @@ Based on coupling analysis:
       "description": "Install and configure testing framework with coverage reporting and CI integration",
       "status": "todo",
       "priority": "high",
-      "dependencies": [1],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [1]
     },
     {
       "id": 4,
@@ -1070,10 +1027,7 @@ Based on coupling analysis:
       "description": "Set up .env files, secrets management, and environment configuration for all environments",
       "status": "todo",
       "priority": "high",
-      "dependencies": [1],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [1]
     },
     {
       "id": 5,
@@ -1081,25 +1035,21 @@ Based on coupling analysis:
       "description": "Create registration endpoint with email validation, password hashing, and user creation",
       "status": "todo",
       "priority": "high",
-      "dependencies": [2, 4],
-      "details": null,
-      "testStrategy": null,
-      "subtasks": []
+      "dependencies": [2, 4]
     }
   ]
 }
 ```
 
 **Note:**
-- Each task uses `"subtasks": []` (empty array)
-- All tasks have `"details": null` and `"testStrategy": null` initially
-- Subtasks will be added in Phase 2 by `task-master expand`
-- Full example shows only first 5 tasks for brevity - actual output would have 25-40 tasks
+- Phase 1 master tasks omit `subtasks`, `details`, and `testStrategy` fields
+- These fields are added in Phase 2/3 by `task-master expand`
+- Full example shows only first 5 tasks for brevity - actual output would have 25-70 tasks
 
 ### Key Points from Example
 
-✅ **27 Master Tasks**: Granular, focused tasks (not 6 big tasks)
-✅ **NO Subtasks Field**: Subtasks added later by task-master expand
+✅ **Granular Master Tasks**: Focused tasks, not monolithic (Registration, Login, Password Reset separate)
+✅ **NO Optional Fields Yet**: subtasks, details, testStrategy added later by task-master expand
 ✅ **Numeric IDs**: Sequential 1, 2, 3...
 ✅ **One Task Per Component**: Registration, Login, Password Reset are separate tasks
 ✅ **Last 3 Tasks**: Integration Testing, E2E Testing, Production Validation
