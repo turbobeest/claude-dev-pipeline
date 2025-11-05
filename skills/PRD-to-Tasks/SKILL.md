@@ -104,9 +104,87 @@ For each PRD section/feature, create multiple focused master tasks:
 - **Feature tasks**: ONE task per specific feature component (not one task per entire feature)
 - **Integration tasks**: Component integration, E2E testing, production validation
 
-**Example breakdown:**
-- Instead of: "User Authentication System" (1 big task)
-- Create: "User Registration API", "Login/Logout with JWT", "Password Reset Flow", "Session Management" (4 focused tasks)
+**Task Granularity Examples:**
+
+❌ **TOO COARSE - Monolithic Tasks (WRONG):**
+```
+Task 1: "User Authentication System"
+  - Combines: registration, login, logout, password reset, session management, OAuth
+  - Problem: Too large for single LLM context, multiple developers blocked
+
+Task 4: "LLM Configuration Engine"
+  - Combines: orchestrator, device LLMs, two-phase workflow, prompt injection prevention,
+    requirements checklist, live preview, document tracking
+  - Problem: 7+ separate concerns in one task
+```
+
+✅ **PROPER GRANULARITY - Focused Tasks (CORRECT):**
+```
+Authentication Feature → 6 Master Tasks:
+  Task 5: "Implement User Registration API Endpoint"
+  Task 6: "Implement Login/Logout with JWT Token Generation"
+  Task 7: "Implement Password Reset Flow with Email Notifications"
+  Task 8: "Implement Session Management and Token Refresh"
+  Task 9: "Implement OAuth2 Integration (Google/GitHub)"
+  Task 10: "Implement Two-Factor Authentication (2FA)"
+
+LLM Configuration Feature → 6 Master Tasks:
+  Task 11: "Implement Hierarchical LLM Orchestrator"
+  Task 12: "Implement Device-Specific LLM Strategy Selection"
+  Task 13: "Implement Phase 1 Operational Configuration Generation"
+  Task 14: "Implement Phase 2 STIG Compliance Layer"
+  Task 15: "Implement Prompt Injection Prevention System"
+  Task 16: "Implement Requirements Checklist Engine"
+```
+
+**Rule of Thumb:** If task description contains >3 "AND" conjunctions, split it into multiple tasks.
+
+**Infrastructure Decomposition Pattern:**
+
+When PRD describes complex infrastructure (multiple containers, services, databases), break into focused tasks:
+
+❌ **TOO COARSE - Monolithic Infrastructure Task:**
+```
+Task 1: "Docker Environment Setup"
+  - Set up complete 11-container architecture
+  - Configure Docker Compose with all services
+  - Set up networking (client, server, internet networks)
+  - Configure volumes for Neo4j, Git, Ollama
+  - Add health checks for all containers
+  - Configure resource limits
+  - Problem: Single huge infrastructure task blocks everything
+```
+
+✅ **PROPER DECOMPOSITION - Focused Infrastructure Tasks:**
+```
+Infrastructure → 5 Master Tasks:
+  Task 1: "Docker Compose Master Configuration - Define 11 Containers"
+    - Define all 11 services in docker-compose.yml with base configuration
+    - Set container names, images, and basic ports
+
+  Task 2: "Docker Network Configuration - Create Isolated Networks"
+    - Create client, server, and internet networks
+    - Configure network isolation and service communication rules
+
+  Task 3: "Volume Management Strategy - Configure Persistent Storage"
+    - Set up volumes for Neo4j, Git, Ollama, and application data
+    - Configure volume mounts and permissions
+
+  Task 4: "Health Check Implementation - Add Service Monitoring"
+    - Add health check endpoints for all services
+    - Configure health check intervals and timeouts
+
+  Task 5: "Container Resource Limits - Configure Memory and CPU"
+    - Set memory limits per container
+    - Configure CPU allocation
+    - Add restart policies
+```
+
+**Why This Matters:**
+- Each task is independently testable
+- Multiple developers can work in parallel
+- Smaller context per task = better LLM performance
+- Failures are isolated and easier to debug
 
 #### 3b. Create JSON Structure (NATIVE TASK-MASTER SCHEMA)
 
@@ -267,7 +345,7 @@ echo $prd_content  # Then try to use
 ```json
 {
   "id": 1,
-  "name": "Set Up Database",
+  "title": "Set Up Database",
   "subtasks": [...]  // ❌ NO SUBTASKS!
 }
 ```
@@ -276,7 +354,10 @@ echo $prd_content  # Then try to use
 ```json
 {
   "id": 1,
-  "name": "Configure PostgreSQL Database and Migrations"
+  "title": "Configure PostgreSQL Database and Migrations",
+  "description": "Set up PostgreSQL database, create initial schema, and configure migration framework",
+  "status": "todo",
+  "subtasks": []
 }
 ```
 
@@ -459,37 +540,56 @@ IF Task has NO dependencies:
 
 ### 4. Integration Task Generation (CRITICAL)
 
-**Always Generate These Final Tasks:**
+**Always Generate These Final 3 Master Tasks:**
 
-**Final Master Task: Integration & Validation**
+Integration tasks are SEPARATE master tasks (not subtasks of a parent). They should be the last 3 tasks in your task list:
+
+**Task #N-2: Component Integration Testing**
 ```json
 {
-  "id": 10,
-  "name": "Integration & Production Validation",
-  "subtasks": [
-    {
-      "id": 1,
-      "title": "Component Integration Testing",
-      "testStrategy": "Execute comprehensive integration test suite covering all component interfaces",
-      "acceptanceCriteria": ["All integration points tested (100%)", "All integration tests passing"]
-    },
-    {
-      "id": 2,
-      "title": "End-to-End Workflow Testing",
-      "testStrategy": "Execute E2E test suite for all critical user journeys",
-      "acceptanceCriteria": ["All critical user journeys tested", "All E2E tests passing"]
-    },
-    {
-      "id": 3,
-      "title": "Production Readiness Validation",
-      "testStrategy": "Execute comprehensive validation checklist",
-      "acceptanceCriteria": ["All tests passing (100%)", "Coverage thresholds met", "Production readiness complete"]
-    }
-  ]
+  "id": 38,
+  "title": "Component Integration Testing",
+  "description": "Test all component interfaces and inter-container communication. Validate API contracts, database queries, and message passing between services.",
+  "status": "todo",
+  "priority": "critical",
+  "dependencies": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "details": null,
+  "testStrategy": null,
+  "subtasks": []
 }
 ```
 
-**Note:** Integration tasks are now consolidated into the final master task above with proper TaskMaster subtask structure.
+**Task #N-1: End-to-End Workflow Testing**
+```json
+{
+  "id": 39,
+  "title": "End-to-End Workflow Testing",
+  "description": "Execute complete user workflows from start to finish. Test all critical user journeys and workflows defined in PRD success criteria.",
+  "status": "todo",
+  "priority": "critical",
+  "dependencies": [38],
+  "details": null,
+  "testStrategy": null,
+  "subtasks": []
+}
+```
+
+**Task #N: Production Readiness Validation**
+```json
+{
+  "id": 40,
+  "title": "Production Readiness Validation",
+  "description": "Final validation of all production-ready criteria from PRD. Execute checklist validation, performance benchmarks, security scanning, and deployment readiness checks.",
+  "status": "todo",
+  "priority": "critical",
+  "dependencies": [39],
+  "details": null,
+  "testStrategy": null,
+  "subtasks": []
+}
+```
+
+**Note:** These are THREE SEPARATE master tasks with empty `subtasks: []` arrays. They will have subtasks added in Phase 2 by `task-master expand`.
 
 ### 5. Quality Checks
 
@@ -510,26 +610,38 @@ IF Task has NO dependencies:
 
 ```json
 {
-  "master": {
-    "tasks": [
-      {
-        "id": 1,                          // ✅ Numeric ID
-        "name": "[Action Verb] + [Object]" // ✅ 'name' for master task
-      },
-      {
-        "id": 2,
-        "name": "Another focused task"
-      }
-    ]
-  }
+  "tasks": [
+    {
+      "id": 1,
+      "title": "[Action Verb] + [Object]",
+      "description": "Detailed explanation of what this task accomplishes",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Another focused task",
+      "description": "Detailed explanation of the next task",
+      "status": "todo",
+      "priority": "medium",
+      "dependencies": [1],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    }
+  ]
 }
 ```
 
 **Field Requirements:**
-- Master task: `id` (number), `name` (string)
-- **NO subtasks field** - subtasks added later by task-master expand
-- NO custom fields like `status`, `priority`, `dependencies`
-- NO string IDs like "TASK-001"
+- **Required:** `id` (number), `title` (string), `description` (string), `status` (string)
+- **Optional:** `priority` (high/medium/low), `dependencies` (array of task IDs), `details` (string), `testStrategy` (string)
+- **Always include:** `subtasks` (empty array `[]`), `details` (null), `testStrategy` (null)
+- **NO string IDs** like "TASK-001" - use numeric IDs: 1, 2, 3, etc.
 
 **Subtasks added LATER by task-master:**
 ```bash
@@ -542,17 +654,35 @@ task-master expand --id=5 --research  # For complex tasks
 ```json
 {
   "id": 5,
-  "name": "Implement User Authentication API",
-  "subtasks": [  // ← Added by task-master expand
+  "title": "Implement User Authentication API",
+  "description": "Create registration endpoint with email validation, password hashing, and user creation",
+  "status": "in-progress",
+  "priority": "high",
+  "dependencies": [2, 4],
+  "details": "Use bcrypt for password hashing, JWT for tokens",
+  "testStrategy": "Unit tests for validation, integration tests for API endpoints",
+  "subtasks": [
     {
       "id": 1,
       "title": "Create user registration endpoint",
-      "testStrategy": "...",
-      "acceptanceCriteria": ["..."]
+      "description": "POST /api/auth/register endpoint with validation",
+      "status": "done",
+      "dependencies": [],
+      "details": "Use express-validator for input validation"
+    },
+    {
+      "id": 2,
+      "title": "Implement password hashing with bcrypt",
+      "description": "Hash passwords before storing in database",
+      "status": "done",
+      "dependencies": [1],
+      "details": "Use bcrypt with salt rounds = 10"
     }
   ]
 }
 ```
+
+**Note:** This shows the task AFTER Phase 2 `task-master expand` has been run. The PRD-to-Tasks skill in Phase 1 would have generated this task with `"subtasks": []`.
 
 ## OpenSpec Mapping Strategy
 
@@ -580,30 +710,34 @@ ELSE IF requirements are independent:
 
 ```json
 {
-  "master": {
-    "tasks": [
-      {
-        "id": 1,
-        "name": "Docker Environment Setup",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create Docker Compose file",
-            "testStrategy": "Validate with docker-compose config",
-            "acceptanceCriteria": ["Docker services start successfully"]
-          },
-          {
-            "id": 2,
-            "title": "Configure environment variables",
-            "testStrategy": "Test variable loading",
-            "acceptanceCriteria": ["All variables loaded correctly"]
-          }
-        ]
-      }
-    ]
-  }
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Docker Environment Setup",
+      "description": "Set up Docker Compose configuration for all 11 containers with networking, volumes, and health checks",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Configure Environment Variables",
+      "description": "Set up .env files and environment variable management for all containers and services",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [1],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    }
+  ]
 }
 ```
+
+**Note:** Master tasks use `"subtasks": []` (empty array). Subtasks will be added later in Phase 2 by `task-master expand`.
 
 **After Generation, Provide:**
 
@@ -723,39 +857,71 @@ Based on coupling analysis:
 
 ```json
 {
-  "master": {
-    "tasks": [
-      {"id": 1, "name": "Initialize Project Repository with CI/CD Pipeline"},
-      {"id": 2, "name": "Configure PostgreSQL Database and Migrations Framework"},
-      {"id": 3, "name": "Set Up Testing Framework (Jest/Pytest) and Coverage Tools"},
-      {"id": 4, "name": "Configure Environment Variables and Secrets Management"},
-      {"id": 5, "name": "Implement User Registration API Endpoint"},
-      {"id": 6, "name": "Implement Login/Logout with JWT Token Generation"},
-      {"id": 7, "name": "Implement Password Reset Flow with Email Notifications"},
-      {"id": 8, "name": "Implement Session Management and Token Refresh"},
-      {"id": 9, "name": "Create Product Model and Database Schema"},
-      {"id": 10, "name": "Implement Product CRUD API Endpoints"},
-      {"id": 11, "name": "Implement Product Search Functionality"},
-      {"id": 12, "name": "Implement Category and Price Range Filtering"},
-      {"id": 13, "name": "Create Cart and CartItem Models"},
-      {"id": 14, "name": "Implement Add/Remove Cart Items API"},
-      {"id": 15, "name": "Implement Cart Quantity Update Logic"},
-      {"id": 16, "name": "Implement Guest Cart Session Storage"},
-      {"id": 17, "name": "Implement Cart Persistence Across User Sessions"},
-      {"id": 18, "name": "Integrate Stripe Payment SDK"},
-      {"id": 19, "name": "Implement Payment Intent Creation and Processing"},
-      {"id": 20, "name": "Implement Payment Webhook Handling"},
-      {"id": 21, "name": "Create Order Model and Database Schema"},
-      {"id": 22, "name": "Implement Order Creation After Successful Payment"},
-      {"id": 23, "name": "Implement Order Confirmation Email Service"},
-      {"id": 24, "name": "Implement Order History Retrieval API"},
-      {"id": 25, "name": "Component Integration Testing"},
-      {"id": 26, "name": "End-to-End Workflow Testing"},
-      {"id": 27, "name": "Production Readiness Validation"}
-    ]
-  }
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Initialize Project Repository with CI/CD Pipeline",
+      "description": "Set up Git repository, initialize project structure, and configure GitHub Actions for automated testing and deployment",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Configure PostgreSQL Database and Migrations Framework",
+      "description": "Set up PostgreSQL database, create initial schema, and configure migration framework for version control",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [1],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "Set Up Testing Framework (Jest/Pytest) and Coverage Tools",
+      "description": "Install and configure testing framework with coverage reporting and CI integration",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [1],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Configure Environment Variables and Secrets Management",
+      "description": "Set up .env files, secrets management, and environment configuration for all environments",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [1],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "Implement User Registration API Endpoint",
+      "description": "Create registration endpoint with email validation, password hashing, and user creation",
+      "status": "todo",
+      "priority": "high",
+      "dependencies": [2, 4],
+      "details": null,
+      "testStrategy": null,
+      "subtasks": []
+    }
+  ]
 }
 ```
+
+**Note:**
+- Each task uses `"subtasks": []` (empty array)
+- All tasks have `"details": null` and `"testStrategy": null` initially
+- Subtasks will be added in Phase 2 by `task-master expand`
+- Full example shows only first 5 tasks for brevity - actual output would have 25-40 tasks
 
 ### Key Points from Example
 
