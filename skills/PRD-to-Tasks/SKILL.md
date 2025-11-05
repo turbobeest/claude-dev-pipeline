@@ -67,7 +67,44 @@ echo "📖 Reading PRD with large-file-reader..."
 
 ### Step 2: Analyze PRD Structure (AI Analysis)
 
-Using the PRD content now in your context, identify:
+**CRITICAL: Check for Explicit Task Breakdown FIRST**
+
+Before analyzing features, search for explicit task breakdowns in the PRD:
+
+**Step 2a: Look for Explicit Task Sections**
+
+Search for sections like:
+- "Task Decomposition"
+- "Task Breakdown"
+- "Implementation Tasks"
+- "Development Tasks"
+- Section 7, Section 7.1, or Appendix with task lists
+
+**If found:**
+- ✅ Use the PRD's explicit task list as the **source of truth**
+- ✅ Extract ALL tasks defined (even if 50-70 tasks)
+- ✅ Preserve task IDs, titles, descriptions from PRD
+- ✅ Maintain PRD's category structure
+- ✅ Capture complexity classifications if provided
+- ✅ Map dependencies explicitly stated
+
+**Example:** If PRD has:
+```
+7.1 Task Decomposition (67 tasks across 13 categories)
+  Category 1: Foundation & Infrastructure (tasks 1-8)
+    Task 1: Docker Environment Setup
+    Task 2: CI/CD Pipeline Configuration
+    ...
+  Category 2: Parent GraphRAG Server (tasks 9-13)
+    Task 9: Neo4j Server Configuration
+    ...
+```
+
+→ Generate 67 master tasks matching this structure
+
+**Step 2b: If NO Explicit Task Breakdown Found**
+
+Fall back to feature-based analysis:
 
 1. **Feature Requirements** (typically Section 3):
    - List each major feature/capability
@@ -89,17 +126,64 @@ Using the PRD content now in your context, identify:
    - Shared infrastructure needs
    - External service integrations
 
+**Step 2c: Extract Performance Targets**
+
+Look for explicit performance targets:
+- Response time requirements (e.g., "<10s UI response p95")
+- Generation time limits (e.g., "<15min config generation")
+- Query performance (e.g., "<10s GraphRAG queries")
+- Throughput requirements
+
+These will be used in performance testing tasks.
+
 ### Step 3: Generate Master Tasks (DIRECT AI GENERATION)
 
 **DO NOT call task-master parse-prd!** Instead, YOU will create the master tasks directly.
 
-#### 3a. Break Down PRD into Granular Master Tasks
+#### 3a. Task Generation Strategy
 
-**Generate as many tasks as needed** - right-size for the project complexity (simple projects may have 10-15 tasks, complex projects may have 30-50+ tasks)
+**Strategy A: PRD Has Explicit Task Breakdown (PREFERRED)**
 
-**Key principle:** More granular tasks = smaller LLM context per task during development
+If Step 2a found explicit tasks (e.g., Section 7.1 with 67 tasks):
 
-For each PRD section/feature, create multiple focused master tasks:
+1. **Extract ALL tasks from PRD** - Do not compress or consolidate
+2. **Preserve PRD task structure** - Maintain categories, IDs, titles
+3. **Map 1:1 where possible** - PRD Task 1 → Master Task 1
+4. **Add TaskMaster required fields** - status, subtasks, details, testStrategy
+5. **Capture PRD metadata** - Add `prd_category`, `prd_task_range` fields to description
+
+**Example mapping:**
+```
+PRD Section 7.1:
+  Category 1: Foundation & Infrastructure (tasks 1-8)
+    Task 1: Docker Environment Setup
+    Task 2: CI/CD Pipeline Configuration
+    ...
+  Category 11: UI Components (tasks 54-60)
+    Task 54: Three-Panel Configuration Interface
+    Task 55: LLM Chat Integration
+    Task 56: Deployment Dashboard
+    Task 57: Configuration Comparison
+    Task 58: Search and History
+    Task 59: In-App Help System
+    Task 60: Responsive Design
+
+→ Generate 60 master tasks preserving this structure
+→ Add 3 integration tasks (61-63) for total of 63 master tasks
+```
+
+**Strategy B: PRD Has NO Explicit Task Breakdown (FALLBACK)**
+
+If Step 2b fallback analysis was used:
+
+1. **Generate granular master tasks** - Right-size for project complexity
+2. **Target task count:**
+   - Simple projects: 10-15 tasks
+   - Medium projects: 20-35 tasks
+   - Complex projects: 40-70 tasks
+3. **Key principle:** More granular tasks = smaller LLM context per task
+
+Break down each PRD section/feature into multiple focused master tasks:
 - **Foundation tasks**: Setup, CI/CD, infrastructure, database
 - **Feature tasks**: ONE task per specific feature component (not one task per entire feature)
 - **Integration tasks**: Component integration, E2E testing, production validation
@@ -268,21 +352,76 @@ Use the Write tool to create `.taskmaster/tasks/tasks.json`:
 
 ### Step 4: Validate Output
 
+**CRITICAL: PRD Coverage Validation**
+
+If PRD had explicit task breakdown (Step 2a), perform coverage check:
+
+```bash
+# Count tasks generated vs PRD tasks
+echo "Generated: $(jq '.tasks | length' .taskmaster/tasks/tasks.json) tasks"
+echo "PRD specified: [X] tasks (from Section 7.1)"
+```
+
+**Coverage Requirements:**
+- ✅ **If PRD specifies 67 tasks → generate 60-70 master tasks**
+- ✅ **If PRD has 13 categories → ensure all 13 represented**
+- ✅ **Missing categories = FAILURE** - go back and add them
+- ❌ **14 tasks when PRD specifies 67 = 21% coverage = UNACCEPTABLE**
+
+**Example check:**
+```
+PRD Category Checklist:
+ ✅ Category 1: Foundation & Infrastructure (tasks 1-8)
+ ✅ Category 2: Parent GraphRAG Server (tasks 9-13)
+ ❌ Category 8: Rollback System (tasks 42-44) ← MISSING!
+ ❌ Category 11: UI Components (tasks 54-60) ← COMPRESSED TO 1 TASK!
+
+ ACTION REQUIRED: Add missing Category 8, expand Category 11 to 7 tasks
+```
+
+**Standard Validation:**
+
 After writing tasks.json, verify:
 - ✅ File exists: `.taskmaster/tasks/tasks.json`
 - ✅ Valid JSON (use `jq . .taskmaster/tasks/tasks.json`)
-- ✅ Task count appropriate for project complexity (not too few, not too many)
+- ✅ Task count appropriate for project complexity:
+  - Simple PRDs: 10-20 tasks
+  - Medium PRDs: 20-40 tasks
+  - Complex PRDs with explicit breakdown: 50-70 tasks
 - ✅ **All tasks have `subtasks: []` (empty array, never populated)**
 - ✅ All required fields present: id, title, description
 - ✅ All defaulted fields present: status ("todo"), subtasks ([]), details (null), testStrategy (null)
 - ✅ Each task title is specific and focused
 - ✅ Last 3 tasks are Integration, E2E, Production Validation
-- ✅ All PRD features mapped to tasks
+- ✅ All PRD features/categories mapped to tasks
 - ✅ Tasks are granular enough for small LLM context windows
+- ✅ Performance targets captured (if specified in PRD)
 
 ### Step 5: Generate Summary
 
-Provide user with:
+**If PRD had explicit task breakdown:**
+```
+✅ Master tasks generated: X tasks
+📋 PRD Coverage:
+   - PRD specified: 67 tasks across 13 categories
+   - Generated: X master tasks
+   - Coverage: X% (target: >90%)
+
+📊 Category Breakdown:
+   ✅ Category 1: Foundation & Infrastructure (8 tasks)
+   ✅ Category 2: Parent GraphRAG Server (5 tasks)
+   ✅ Category 3: Client Local GraphRAG (4 tasks)
+   ...
+   ✅ Category 11: UI Components (7 tasks)
+   ✅ Category 13: Documentation (3 tasks)
+
+📝 Next Steps:
+   1. Review: task-master list
+   2. Complexity analysis: task-master analyze-complexity --research
+   3. Expand high-complexity tasks: task-master expand --id=<X> --research
+```
+
+**If PRD had NO explicit task breakdown:**
 ```
 ✅ Master tasks generated: X tasks
 📊 Breakdown:
@@ -297,6 +436,40 @@ Provide user with:
 ```
 
 ## Common Mistakes to AVOID
+
+### ❌ Mistake #0: Ignoring Explicit Task Breakdown in PRD
+
+**WRONG:**
+```
+PRD has Section 7.1 "Task Decomposition" with 67 explicit tasks
+→ Skill ignores it, invents own 14 tasks from features
+→ Result: 21% coverage, missing entire categories (Rollback System)
+```
+
+**WHY WRONG:**
+- PRD author spent significant time defining 67 specific tasks
+- Explicit task breakdown is the **source of truth**
+- Compressing 67 tasks into 14 loses critical detail
+- Missing categories will cause project failures
+
+**CORRECT:**
+1. Search for Section 7, Section 7.1, "Task Decomposition", etc.
+2. If found with 50-70 explicit tasks → **USE THOSE**
+3. Extract ALL tasks, preserve structure, maintain categories
+4. Add TaskMaster fields (subtasks: [], status: "todo", etc.)
+5. Result: 60-70 master tasks matching PRD
+
+**Example:**
+```
+PRD Section 7.1 lists:
+  Category 8: Rollback System (tasks 42-44)
+    Task 42: Pre-deployment Snapshot System
+    Task 43: Rollback Command Generation
+    Task 44: Rollback Execution Workflow
+
+→ Generate 3 master tasks (42, 43, 44) for this category
+→ DO NOT compress into "Deployment Workflows" task
+```
 
 ### ❌ Mistake #1: Calling task-master parse-prd
 
