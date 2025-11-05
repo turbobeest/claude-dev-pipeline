@@ -22,12 +22,22 @@ Check for PRD in these locations (in order):
 Before reading, check the file size:
 
 ```bash
-wc -w docs/PRD.md | awk '{print "Words:", $1, "| Est. tokens:", int($1 * 1.3)}'
+wc -w docs/PRD.md | awk '{print "Words:", $1, "| Est. tokens:", int($1 * 2.5)}'
 ```
 
+**Token Estimation:**
+- Technical PRDs with markdown/code average **2.5 tokens per word**
+- This is more conservative than simple text (1.3x) due to:
+  - Markdown formatting (headers, lists, code blocks)
+  - Technical terminology
+  - Code examples and snippets
+  - URLs and special characters
+
 **IMPORTANT File Size Rules:**
-- **< 25,000 tokens**: Use Read tool directly
-- **≥ 25,000 tokens**: Use large-file-reader utility
+- **< 10,000 words (≈25K tokens)**: Use Read tool directly
+- **≥ 10,000 words (≈25K tokens)**: Use large-file-reader utility
+
+**When in doubt, use large-file-reader** - it handles files of any size.
 
 ### Step 3: Read the PRD
 
