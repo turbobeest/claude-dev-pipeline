@@ -13,24 +13,28 @@ A complete end-to-end development automation system that takes your Product Requ
 The installer **automatically checks and installs** all prerequisites for you!
 
 ```bash
-# Step 1: Clone to temporary location
-cd /tmp
+# Step 1: Clone to SYSTEM /tmp directory (NOT a local tmp folder!)
+cd /tmp                                    # ← System temp directory
 git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
 
 # Step 2: Navigate to YOUR project directory
-cd /path/to/your-project  # <-- Where you want .claude/ installed
+cd /path/to/your-project                  # ← Where you want .claude/ installed
 
 # Step 3: Run the installer (auto-checks & installs prerequisites)
 bash /tmp/claude-dev-pipeline/install.sh
+
+# Step 4: Done! (/tmp/claude-dev-pipeline is automatically removed)
 ```
+
+**⚠️ IMPORTANT:** Clone to the **system `/tmp`** directory, not a local `tmp/` folder inside your project. The installer auto-removes `/tmp/claude-dev-pipeline` after installation to keep your system clean.
 
 **What the installer does:**
 - ✅ Checks all prerequisites (Claude Code, Git, Bash, jq, TaskMaster, OpenSpec)
 - ✅ Auto-installs missing tools (jq, TaskMaster, OpenSpec)
-- ✅ Copies pipeline files to `.claude/`
+- ✅ Copies pipeline files to `.claude/` in your project
 - ✅ Initializes configuration
 - ✅ Verifies installation
-- ✅ Tests hooks
+- ✅ Auto-removes installation directory from `/tmp`
 
 **Installation takes < 2 minutes with zero manual steps for most prerequisites!**
 
