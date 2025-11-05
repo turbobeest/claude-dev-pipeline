@@ -214,15 +214,21 @@ configure_pipeline() {
 
     # Initialize TaskMaster if installed
     if command -v task-master >/dev/null 2>&1; then
-        # Clean up old taskmaster data if it exists
-        if [[ -d ".taskmaster" ]]; then
-            log_info "Cleaning up existing TaskMaster data..."
-            rm -rf .taskmaster/tasks/*.json 2>/dev/null || true
-            rm -rf .taskmaster/proposals/*.json 2>/dev/null || true
-            rm -rf .taskmaster/.signals/* 2>/dev/null || true
+        # Check if TaskMaster already has data
+        local has_existing_data=false
+        if [[ -f ".taskmaster/tasks/tasks.json" ]]; then
+            local task_count=$(jq 'try (.master.tasks | length) // (if .tasks then (.tasks | length) else 0 end)' .taskmaster/tasks/tasks.json 2>/dev/null || echo "0")
+            if [[ "$task_count" -gt 0 ]]; then
+                has_existing_data=true
+            fi
         fi
 
-        if [[ ! -d ".taskmaster" ]] || [[ ! -f ".taskmaster/config.json" ]]; then
+        if [[ "$has_existing_data" == "true" ]]; then
+            # Preserve existing data
+            log_success "TaskMaster data found ($task_count tasks) - preserving existing data"
+            log_info "To start fresh, manually delete .taskmaster/ before reinstalling"
+        elif [[ ! -d ".taskmaster" ]] || [[ ! -f ".taskmaster/config.json" ]]; then
+            # Fresh installation
             log_info "Initializing TaskMaster in project..."
 
             # Create directory structure
@@ -230,6 +236,7 @@ configure_pipeline() {
             mkdir -p .taskmaster/proposals
             mkdir -p .taskmaster/.checkpoints
             mkdir -p .taskmaster/.signals
+            mkdir -p .taskmaster/docs
 
             # Run task-master init with -y flag for non-interactive (claude rule only)
             if task-master init -y -r claude >/dev/null 2>&1; then
@@ -240,7 +247,8 @@ configure_pipeline() {
                 log_success "TaskMaster directories created"
             fi
         else
-            log_info "TaskMaster already initialized (data cleaned)"
+            # Empty .taskmaster exists - safe to skip
+            log_info "TaskMaster already initialized (no data to preserve)"
         fi
     else
         log_warning "TaskMaster not installed - skipping initialization"
