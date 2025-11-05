@@ -105,7 +105,79 @@ task-master show 1
 
 **Now you're ready for OpenSpec specification generation.**
 
-## What This Phase Does
+---
+
+## OpenSpec Specification Generation Workflow
+
+**CRITICAL:** You must now execute the Spec Generator skill workflow. This is the core of Phase 2.
+
+### Step 1: Read the Spec Generator Skill
+
+```bash
+cat .claude/skills/spec-gen/SKILL.md
+```
+
+### Step 2: Execute ALL Stages in Order
+
+You must complete these stages sequentially:
+
+**Stage 1: Load TaskMaster Results**
+- Read `.taskmaster/tasks/tasks.json`
+- Extract all master tasks and their subtasks
+- Count total subtasks (this equals number of proposals to create)
+
+**Stage 2: Determine Batching**
+- Group master tasks into batches (5-10 tasks per batch)
+- Plan worktree isolation strategy
+- Identify dependencies between batches
+
+**Stage 3: Create OpenSpec Proposals**
+- Create 1 proposal per subtask (1:1 mapping)
+- Path: `openspec/changes/[task-name]-subtask-[id]/proposal.md`
+- Include: title, description, test strategy, dependencies
+- Update `TASKMASTER_OPENSPEC_MAP.md` as you go
+
+**Stage 4: Validate Proposals**
+- Verify all subtasks have proposals
+- Check proposal format and completeness
+- Validate cross-proposal dependencies
+
+**Stage 5: Generate Summary**
+- Count proposals created
+- Document batching strategy
+- List any issues encountered
+
+**Stage 6: Create Completion Signal**
+- Update `.claude/.signals/phase2-complete.json`
+- Include: proposals_created, batches_processed, status
+
+### Step 3: Expected Outputs
+
+When complete, you should have:
+- **Proposals:** One per subtask in `openspec/changes/[task-name]-subtask-[id]/proposal.md`
+- **Mapping:** `TASKMASTER_OPENSPEC_MAP.md` showing task → proposal relationships
+- **Worktrees:** `.worktrees/phase-2-batch-[1-4]/` (if using worktree isolation)
+- **Signal:** Updated `.claude/.signals/phase2-complete.json` with proposal count
+
+### Step 4: Verification
+
+Before proceeding, verify:
+```bash
+# Count proposals (should equal subtask count)
+find openspec/changes -name "proposal.md" | wc -l
+
+# Verify mapping file exists
+ls -lh TASKMASTER_OPENSPEC_MAP.md
+
+# Check signal file
+cat .claude/.signals/phase2-complete.json
+```
+
+**DO NOT skip the workflow execution.** Phase 2 is not complete until all proposals are created.
+
+---
+
+## What This Phase Does (Summary)
 
 1. **Analyze Coupling**: Review coupling analysis from Phase 1
 2. **Identify Batches**: Group tightly coupled tasks (5-10 tasks per batch)
