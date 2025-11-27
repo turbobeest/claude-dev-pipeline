@@ -486,7 +486,7 @@ EOF
         fi
     else
         log_warning "OpenSpec not installed - skipping initialization"
-        log_info "Install with: npm install -g @anthropic/openspec"
+        log_info "Install with: npm install -g @fission-ai/openspec@latest"
     fi
 
     # Check if in git repo and get existing remote
