@@ -366,9 +366,9 @@ install_openspec() {
     # Check if npm is available (OpenSpec might be an npm package)
     if command -v npm >/dev/null 2>&1; then
         log_info "Installing OpenSpec via npm..."
-        npm install -g @anthropic/openspec 2>/dev/null || {
+        npm install -g @fission-ai/openspec@latest 2>/dev/null || {
             log_warning "Global npm install failed, trying local installation..."
-            npm install --prefix "$HOME/.local" @anthropic/openspec
+            npm install --prefix "$HOME/.local" @fission-ai/openspec@latest
 
             # Create symlink
             ln -sf "${HOME}/.local/node_modules/.bin/openspec" "${install_dir}/openspec"

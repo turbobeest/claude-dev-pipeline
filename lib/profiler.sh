@@ -11,6 +11,8 @@
 #   # ... do work ...
 #   duration=$(profile_end "operation_name")
 #
+# Note: Requires Bash 4+ for full functionality. Degrades gracefully on Bash 3.x.
+#
 # =============================================================================
 
 # Ensure we're in the project root
@@ -18,12 +20,24 @@ if [[ -z "${PROJECT_ROOT:-}" ]]; then
     PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
+# Check Bash version - associative arrays require Bash 4+
+BASH_VERSION_MAJOR="${BASH_VERSION%%.*}"
+if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
+    # Bash 3.x - disable profiler (associative arrays not supported)
+    PROFILER_ENABLED="false"
+    PROFILER_BASH3_MODE="true"
+else
+    PROFILER_BASH3_MODE="false"
+fi
+
 # Configuration
 PROFILER_SESSION_ID="${PROFILER_SESSION_ID:-$(uuidgen 2>/dev/null || echo "$$-$(date +%s)")}"
 PROFILER_ENABLED="${PROFILER_ENABLED:-true}"
 
-# Storage for profile timings
-declare -A PROFILE_START_TIMES
+# Storage for profile timings (only declare if Bash 4+)
+if [[ "$PROFILER_BASH3_MODE" != "true" ]]; then
+    declare -A PROFILE_START_TIMES
+fi
 
 # =============================================================================
 # Core Profiling Functions

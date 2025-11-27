@@ -1,141 +1,67 @@
 # Known Issues
 
-## 🐛 UserPromptSubmit Hooks Broken in Claude Code v2.0.26+
+## ✅ RESOLVED: UserPromptSubmit Hooks (Fixed in Claude Code v2.0.55+)
 
 ### Issue Description
 
-**Claude Code versions 2.0.26 through 2.0.32 (and possibly later) have a critical bug where UserPromptSubmit hooks are completely non-functional.**
+**Claude Code versions 2.0.26 through 2.0.32 had a critical bug where UserPromptSubmit hooks were non-functional.**
 
-- **Affected Versions:** v2.0.26 - v2.0.32+ (tested and confirmed)
-- **Status:** Reported to Anthropic
+- **Affected Versions:** v2.0.26 - v2.0.32
+- **Fixed In:** v2.0.55+
+- **Status:** ✅ RESOLVED
 - **GitHub Issue:** https://github.com/anthropics/claude-code/issues/10287
-- **Impact:** Skill activation via user prompts does not work
-- **Discovery:** v2.0.26 testing confirmed bug extends earlier than initially reported
 
-### Symptoms
+### Resolution
 
-1. UserPromptSubmit hooks are registered in settings.json but never execute
-2. No hook activity appears in logs when users submit prompts
-3. PreToolUse and PostToolUse hooks continue to work normally
-4. Hook script works perfectly when tested manually
+As of Claude Code v2.0.55, all hook types are working correctly:
 
-### Root Cause
+- ✅ UserPromptSubmit hooks execute properly
+- ✅ PreToolUse hooks work
+- ✅ PostToolUse hooks work
 
-This is a **Claude Code bug**, not a configuration issue. After extensive testing:
+The pipeline settings have been updated (v3.2) to re-enable automatic hook-based phase transitions.
 
-- ✅ Hook configuration is correct
-- ✅ Hook file permissions are correct
-- ✅ Hook script executes successfully when tested manually
-- ✅ PreToolUse/PostToolUse hooks function normally
-- ❌ Claude Code simply doesn't invoke UserPromptSubmit hooks in v2.0.26+
+### Previous Workarounds (No Longer Required)
 
-### Workaround (Hybrid Approach - Currently Active)
-
-This pipeline implements a **three-method workaround strategy**:
-
-1. **Slash Command (Recommended)** - `/parse-prd`
-   - **Most reliable** - Bypasses broken hook system completely
-   - Explicit activation: Just type `/parse-prd` in Claude Code
-   - Handles large PRDs automatically (>25K tokens)
-   - Works 100% of the time
-   - Location: `commands/parse-prd.md`
-   - **Use this method for guaranteed activation**
-
-2. **PreToolUse Hook (Automatic Fallback)** - `pretooluse-skill-activator.sh`
-   - Detects `task-master parse-prd` commands
-   - Injects skill activation context
-   - Provides PRD size warnings
-   - Less elegant than UserPromptSubmit but functional
-   - **Limitation**: Only fires when Claude naturally chooses Bash tool
-   - Works as automatic backup when you say things like "run task-master parse-prd"
-
-3. **Version Checker** - `claude-version-checker.sh`
-   - Runs on SessionStart
-   - Alerts when you're running a broken version
-   - **LOUDLY notifies** when a new version is available
-   - Provides update instructions
-
-4. **UserPromptSubmit Hook Preserved** (Forward Compatibility)
-   - Kept in configuration for when bug is fixed
-   - Will automatically work when Claude Code is patched
-   - No code changes needed once fixed
-
-**Usage Recommendation:**
-- **For reliability**: Use `/parse-prd` slash command
-- **For convenience**: Say "run task-master parse-prd docs/PRD.md"
-- **Natural language**: May work if Claude chooses Bash tool, but not guaranteed
-
-### When Bug is Fixed
-
-**You will see a LOUD notification** when:
-1. Claude Code version is newer than v2.0.32
-2. You start a new session
-3. The version checker detects the update
-
-**Then follow these steps:**
-
-```bash
-# 1. Verify the bug is fixed
-# Check GitHub issue: https://github.com/anthropics/claude-code/issues/10287
-
-# 2. Update this pipeline
-cd /path/to/claude-dev-pipeline
-git pull origin deploy
-
-# 3. Reinstall in your project
-./install.sh /path/to/your/project
-
-# 4. Test UserPromptSubmit hooks
-claude --permission-mode bypassPermissions
-# Try: "generate tasks from my PRD"
-# Check: tail -f .claude/logs/skill-activations.log
-```
-
-### Testing Hook Functionality
-
-To verify hooks are working:
-
-```bash
-# Test UserPromptSubmit manually
-cd /path/to/your/project
-echo '{"message":"generate tasks from my PRD"}' | .claude/hooks/user-prompt-submit.sh
-
-# Should output:
-# - Pattern detection message
-# - PRD location
-# - Codeword: [ACTIVATE:PRD_TO_TASKS_V1]
-# - JSON with injectedText field
-
-# Check logs
-tail -20 .claude/logs/skill-activations.log
-# Should show pattern matching and activation
-```
-
-### Reporting Issues
-
-If you discover:
-- Bug is fixed in a new Claude Code version
-- Workaround is causing problems
-- Additional issues
-
-**Update the pipeline** and file an issue with:
-- Claude Code version (`claude --version`)
-- Log output (`.claude/logs/skill-activations.log`)
-- Expected vs actual behavior
+The slash commands (`/parse-prd`, `/generate-specs`, etc.) remain available as fallback but are no longer the primary activation method.
 
 ---
 
-## Other Known Issues
+## ✅ RESOLVED: Bash 3.2 Compatibility
 
-### PreToolUse/PostToolUse Hook Errors
+### Issue Description
 
-**Status:** Under investigation
+**macOS ships with Bash 3.2, but `profiler.sh` used Bash 4+ features (`declare -A` associative arrays).**
 
-Some users see "PreToolUse hook error" or "PostToolUse hook returned blocking error" messages. These are logged by Claude Code but don't appear to break functionality.
+This caused PostToolUse hooks to fail with exit code 2 on macOS.
 
-**Impact:** Cosmetic - hooks still execute
+### Resolution
 
-**Workaround:** None needed currently
+`lib/profiler.sh` now checks the Bash version and gracefully disables profiling on Bash < 4:
+
+```bash
+BASH_VERSION_MAJOR="${BASH_VERSION%%.*}"
+if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
+    PROFILER_ENABLED="false"
+    PROFILER_BASH3_MODE="true"
+fi
+```
+
+All hooks now work on both macOS (Bash 3.2) and Linux (Bash 4+).
+
+---
+
+## ✅ RESOLVED: OpenSpec Package Name
+
+### Issue Description
+
+The prerequisites installer referenced `@anthropic/openspec` which doesn't exist on npm.
+
+### Resolution
+
+Corrected to `@fission-ai/openspec@latest` in:
+- `lib/prerequisites-installer.sh`
+- `install.sh`
 
 ---
 
@@ -143,10 +69,35 @@ Some users see "PreToolUse hook error" or "PostToolUse hook returned blocking er
 
 | Claude Code Version | UserPromptSubmit | PreToolUse | PostToolUse | Status |
 |-------------------|------------------|------------|-------------|---------|
-| v2.0.25 and earlier | ❓ Unknown | ✅ Working | ✅ Working | Not tested - may work |
-| v2.0.26 - v2.0.32 | ❌ Broken | ✅ Working | ✅ Working | Workaround active (tested) |
-| v2.0.33+ | ❓ Unknown | ✅ Working | ✅ Working | **Test and report!** |
+| v2.0.25 and earlier | ❓ Unknown | ✅ Working | ✅ Working | Not tested |
+| v2.0.26 - v2.0.32 | ❌ Broken | ✅ Working | ✅ Working | Use slash commands |
+| v2.0.33 - v2.0.54 | ❓ Unknown | ✅ Working | ✅ Working | Likely fixed |
+| **v2.0.55+** | **✅ Working** | **✅ Working** | **✅ Working** | **Full hook support** |
 
 ---
 
-**Last Updated:** 2025-11-05
+## Remaining Notes
+
+### Slash Commands Still Available
+
+Even with hooks working, slash commands remain as reliable fallback:
+
+- `/parse-prd` - Phase 1: Task Decomposition
+- `/generate-specs` - Phase 2: Specification Generation
+- `/implement-tdd` - Phase 3: TDD Implementation
+- `/validate-integration` - Phase 4: Integration Testing
+- `/validate-e2e` - Phase 5: E2E Validation
+- `/deploy` - Phase 6: Production Deployment
+
+### Profiler Disabled on Bash 3.2
+
+On macOS with default Bash 3.2, the profiler is automatically disabled. This is cosmetic - all other functionality works normally. To enable profiling, use Bash 4+:
+
+```bash
+brew install bash
+/opt/homebrew/bin/bash your-script.sh
+```
+
+---
+
+**Last Updated:** 2025-11-27
