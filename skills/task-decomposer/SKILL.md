@@ -105,6 +105,8 @@ Stage 7: Final Verification
 
 ### Full Automated Execution
 
+**IMPORTANT:** Use the wrapper script to avoid Claude Code's 10-minute Bash timeout:
+
 ```bash
 # When activated, skill runs all stages automatically:
 
@@ -112,17 +114,16 @@ Stage 7: Final Verification
 echo "✅ Verifying prerequisites..."
 [checks tasks.json, TaskMaster, no existing subtasks]
 
-# Stage 2: Complexity Analysis
+# Stage 2: Complexity Analysis (use wrapper to avoid timeout)
 echo "🔍 Analyzing task complexity..."
-task-master analyze-complexity --research
-task-master complexity-report > .taskmaster/phase1-complexity-report.txt
+./.claude/lib/task-master-wrapper.sh analyze --research
 
-# Stage 3: Expansion
+# Stage 3: Expansion (use wrapper - expands tasks individually to avoid timeout)
 echo "🔨 Expanding high-complexity tasks..."
-for task_id in [high_complexity_ids]; do
-  task-master expand --id=$task_id --research
-  [save checkpoint every 2 tasks]
-done
+./.claude/lib/task-master-wrapper.sh expand-high --research
+
+# Alternative: Expand ALL tasks (chunked, 5 min per task)
+# ./.claude/lib/task-master-wrapper.sh expand-all --research
 
 # Stage 4: Validation
 echo "🔍 Validating expansion quality..."

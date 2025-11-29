@@ -199,6 +199,24 @@ cat .claude/config/settings.json
 | State corruption | Reset: `rm .claude/.workflow-state.json` |
 | Git worktree conflicts | Clean up: `git worktree prune` |
 | Missing jq | Install: `brew install jq` (macOS) or `apt install jq` (Linux) |
+| TaskMaster timeout | Use wrapper: `./.claude/lib/task-master-wrapper.sh expand-all --research` |
+
+### TaskMaster Timeout Issues
+
+Claude Code has a 10-minute timeout for Bash commands. For large projects, `task-master expand --all` may timeout. Use the wrapper script instead:
+
+```bash
+# Analyze complexity (10 min timeout)
+./.claude/lib/task-master-wrapper.sh analyze --research
+
+# Expand all tasks (chunked, 5 min per task)
+./.claude/lib/task-master-wrapper.sh expand-all --research
+
+# Expand only high-complexity tasks (score >= 7)
+./.claude/lib/task-master-wrapper.sh expand-high --research
+```
+
+The wrapper expands tasks individually to avoid the timeout.
 
 For detailed troubleshooting: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 
