@@ -4,7 +4,7 @@ phase: 6
 prerequisites:
   - All tests passing
   - Production readiness validated
-  - Human approval
+  - Phase 5 complete
 outputs:
   - Deployment artifacts
   - .signals/phase6-complete.json
@@ -12,8 +12,8 @@ outputs:
 description: |
   Orchestrates deployment to production after all validations pass.
   Activates via codeword [ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1] injected by hooks
-  after human approval gate.
-  
+  automatically after Phase 5 completes.
+
   Activation trigger: [ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1]
 ---
 
@@ -27,9 +27,9 @@ This skill activates when the hook system injects the codeword:
 ```
 
 This occurs when:
-- Phase 5 E2E tests pass with Go decision
+- Phase 5 E2E tests pass
 - Task #26 (deployment) is active
-- Human approval received
+- Automatically triggered after Phase 5 completion
 
 ## Worktree Isolation Requirements
 
@@ -56,7 +56,7 @@ cd ./worktrees/phase-6-task-1
 
 ## What This Skill Does
 
-Automates Phase 6: Production deployment in isolated worktree
+Automates Phase 6: Production deployment in isolated worktree (fully autonomous)
 
 - **Infrastructure validation** (Docker, Kubernetes, services)
 - **Container build and startup** (docker-compose up)
@@ -64,7 +64,7 @@ Automates Phase 6: Production deployment in isolated worktree
 - **Staging deployment** (validate) in isolated environment
 - **Canary deployment** (monitor) with isolated deployment artifacts
 - **Production rollout** (gradual or immediate) from clean workspace
-- **Human approval gates** (before canary, before production)
+- **Automatic progression** through all deployment stages
 - **Rollback capability** (if issues detected) with isolated rollback scripts
 - **NEW**: Isolated deployment environment prevents contamination
 - **NEW**: Secure artifact management within worktree boundaries
@@ -72,7 +72,7 @@ Automates Phase 6: Production deployment in isolated worktree
 ## Execution Flow
 
 ```
-Stage 0: Automated Validation (NEW)
+Stage 0: Automated Validation
          - Run security validation
          - Run load testing
          - Validate performance targets
@@ -83,24 +83,23 @@ Stage 1: Infrastructure Setup
          - Validate health checks
          - Verify connectivity
 Stage 2: Pre-Deployment Validation
-         - Verify Phase 5 GO decision
          - Check all tests passing
          - Validate production readiness score
 Stage 3: Staging Deployment
          - Deploy to staging environment
          - Run smoke tests
          - Validate monitoring
-         ⚠️ HUMAN APPROVAL: Proceed to canary?
-Stage 3: Canary Deployment
+         - Auto-proceed on success
+Stage 4: Canary Deployment
          - Deploy to 5% of production traffic
-         - Monitor for 24 hours
+         - Monitor metrics
          - Compare metrics vs baseline
-         ⚠️ HUMAN APPROVAL: Full production?
-Stage 4: Production Rollout
+         - Auto-proceed if metrics healthy
+Stage 5: Production Rollout
          - Gradual rollout (10% → 50% → 100%)
          - OR immediate (100%)
          - Monitor continuously
-Stage 5: Post-Deployment Validation
+Stage 6: Post-Deployment Validation
          - Verify all services healthy
          - Confirm metrics normal
          - Generate completion report
@@ -178,50 +177,49 @@ npm test:smoke
 ./scripts/health-check.sh staging
 ```
 
-### Canary (with approval)
+### Canary (automatic)
 ```bash
 # Deploy 5% traffic
 ./scripts/deploy.sh canary --traffic=5
 
-# Monitor 24 hours
+# Monitor metrics automatically
 # Watch: error rate, latency, throughput
 
-# ⚠️ HUMAN DECISION POINT
-# Continue OR Rollback
+# Auto-proceed if metrics healthy
+# Auto-rollback if metrics degrade
 ```
 
-### Production (with approval)
+### Production (automatic)
 ```bash
 # Gradual rollout
 ./scripts/deploy.sh prod --traffic=10
-# Wait 2 hours, monitor
+# Monitor, auto-proceed if healthy
 ./scripts/deploy.sh prod --traffic=50
-# Wait 4 hours, monitor
+# Monitor, auto-proceed if healthy
 ./scripts/deploy.sh prod --traffic=100
 
-# OR immediate
+# OR immediate (if canary validated)
 ./scripts/deploy.sh prod --traffic=100
 ```
 
-## Human Approval Gates
+## Automatic Validation Gates
 
-### Gate 1: Staging → Canary
-**Required checks:**
+### Gate 1: Staging → Canary (Auto)
+**Required checks (automated):**
 - ✅ Staging deployment successful
 - ✅ Smoke tests passing
 - ✅ No errors in logs
 - ✅ Monitoring dashboards healthy
 
-**Question:** "Proceed to canary deployment?"
+**Action:** Auto-proceed to canary if all checks pass
 
-### Gate 2: Canary → Production
-**Required checks:**
-- ✅ Canary stable for 24 hours
+### Gate 2: Canary → Production (Auto)
+**Required checks (automated):**
+- ✅ Canary metrics stable
 - ✅ Error rate ≤ baseline
 - ✅ Latency ≤ baseline +10%
-- ✅ No customer complaints
 
-**Question:** "Proceed to full production?"
+**Action:** Auto-proceed to production if metrics healthy
 
 ## Rollback Triggers
 

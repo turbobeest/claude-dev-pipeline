@@ -568,15 +568,14 @@ inject_next_activation() {
             audit_log "INFO" "Auto-transition: $signal -> $next_activation ($skill_name)"
             
         elif [ -n "$next_activation" ]; then
+            # Auto-proceed to next phase (no manual gate)
             echo ""
-            echo "⏸️ **MANUAL GATE REACHED**"
-            echo "**Signal:** $signal"
-            echo "**Next Skill:** $next_activation (requires user confirmation)"
+            echo "🚀 **PROCEEDING TO NEXT PHASE**"
             echo ""
-            echo "To continue, say: \"Proceed to next phase\" or \"Continue pipeline\""
+            echo "[ACTIVATE:$next_activation]"
             echo ""
-            
-            audit_log "INFO" "Manual gate reached: $signal -> $next_activation"
+
+            audit_log "INFO" "Auto-proceeding: $signal -> $next_activation"
         fi
     fi
     
@@ -749,12 +748,8 @@ case "$TOOL_NAME" in
             if emit_signal "PHASE5_COMPLETE" "phase5-complete" '{"e2e_tests":"passed"}'; then
                 echo "✅ **Phase 5 Complete:** E2E tests passing"
                 echo ""
-                echo "🔴 **GO/NO-GO DECISION REQUIRED**"
-                echo ""
-                echo "Review test results and make decision:"
-                echo "- Say \"GO\" to approve production deployment"
-                echo "- Say \"NO-GO\" to halt and review issues"
-                echo ""
+                echo "🚀 **Auto-proceeding to Phase 6: Deployment**"
+                inject_next_activation "PHASE5_COMPLETE"
             fi
         fi
         
@@ -789,61 +784,16 @@ if [ "$TOOL_NAME" = "Read" ] || [ "$TOOL_NAME" = "Bash" ]; then
         echo ""
     fi
     
-    # Task #26 - Production Readiness
+    # Task #26 - Production Readiness (auto-proceed)
     if [[ "$CONTENT" == *"task #26"* ]] || [[ "$CONTENT" == *"task 26"* ]]; then
-        local go_decision
-        go_decision=$(timeout 5s jq -r '.signals.GO_DECISION // empty' "$STATE_FILE" 2>/dev/null || echo "")
-        
-        if [ -n "$go_decision" ]; then
-            echo ""
-            echo "[ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1]"
-            echo "**Task #26:** Production Deployment (GO decision confirmed)"
-            echo ""
-        else
-            echo ""
-            echo "⚠️ **Task #26 Blocked:** Awaiting GO/NO-GO decision from Phase 5"
-            echo ""
-        fi
+        echo ""
+        echo "[ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1]"
+        echo "**Task #26:** Production Deployment (auto-proceeding)"
+        echo ""
     fi
 fi
 
-# Special handling for user approval responses (secure)
-if [ "$TOOL_NAME" = "UserMessage" ]; then
-    MESSAGE_RAW=$(echo "$TOOL_INPUT" | jq -r '.message // ""' 2>/dev/null || echo "")
-    MESSAGE=$(sanitize_string "$MESSAGE_RAW" 1000 | tr '[:upper:]' '[:lower:]')
-    
-    # GO/NO-GO decision
-    if [[ "$MESSAGE" == *"go"* ]] && [[ "$MESSAGE" != *"no-go"* ]]; then
-        local phase5_complete
-        phase5_complete=$(timeout 5s jq -r '.signals.PHASE5_COMPLETE // empty' "$STATE_FILE" 2>/dev/null || echo "")
-        
-        if [ -n "$phase5_complete" ]; then
-            if emit_signal "GO_DECISION" "phase5-approved" '{"decision":"GO"}'; then
-                echo ""
-                echo "✅ **GO DECISION RECORDED**"
-                echo "[ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1]"
-                echo ""
-            fi
-        fi
-    elif [[ "$MESSAGE" == *"no-go"* ]] || [[ "$MESSAGE" == *"no go"* ]]; then
-        if emit_signal "NO_GO_DECISION" "phase5-blocked" '{"decision":"NO-GO"}'; then
-            echo ""
-            echo "🛑 **NO-GO DECISION RECORDED**"
-            echo "Pipeline halted. Review issues and address before retry."
-            echo ""
-        fi
-    fi
-    
-    # Manual progression triggers
-    if [[ "$MESSAGE" == *"proceed"* ]] || [[ "$MESSAGE" == *"continue pipeline"* ]]; then
-        local last_signal
-        last_signal=$(timeout 5s jq -r '.lastSignal // ""' "$STATE_FILE" 2>/dev/null || echo "")
-        
-        if [ -n "$last_signal" ]; then
-            inject_next_activation "$last_signal"
-        fi
-    fi
-fi
+# Note: Manual approval responses no longer needed - pipeline is fully autonomous after Phase 1
 
 audit_log "INFO" "Hook completed successfully"
 exit 0

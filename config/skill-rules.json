@@ -233,7 +233,7 @@
         "phase_state": "integration_complete"
       },
       "outputs": {
-        "signals": ["PHASE5_COMPLETE", "GO_NO_GO_DECISION"],
+        "signals": ["PHASE5_COMPLETE"],
         "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1"
       },
       "priority": 9
@@ -251,8 +251,8 @@
           "deployment",
           "go live"
         ],
-        "signals_detected": ["PHASE5_COMPLETE", "GO_DECISION"],
-        "phase_state": "approved_for_production"
+        "signals_detected": ["PHASE5_COMPLETE"],
+        "phase_state": "ready_for_deployment"
       },
       "outputs": {
         "signals": ["PHASE6_COMPLETE", "DEPLOYED_TO_PRODUCTION"]
@@ -320,9 +320,8 @@
       "next_activation": "DEPLOYMENT_ORCHESTRATOR_V1",
       "auto_trigger": true,
       "requires_user_confirmation": false,
-      "approval_gate": "GO_NO_GO_DECISION",
       "delay_seconds": 2,
-      "note": "Automatically proceeds to deployment setup and demo mode"
+      "note": "Automatically proceeds to deployment - fully autonomous"
     }
   },
   "error_recovery": {
@@ -334,11 +333,11 @@
   "notes": {
     "activation_mode": "Codeword-based activation using unique identifiers",
     "signal_flow": "Each skill emits signals that trigger next phase automatically",
-    "human_gates": "ONE interactive review after task generation, then FULLY AUTOMATED",
-    "review_gate": "After PRD-to-Tasks: Interactive review/refinement session before automation",
+    "human_gates": "ONE approval after task generation (Phase 1), then FULLY AUTONOMOUS",
+    "review_gate": "After PRD-to-Tasks: User approves task breakdown, then pipeline runs uninterrupted",
     "priority": "Lower number = higher priority (1 is highest)",
-    "auto_trigger": "All transitions automatic after task approval",
-    "automation_level": "Interactive task review, then 100% autonomous through deployment",
-    "workflow": "PRD → Tasks → REVIEW GATE → Full Automation (Phases 1-6)"
+    "auto_trigger": "All transitions automatic after Phase 1 approval",
+    "automation_level": "Phases 2-6 are 100% autonomous - no human intervention required",
+    "workflow": "PRD → Tasks → APPROVAL → Full Automation (Phases 2-6 uninterrupted)"
   }
 }
