@@ -101,8 +101,15 @@ The installer automatically configures TaskMaster to use Opus 4.5 (`claude-opus-
 
 📄 **[PRD Template](templates/PRD-template.md)** — Start here
 
-**Step 2:** Start Claude Code in your project directory:
+**Step 2:** Start Claude Code in autonomous mode:
 
+```bash
+claude --dangerously-skip-permissions
+```
+
+This flag enables fully autonomous operation—Claude won't prompt for confirmation on file edits, command execution, or other actions. **Use only in trusted project directories.**
+
+For standard interactive mode (with permission prompts), use:
 ```bash
 claude
 ```
