@@ -59,6 +59,47 @@ log_step() {
     echo -e "\n${CYAN}==>${NC} ${BLUE}$*${NC}"
 }
 
+# Configure TaskMaster with Opus 4.5 for all models
+configure_taskmaster_opus() {
+    if [[ ! -f ".taskmaster/config.json" ]]; then
+        log_warning "TaskMaster config.json not found, skipping model configuration"
+        return 0
+    fi
+
+    log_info "Configuring TaskMaster models to Opus 4.5..."
+
+    # Create the models configuration
+    local opus_config='{
+      "main": {
+        "provider": "anthropic",
+        "modelId": "claude-opus-4-5-20251101",
+        "maxTokens": 120000,
+        "temperature": 0.2
+      },
+      "research": {
+        "provider": "anthropic",
+        "modelId": "claude-opus-4-5-20251101",
+        "maxTokens": 120000,
+        "temperature": 0.1
+      },
+      "fallback": {
+        "provider": "anthropic",
+        "modelId": "claude-opus-4-5-20251101",
+        "maxTokens": 120000,
+        "temperature": 0.2
+      }
+    }'
+
+    # Update config.json with Opus 4.5 models
+    if jq --argjson models "$opus_config" '.models = $models' \
+        .taskmaster/config.json > .taskmaster/config.json.tmp 2>/dev/null; then
+        mv .taskmaster/config.json.tmp .taskmaster/config.json
+        log_success "All TaskMaster models set to claude-opus-4-5-20251101"
+    else
+        log_warning "Could not update TaskMaster config - manual configuration may be needed"
+    fi
+}
+
 # =============================================================================
 # Banner
 # =============================================================================
@@ -247,6 +288,9 @@ configure_pipeline() {
                 echo '{"version":"1.0","initialized":true}' > .taskmaster/config.json 2>/dev/null || true
                 log_success "TaskMaster directories created"
             fi
+
+            # Auto-configure all models to Opus 4.5
+            configure_taskmaster_opus
         else
             # Empty .taskmaster exists - safe to skip
             log_info "TaskMaster already initialized (no data to preserve)"
@@ -329,136 +373,13 @@ configure_pipeline() {
             log_info "You can add it later to .env file: ANTHROPIC_API_KEY=your_key"
         fi
 
-        # Configure TaskMaster models
+        # Model configuration is now automatic (Opus 4.5) - just display current settings
         if [[ -f ".taskmaster/config.json" ]]; then
-            echo ""
-            log_info "TaskMaster Model Configuration"
-            echo ""
-
-            # Check existing model configuration
             local current_main_model=$(jq -r '.models.main.modelId // "not configured"' .taskmaster/config.json 2>/dev/null)
-            local current_research_model=$(jq -r '.models.research.modelId // "not configured"' .taskmaster/config.json 2>/dev/null)
-
-            # Check if models are already configured
-            local current_fallback_model=$(jq -r '.models.fallback.modelId // "not configured"' .taskmaster/config.json 2>/dev/null)
-
             if [[ "$current_main_model" != "not configured" ]]; then
-                echo "  Current configuration:"
-                echo "    Main model: ${CYAN}${current_main_model}${NC}"
-                echo "    Research model: ${CYAN}${current_research_model}${NC}"
-                echo "    Fallback model: ${CYAN}${current_fallback_model}${NC}"
                 echo ""
-                read -p "Keep these model settings? [Y/n] " -n 1 -r
-                echo ""
-                if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
-                    log_success "Using existing model configuration"
-                else
-                    # Prompt for new model selection (all three roles)
-                    echo ""
-                    echo "  ${YELLOW}TaskMaster uses three model roles:${NC}"
-                    echo "    • ${CYAN}Main${NC}: Primary task processing (parse PRD, add/update tasks)"
-                    echo "    • ${CYAN}Research${NC}: Web research and analysis (--research flag)"
-                    echo "    • ${CYAN}Fallback${NC}: Backup if main model fails"
-                    echo ""
-                    echo "  ${GREEN}Recommended: Use Sonnet 4.5 for all three roles${NC}"
-                    echo ""
-
-                    # Model selection options
-                    echo "  Available models:"
-                    echo "    ${CYAN}1${NC}) claude-sonnet-4-5-20250929 (73% SWE, \$3/\$15 per 1M tokens) ${GREEN}[Default]${NC}"
-                    echo "    ${CYAN}2${NC}) claude-opus-4-20250514 (72.5% SWE, \$15/\$75 per 1M tokens)"
-                    echo "    ${CYAN}3${NC}) claude-3-7-sonnet-20250219 (62% SWE, \$3/\$15 per 1M tokens)"
-                    echo "    ${CYAN}4${NC}) claude-haiku-4-5-20251001 (45% SWE, \$1/\$5 per 1M tokens)"
-                    echo "    ${CYAN}5${NC}) perplexity-llama-3.1-sonar-large-128k-online (research only)"
-                    echo ""
-
-                    # Main model
-                    read -p "Main model [1-5] (default: 1): " main_choice
-                    main_choice=${main_choice:-1}
-                    case $main_choice in
-                        1) main_model="claude-sonnet-4-5-20250929"; main_provider="anthropic" ;;
-                        2) main_model="claude-opus-4-20250514"; main_provider="anthropic" ;;
-                        3) main_model="claude-3-7-sonnet-20250219"; main_provider="anthropic" ;;
-                        4) main_model="claude-haiku-4-5-20251001"; main_provider="anthropic" ;;
-                        5) main_model="perplexity-llama-3.1-sonar-large-128k-online"; main_provider="perplexity" ;;
-                        *) main_model="claude-sonnet-4-5-20250929"; main_provider="anthropic" ;;
-                    esac
-
-                    # Research model
-                    read -p "Research model [1-5] (default: 1): " research_choice
-                    research_choice=${research_choice:-1}
-                    case $research_choice in
-                        1) research_model="claude-sonnet-4-5-20250929"; research_provider="anthropic" ;;
-                        2) research_model="claude-opus-4-20250514"; research_provider="anthropic" ;;
-                        3) research_model="claude-3-7-sonnet-20250219"; research_provider="anthropic" ;;
-                        4) research_model="claude-haiku-4-5-20251001"; research_provider="anthropic" ;;
-                        5) research_model="perplexity-llama-3.1-sonar-large-128k-online"; research_provider="perplexity" ;;
-                        *) research_model="claude-sonnet-4-5-20250929"; research_provider="anthropic" ;;
-                    esac
-
-                    # Fallback model
-                    read -p "Fallback model [1-5] (default: 1): " fallback_choice
-                    fallback_choice=${fallback_choice:-1}
-                    case $fallback_choice in
-                        1) fallback_model="claude-sonnet-4-5-20250929"; fallback_provider="anthropic" ;;
-                        2) fallback_model="claude-opus-4-20250514"; fallback_provider="anthropic" ;;
-                        3) fallback_model="claude-3-7-sonnet-20250219"; fallback_provider="anthropic" ;;
-                        4) fallback_model="claude-haiku-4-5-20251001"; fallback_provider="anthropic" ;;
-                        5) fallback_model="perplexity-llama-3.1-sonar-large-128k-online"; fallback_provider="perplexity" ;;
-                        *) fallback_model="claude-sonnet-4-5-20250929"; fallback_provider="anthropic" ;;
-                    esac
-
-                    # Update config.json with all three models
-                    jq --arg main "$main_model" \
-                       --arg main_provider "$main_provider" \
-                       --arg research "$research_model" \
-                       --arg research_provider "$research_provider" \
-                       --arg fallback "$fallback_model" \
-                       --arg fallback_provider "$fallback_provider" \
-                        '.models.main.modelId = $main |
-                         .models.main.provider = $main_provider |
-                         .models.research.modelId = $research |
-                         .models.research.provider = $research_provider |
-                         .models.fallback.modelId = $fallback |
-                         .models.fallback.provider = $fallback_provider' \
-                        .taskmaster/config.json > .taskmaster/config.json.tmp && \
-                        mv .taskmaster/config.json.tmp .taskmaster/config.json
-
-                    echo ""
-                    log_success "Model configuration updated:"
-                    echo "  Main: ${CYAN}${main_model}${NC}"
-                    echo "  Research: ${CYAN}${research_model}${NC}"
-                    echo "  Fallback: ${CYAN}${fallback_model}${NC}"
-                fi
-            else
-                # First-time setup - offer quick defaults
-                echo "  ${YELLOW}TaskMaster Model Configuration${NC}"
-                echo ""
-                echo "  TaskMaster uses three model roles:"
-                echo "    • ${CYAN}Main${NC}: Primary task processing"
-                echo "    • ${CYAN}Research${NC}: Web research (with --research flag)"
-                echo "    • ${CYAN}Fallback${NC}: Backup if main fails"
-                echo ""
-                echo "  ${GREEN}Quick Setup: Use Sonnet 4.5 for all three? [Y/n]${NC}"
-                read -p "  " -n 1 -r
-                echo ""
-
-                if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
-                    # Set all three to sonnet 4.5
-                    jq '.models.main.modelId = "claude-sonnet-4-5-20250929" |
-                        .models.main.provider = "anthropic" |
-                        .models.research.modelId = "claude-sonnet-4-5-20250929" |
-                        .models.research.provider = "anthropic" |
-                        .models.fallback.modelId = "claude-sonnet-4-5-20250929" |
-                        .models.fallback.provider = "anthropic"' \
-                        .taskmaster/config.json > .taskmaster/config.json.tmp && \
-                        mv .taskmaster/config.json.tmp .taskmaster/config.json
-
-                    log_success "All models set to claude-sonnet-4-5-20250929"
-                else
-                    log_info "Models will use TaskMaster defaults"
-                    log_info "Run 'task-master models --setup' later to configure"
-                fi
+                log_info "TaskMaster model configuration:"
+                echo "    All models: ${CYAN}${current_main_model}${NC}"
             fi
         fi
     fi
