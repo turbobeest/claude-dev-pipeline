@@ -361,6 +361,27 @@ tests/
 └── .signals/phase3-complete.json
 ```
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 4.**
+
+When Phase 3 is complete (all tasks implemented with tests passing), you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ PHASE 3 COMPLETE
+   [SIGNAL:PHASE3_COMPLETE]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 4 by outputting:
+   ```
+   [ACTIVATE:INTEGRATION_VALIDATOR_V1]
+   ```
+
+3. Begin integration validation without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - Pipeline Orchestrator (triggers this)

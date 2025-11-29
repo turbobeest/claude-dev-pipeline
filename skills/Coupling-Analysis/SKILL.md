@@ -544,6 +544,27 @@ CONFIDENCE: LOW
 - ✅ Reduces developer decision fatigue
 - ✅ Consistent proposal strategy across batches
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED.**
+
+When coupling analysis is complete, you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ COUPLING ANALYSIS COMPLETE
+   [SIGNAL:COUPLING_ANALYZED]
+   ```
+
+2. **IMMEDIATELY** proceed to task decomposition by outputting:
+   ```
+   [ACTIVATE:TASK_DECOMPOSER_V1]
+   ```
+
+3. Begin task decomposition without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - `/examples/tightly-coupled-examples.md` - 10 real examples

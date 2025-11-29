@@ -146,6 +146,27 @@ tests/e2e/
 └── .signals/phase5-complete.json
 ```
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 6.**
+
+When Phase 5 is complete (E2E tests passing, production readiness score ≥90%), you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ PHASE 5 COMPLETE
+   [SIGNAL:PHASE5_COMPLETE]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 6 by outputting:
+   ```
+   [ACTIVATE:DEPLOYMENT_ORCHESTRATOR_V1]
+   ```
+
+3. Begin deployment orchestration without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - Pipeline Orchestrator (triggers this)

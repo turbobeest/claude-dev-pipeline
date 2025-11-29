@@ -247,11 +247,33 @@ Resume command: "Resume Phase 1 from checkpoint"
 
 ## Success Criteria
 
-✅ All tasks analyzed  
-✅ High-complexity tasks (≥7) expanded  
-✅ Subtasks have acceptance criteria  
-✅ Completion signal created  
+✅ All tasks analyzed
+✅ High-complexity tasks (≥7) expanded
+✅ Subtasks have acceptance criteria
+✅ Completion signal created
 ✅ Ready for Phase 2
+
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 2.**
+
+When Phase 1 is complete (all tasks expanded), you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ PHASE 1 COMPLETE
+   [SIGNAL:PHASE1_COMPLETE]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 2 by outputting:
+   ```
+   [ACTIVATE:SPEC_GEN_V1]
+   ```
+
+3. Begin Phase 2 (Spec Generation) without waiting for user input.
+
+**The pipeline is designed to be fully autonomous after Phase 1 task approval.**
+Do not ask "Would you like to proceed?" or offer choices - just proceed automatically.
 
 ## Output Files
 

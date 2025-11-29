@@ -677,6 +677,27 @@ READY FOR TDD IMPLEMENTATION ✅
 - ✅ TDD cycle enforced (RED-GREEN-REFACTOR)
 - ✅ No untested edge cases discovered in production
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 3.**
+
+When test strategy generation is complete, you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ TEST STRATEGY COMPLETE
+   [SIGNAL:TEST_STRATEGY_COMPLETE]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 3 by outputting:
+   ```
+   [ACTIVATE:TDD_IMPLEMENTER_V1]
+   ```
+
+3. Begin TDD implementation without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - `/templates/unit-test-template.js` - Complete unit test example

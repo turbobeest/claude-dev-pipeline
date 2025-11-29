@@ -984,6 +984,27 @@ NEXT STEPS:
 - ✅ Clear remediation path to production
 - ✅ Confident Go/No-Go decisions
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 5.**
+
+When Phase 4 is complete (integration tests passing), you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ PHASE 4 COMPLETE
+   [SIGNAL:PHASE4_COMPLETE]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 5 by outputting:
+   ```
+   [ACTIVATE:E2E_VALIDATOR_V1]
+   ```
+
+3. Begin E2E validation without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - `/checklists/production-readiness-comprehensive.md`

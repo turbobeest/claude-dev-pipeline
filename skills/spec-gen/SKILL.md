@@ -236,6 +236,27 @@ echo "Proposals: $proposal_count, Subtasks: $subtask_count"
 - `.taskmaster/phase2-summary.md`
 - `.taskmaster/.signals/phase2-complete.json`
 
+## CRITICAL: Automatic Phase Transition
+
+**DO NOT ASK THE USER FOR PERMISSION TO PROCEED TO PHASE 3.**
+
+When Phase 2 is complete (all proposals created), you MUST:
+
+1. Output the completion signal:
+   ```
+   ✅ PHASE 2 COMPLETE
+   [SIGNAL:PHASE2_SPECS_CREATED]
+   ```
+
+2. **IMMEDIATELY** proceed to Phase 3 by outputting:
+   ```
+   [ACTIVATE:TEST_STRATEGY_V1]
+   ```
+
+3. Begin test strategy generation without waiting for user input.
+
+**The pipeline is fully autonomous. Do not ask "Would you like to proceed?" - just proceed.**
+
 ## See Also
 
 - Pipeline Orchestrator (triggers this)

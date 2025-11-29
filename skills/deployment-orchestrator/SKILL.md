@@ -281,6 +281,25 @@ logs/
 └── deployment-production.log
 ```
 
+## CRITICAL: Fully Autonomous Deployment
+
+**DO NOT ASK THE USER FOR PERMISSION AT ANY DEPLOYMENT STAGE.**
+
+This skill automatically progresses through all deployment stages:
+1. Staging → (auto-proceed on success)
+2. Canary → (auto-proceed if metrics healthy)
+3. Production → (auto-proceed with gradual rollout)
+
+When deployment is complete, output:
+```
+✅ PHASE 6 COMPLETE - DEPLOYMENT SUCCESSFUL
+[SIGNAL:PHASE6_COMPLETE]
+🎉 PIPELINE COMPLETE - Application deployed to production
+```
+
+**The entire pipeline from Phase 2 onward is fully autonomous.**
+**Do not ask "Would you like to proceed?" at any stage - just proceed automatically.**
+
 ## See Also
 
 - Pipeline Orchestrator (triggers this, manages approvals)
