@@ -6,7 +6,7 @@ An autonomous development system that takes you from a Product Requirements Docu
 
 The Claude Dev System automates the entire software development lifecycle:
 
-1. You customize a **detailed PRD** built xspecifically for TaaskMaster using claude projects. Describe EXACTLY what you want to build — use the **[PRD Template](templates/PRD-template.md)**
+1. You customize a **detailed PRD** built specifically for TaskMaster using claude projects. Describe EXACTLY what you want to build — use the **[PRD Template](templates/PRD-template.md)**
 2. Run one command to install the system
 3. Approve the top-level task breakdown (Phase 1)
 4. Claude autonomously handles everything else — specs, implementation, testing, and deployment
