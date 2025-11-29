@@ -1,13 +1,13 @@
-# Claude Dev Pipeline
+# Claude Dev System
 
 An autonomous development system that takes you from a Product Requirements Document (PRD) to deployed code with 95% automation. You provide the requirements—Claude handles the rest.
 
 ## What This Does
 
-The Claude Dev Pipeline automates the entire software development lifecycle:
+The Claude Dev System automates the entire software development lifecycle:
 
 1. You write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
-2. You run one command to install the pipeline
+2. You run one command to install the system
 3. You approve the task breakdown (Phase 1)
 4. Claude autonomously handles everything else — specs, implementation, testing, and deployment
 
@@ -28,7 +28,7 @@ The Claude Dev Pipeline automates the entire software development lifecycle:
 | **5. E2E Validation** | Full user workflows are tested end-to-end. | Automatic |
 | **6. Deployment** | Code is deployed with staged rollout and rollback triggers. | Automatic |
 
-**One approval, then fully autonomous.** After you approve the task breakdown in Phase 1, the pipeline runs to completion without intervention.
+**One approval, then fully autonomous.** After you approve the task breakdown in Phase 1, the system runs to completion without intervention.
 
 ---
 
@@ -46,26 +46,26 @@ The Claude Dev Pipeline automates the entire software development lifecycle:
 The installer automatically:
 - **Checks versions** of Node.js, npm, TaskMaster, and OpenSpec
 - **Installs or updates** any outdated dependencies
-- **Sets up** all 10 pipeline skills and 3 hooks
+- **Sets up** all 10 skills and 3 hooks
 
 ```bash
-# Clone the pipeline
-git clone https://github.com/turbobeest/claude-dev-pipeline.git
+# Clone the system
+git clone https://github.com/turbobeest/claude-dev-system.git
 
 # Navigate to your project
 cd your-project
 
-# Install the pipeline (checks and updates all dependencies)
-bash /path/to/claude-dev-pipeline/install-pipeline.sh
+# Install the system (checks and updates all dependencies)
+bash /path/to/claude-dev-system/install.sh
 
 # Or auto-update without prompts
-bash /path/to/claude-dev-pipeline/install-pipeline.sh --auto
+bash /path/to/claude-dev-system/install.sh --auto
 
 # Check dependency versions only (no install)
-bash /path/to/claude-dev-pipeline/install-pipeline.sh --check-only
+bash /path/to/claude-dev-system/install.sh --check-only
 
 # Skip tool installation if you manage dependencies separately
-bash /path/to/claude-dev-pipeline/install-pipeline.sh --no-tools
+bash /path/to/claude-dev-system/install.sh --no-tools
 
 # Verify installation
 ./health-check.sh
@@ -83,7 +83,7 @@ OpenSpec             0.5.1           0.6.0           Update
 
 This creates a `.claude/` directory with all skills, hooks, and configuration.
 
-### Your First Pipeline Run
+### Your First Run
 
 **Step 1:** Create your PRD using the template:
 
@@ -95,7 +95,7 @@ This creates a `.claude/` directory with all skills, hooks, and configuration.
 claude
 ```
 
-**Step 3:** Kick off the pipeline:
+**Step 3:** Kick off the system:
 
 ```
 I've completed my PRD at docs/PRD.md. Begin automated development.
@@ -107,7 +107,7 @@ I've completed my PRD at docs/PRD.md. Begin automated development.
 
 ## How It Works
 
-The pipeline uses **hooks** to inject activation codewords that guarantee skill activation (100% reliability vs ~70% with keyword detection).
+The system uses **hooks** to inject activation codewords that guarantee skill activation (100% reliability vs ~70% with keyword detection).
 
 ```
 Your Message → Hook analyzes context → Injects activation code → Skill executes → Phase completes → Next phase triggers
@@ -142,7 +142,7 @@ your-project/
 
 | Skill | Phase | What It Does |
 |-------|-------|--------------|
-| Pipeline Orchestration | 0 | Master controller coordinating all phases |
+| System Orchestration | 0 | Master controller coordinating all phases |
 | PRD-to-Tasks | 1 | Converts PRD into structured tasks.json |
 | Task Decomposer | 1 | Breaks complex tasks into subtasks |
 | Coupling Analysis | 1 | Determines task dependencies |
