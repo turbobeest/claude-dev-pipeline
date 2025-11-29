@@ -103,6 +103,21 @@ I've completed my PRD at docs/PRD.md. Begin automated development.
 
 **Step 4:** Approve the task breakdown when prompted, then watch it run autonomously through deployment.
 
+### Already Have tasks.json?
+
+If your PRD is too large or you already have a `tasks.json` file, skip PRD parsing:
+
+```
+I have an existing tasks.json file. Skip PRD parsing and start complexity analysis.
+```
+
+Or use the slash command:
+```
+/use-existing-tasks
+```
+
+The system will validate your tasks.json and proceed directly to complexity analysis (Phase 1.5).
+
 ---
 
 ## How It Works

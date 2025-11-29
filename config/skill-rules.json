@@ -55,6 +55,31 @@
       "priority": 2
     },
     {
+      "skill": "use-existing-tasks",
+      "activation_code": "USE_EXISTING_TASKS_V1",
+      "phase": 1,
+      "trigger_conditions": {
+        "user_patterns": [
+          "use existing tasks",
+          "skip prd",
+          "skip prd parsing",
+          "tasks already exist",
+          "I have tasks.json",
+          "use my tasks.json",
+          "start from tasks.json",
+          "skip to complexity"
+        ],
+        "file_exists": [".taskmaster/tasks/tasks.json"],
+        "phase_state": "tasks_exist"
+      },
+      "outputs": {
+        "signals": ["TASKS_GENERATED", "PRD_SKIPPED"],
+        "next_activation": "COUPLING_ANALYSIS_V1"
+      },
+      "priority": 1.5,
+      "note": "Bypasses PRD parsing when tasks.json already exists"
+    },
+    {
       "skill": "task-review-gate",
       "activation_code": "TASK_REVIEW_GATE_V1",
       "phase": 1.2,
