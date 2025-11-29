@@ -8,10 +8,10 @@ The Claude Dev Pipeline automates the entire software development lifecycle:
 
 1. You write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
 2. You run one command to install the pipeline
-3. Claude automatically decomposes tasks, writes specs, implements with TDD, tests, and deploys
-4. You approve at just 3 strategic checkpoints
+3. You approve the task breakdown (Phase 1)
+4. Claude autonomously handles everything else — specs, implementation, testing, and deployment
 
-> **The PRD is critical.** The more detailed your requirements, the better the output. Include user stories, acceptance criteria, technical constraints, and edge cases. A thorough PRD means less manual intervention later.
+> **The PRD is critical.** The more detailed your requirements, the better the output. Include user stories, acceptance criteria, technical constraints, and edge cases. A thorough PRD means fully autonomous execution from Phase 2 onward.
 
 **No more manually orchestrating Claude through each development step.**
 
@@ -22,13 +22,13 @@ The Claude Dev Pipeline automates the entire software development lifecycle:
 | Phase | What Happens | Your Role |
 |-------|--------------|-----------|
 | **1. Task Decomposition** | Your PRD is parsed into structured tasks. Complex tasks are broken into subtasks. | Approve task breakdown |
-| **2. Specification** | Tasks are analyzed for dependencies. OpenSpec proposals are generated for each work unit. | Review specs (optional) |
-| **3. TDD Implementation** | Tests are written first, then code to pass them. Enforced automatically—no skipping. | Approve start of implementation |
-| **4. Integration Testing** | Components are tested together. Architecture is validated. | None (automatic) |
-| **5. E2E Validation** | Full user workflows are tested end-to-end. | None (automatic) |
-| **6. Deployment** | Code is deployed with staged rollout and rollback triggers. | Approve production deployment |
+| **2. Specification** | Tasks are analyzed for dependencies. OpenSpec proposals are generated for each work unit. | Automatic |
+| **3. TDD Implementation** | Tests are written first, then code to pass them. Enforced automatically—no skipping. | Automatic |
+| **4. Integration Testing** | Components are tested together. Architecture is validated. | Automatic |
+| **5. E2E Validation** | Full user workflows are tested end-to-end. | Automatic |
+| **6. Deployment** | Code is deployed with staged rollout and rollback triggers. | Automatic |
 
-**Only 3 manual approvals required:** Pipeline start → Implementation start → Production deploy
+**One approval, then fully autonomous.** After you approve the task breakdown in Phase 1, the pipeline runs to completion without intervention.
 
 ---
 
@@ -101,7 +101,7 @@ claude
 I've completed my PRD at docs/PRD.md. Begin automated development.
 ```
 
-**Step 4:** Approve the 3 gates when prompted, then watch it run.
+**Step 4:** Approve the task breakdown when prompted, then watch it run autonomously through deployment.
 
 ---
 
