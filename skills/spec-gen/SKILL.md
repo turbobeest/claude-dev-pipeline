@@ -141,7 +141,64 @@ Load `.taskmaster/tasks/tasks.json`:
 
 **Result:** Total proposals = Total subtasks (30-60 proposals)
 
-## Time Estimates
+## Parallel Subagent Execution
+
+For faster proposal generation, use parallel Claude Code subagents:
+
+### Step 1: Identify Independent Batches
+
+```bash
+# Group master tasks into parallel batches
+# Tasks 1-4 (no cross-dependencies) → Subagent 1
+# Tasks 5-8 (no cross-dependencies) → Subagent 2
+# Tasks 9-12 (depends on 1-8) → Subagent 3 (runs after 1 & 2)
+```
+
+### Step 2: Launch Parallel Subagents
+
+Use Claude Code's Task tool to create proposals in parallel:
+
+```
+Launch 3 parallel subagents for OpenSpec proposal generation:
+
+Subagent 1: Create proposals for master tasks 1-4
+  - Process all subtasks under tasks 1-4
+  - Create 1 proposal per subtask
+  - Update TASKMASTER_OPENSPEC_MAP.md (append mode)
+
+Subagent 2: Create proposals for master tasks 5-8
+  - Process all subtasks under tasks 5-8
+  - Create 1 proposal per subtask
+  - Update TASKMASTER_OPENSPEC_MAP.md (append mode)
+
+Subagent 3: Create proposals for master tasks 9-12
+  - Process all subtasks under tasks 9-12
+  - Create 1 proposal per subtask
+  - Update TASKMASTER_OPENSPEC_MAP.md (append mode)
+```
+
+### Step 3: Merge and Validate
+
+After all subagents complete:
+```bash
+# Validate proposal count matches subtask count
+proposal_count=$(ls -1 openspec/changes/*/proposal.md | wc -l)
+subtask_count=$(jq '[.tasks[].subtasks | length] | add' .taskmaster/tasks/tasks.json)
+echo "Proposals: $proposal_count, Subtasks: $subtask_count"
+
+# Verify TASKMASTER_OPENSPEC_MAP.md is complete
+# Each subtask should map to exactly 1 proposal
+```
+
+### Performance Comparison
+
+| Method | 50 Subtasks | Speed |
+|--------|-------------|-------|
+| Sequential | 40-70 min | 1x |
+| 3 Parallel Subagents | 15-25 min | 3x |
+| 5 Parallel Subagents | 10-15 min | 4-5x |
+
+## Time Estimates (Sequential)
 
 **Based on master tasks (not subtasks):**
 

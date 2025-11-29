@@ -40,6 +40,7 @@ The Claude Dev System automates the entire software development lifecycle:
 - Bash 3.2+, Git 2.20+, jq
 - Node.js & npm (for TaskMaster and OpenSpec)
 - Claude Code CLI installed
+- **Anthropic API key** (for TaskMaster's AI-powered task expansion)
 
 ### Installation (2 minutes)
 
@@ -82,6 +83,17 @@ OpenSpec             0.5.1           0.6.0           Update
 ```
 
 This creates a `.claude/` directory with all skills, hooks, and configuration.
+
+### Configure API Key
+
+TaskMaster requires an Anthropic API key for AI-powered task expansion. Add it to your project's `.env` file:
+
+```bash
+# Create .env file in your project root
+echo "ANTHROPIC_API_KEY=your-api-key-here" >> .env
+```
+
+The installer automatically configures TaskMaster to use Opus 4.5 (`claude-opus-4-5-20251101`) for all AI operations.
 
 ### Your First Run
 

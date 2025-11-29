@@ -219,7 +219,91 @@ git merge feature/task-[id]
 
 **Time:** 3-4x faster (30-45 min total vs sequential)
 
-## Time Estimates
+## Parallel Subagent Execution
+
+For maximum implementation speed, use parallel Claude Code subagents with worktrees:
+
+### Step 1: Analyze Dependencies
+
+```bash
+# Identify independent subtasks that can run in parallel
+# Group by master task or by loose coupling analysis
+jq '.tasks[] | select(.subtasks != null) | {id, subtasks: [.subtasks[].id]}' \
+  .taskmaster/tasks/tasks.json
+```
+
+### Step 2: Create Worktrees
+
+```bash
+# Create one worktree per parallel subagent
+./lib/worktree-manager.sh create 3 1  # phase-3-task-1
+./lib/worktree-manager.sh create 3 2  # phase-3-task-2
+./lib/worktree-manager.sh create 3 3  # phase-3-task-3
+# ... continue for each parallel implementation slot
+```
+
+### Step 3: Launch Parallel Subagents
+
+Use Claude Code's Task tool to implement tasks in parallel:
+
+```
+Launch 5 parallel subagents for TDD implementation:
+
+Subagent 1 (worktree: phase-3-task-1):
+  - Implement subtasks 1.1, 1.2, 1.3
+  - Follow RED → GREEN → REFACTOR cycle
+  - Validate 80% coverage before marking complete
+  - Commit to feature/task-1 branch
+
+Subagent 2 (worktree: phase-3-task-2):
+  - Implement subtasks 2.1, 2.2, 2.3
+  - Independent code paths (no conflicts)
+  - Commit to feature/task-2 branch
+
+Subagent 3 (worktree: phase-3-task-3):
+  - Implement subtasks 3.1, 3.2
+  - Commit to feature/task-3 branch
+
+[Continue for remaining subagents...]
+```
+
+### Step 4: Sequential Merge
+
+After all subagents complete:
+```bash
+# Merge in dependency order (not random)
+git checkout main
+
+# Merge independent branches first
+git merge feature/task-1 --no-ff -m "Implement task 1 subtasks"
+git merge feature/task-2 --no-ff -m "Implement task 2 subtasks"
+git merge feature/task-3 --no-ff -m "Implement task 3 subtasks"
+
+# Run integration tests after each merge
+npm test:integration
+
+# Clean up worktrees
+./lib/worktree-manager.sh cleanup
+```
+
+### Conflict Prevention
+
+- Each subagent works in isolated worktree
+- Assign subtasks by directory/module to minimize conflicts
+- Run linting and tests before merge
+- Use `--no-ff` to preserve merge history
+
+### Performance Comparison
+
+| Method | 20 Subtasks | Speed |
+|--------|-------------|-------|
+| Sequential | 15-30 hours | 1x |
+| 4 Parallel Subagents | 4-8 hours | 4x |
+| 8 Parallel Subagents | 2-4 hours | 6-8x |
+
+**Note:** Diminishing returns above 8 subagents due to merge overhead
+
+## Time Estimates (Sequential)
 
 | Tasks | Sequential | Parallel |
 |-------|-----------|----------|

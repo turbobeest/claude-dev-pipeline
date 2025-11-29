@@ -144,7 +144,57 @@ echo "🎯 Final verification..."
 echo "✅ PHASE 1 COMPLETE"
 ```
 
-## Time Estimates
+## Parallel Subagent Execution
+
+For faster task expansion, use parallel Claude Code subagents:
+
+### Step 1: Get Task IDs
+
+```bash
+# List all tasks needing expansion
+./.claude/lib/task-master-wrapper.sh get-task-ids
+
+# Or get tasks in batches of 5
+./.claude/lib/task-master-wrapper.sh get-batches 5
+```
+
+### Step 2: Launch Parallel Subagents
+
+Use Claude Code's Task tool to launch multiple subagents simultaneously:
+
+```
+Launch 5 parallel subagents, each running:
+  ./.claude/lib/task-master-wrapper.sh expand-single <task_id> --research
+
+Task IDs to expand: 1, 2, 3, 4, 5
+```
+
+Each subagent will:
+1. Expand its assigned task independently
+2. Report SUCCESS or FAILED status
+3. Complete within 5-minute timeout per task
+
+### Step 3: Batch Expansion (Alternative)
+
+For fewer subagents handling multiple tasks each:
+
+```bash
+# Subagent 1: Expand tasks 1, 2, 3
+./.claude/lib/task-master-wrapper.sh expand-batch 1 2 3 --research
+
+# Subagent 2: Expand tasks 4, 5, 6
+./.claude/lib/task-master-wrapper.sh expand-batch 4 5 6 --research
+```
+
+### Performance Comparison
+
+| Method | 20 Tasks | Speed |
+|--------|----------|-------|
+| Sequential | 40-60 min | 1x |
+| 4 Parallel Subagents | 10-15 min | 4x |
+| 10 Parallel Subagents | 5-8 min | 8x |
+
+## Time Estimates (Sequential)
 
 | Tasks | Analysis | Expansion | Total |
 |-------|----------|-----------|-------|
