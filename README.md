@@ -6,7 +6,7 @@ An autonomous development system that takes you from a Product Requirements Docu
 
 The Claude Dev System automates the entire software development lifecycle:
 
-1. You write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
+1. You (claude.ai) write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
 2. You run one command to install the system
 3. You approve the task breakdown (Phase 1)
 4. Claude autonomously handles everything else — specs, implementation, testing, and deployment
