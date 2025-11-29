@@ -6,10 +6,12 @@ An autonomous development system that takes you from a Product Requirements Docu
 
 The Claude Dev Pipeline automates the entire software development lifecycle:
 
-1. You write a PRD describing what you want to build
+1. You write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
 2. You run one command to install the pipeline
 3. Claude automatically decomposes tasks, writes specs, implements with TDD, tests, and deploys
 4. You approve at just 3 strategic checkpoints
+
+> **The PRD is critical.** The more detailed your requirements, the better the output. Include user stories, acceptance criteria, technical constraints, and edge cases. A thorough PRD means less manual intervention later.
 
 **No more manually orchestrating Claude through each development step.**
 
