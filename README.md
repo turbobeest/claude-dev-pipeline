@@ -21,8 +21,8 @@ The Claude Dev System automates the entire software development lifecycle:
 
 | Phase | What Happens | Your Role |
 |-------|--------------|-----------|
-| **1. Task Decomposition** | Your PRD is parsed into structured tasks. Complex tasks are broken into subtasks. | Approve task breakdown |
-| **2. Specification** | Tasks are analyzed for dependencies. OpenSpec proposals are generated for each work unit. | Automatic |
+| **1. Task Decomposition** | Your PRD is parsed into structured tasks using [TaskMaster](https://github.com/eyaltoledano/claude-task-master). Complex tasks are broken into subtasks. | Approve task breakdown |
+| **2. Specification** | Tasks are analyzed for dependencies. [OpenSpec](https://github.com/Fission-AI/OpenSpec) proposals are generated for each work unit. | Automatic |
 | **3. TDD Implementation** | Tests are written first, then code to pass them. Enforced automatically—no skipping. | Automatic |
 | **4. Integration Testing** | Components are tested together. Architecture is validated. | Automatic |
 | **5. E2E Validation** | Full user workflows are tested end-to-end. | Automatic |
