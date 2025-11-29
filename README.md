@@ -6,12 +6,12 @@ An autonomous development system that takes you from a Product Requirements Docu
 
 The Claude Dev System automates the entire software development lifecycle:
 
-1. You (claude.ai) write a **detailed PRD** describing what you want to build — use the **[PRD Template](templates/PRD-template.md)**
-2. You run one command to install the system
-3. You approve the task breakdown (Phase 1)
+1. You customize a **detailed PRD** built xspecifically for TaaskMaster using claude projects. Describe EXACTLY what you want to build — use the **[PRD Template](templates/PRD-template.md)**
+2. Run one command to install the system
+3. Approve the top-level task breakdown (Phase 1)
 4. Claude autonomously handles everything else — specs, implementation, testing, and deployment
 
-> **The PRD is critical.** The more detailed your requirements, the better the output. Include user stories, acceptance criteria, technical constraints, and edge cases. A thorough PRD means fully autonomous execution from Phase 2 onward.
+> **The PRD is critical.** The more detailed your requirements, the better the output. Audit the PRD back and forth. Ensure no gaps exist. Include user stories, acceptance criteria, technical constraints, and edge cases. A thorough PRD means fully autonomous execution from Phase 2 onward.
 
 **No more manually orchestrating Claude through each development step.**
 
