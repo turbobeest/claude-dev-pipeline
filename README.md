@@ -1,332 +1,212 @@
-# Claude Dev Pipeline - Autonomous Full Stack Development System
+# Claude Dev Pipeline
 
-[![Version](https://img.shields.io/badge/Version-3.0-blue.svg)](#)
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](#)
-[![Automation](https://img.shields.io/badge/Automation-95%25-brightgreen.svg)](#)
+An autonomous development system that takes you from a Product Requirements Document (PRD) to deployed code with 95% automation. You provide the requirements—Claude handles the rest.
 
-> **⚠️ IMPORTANT:** Claude Code v2.0.26-2.0.32 has critical hook bugs. **ALL HOOKS ARE DISABLED** in this version. Use slash commands exclusively for 100% reliable operation. The pipeline works perfectly without hooks - just type commands like `/parse-prd`, `/generate-specs`, `/implement-tdd`, `/validate-integration`, `/validate-e2e`, `/deploy`. See [COMMANDS.md](COMMANDS.md) for complete reference.
+## What This Does
 
-A complete end-to-end development automation system that takes your Product Requirements Document (PRD) and autonomously handles the entire software development lifecycle - from task decomposition and specification generation through implementation, testing, validation, and deployment. This pipeline achieves 95% automation across all development phases, requiring human intervention only at three strategic decision points.
+The Claude Dev Pipeline automates the entire software development lifecycle:
 
-## ⚡ Fast Installation (< 2 minutes)
+1. You write a PRD describing what you want to build
+2. You run one command to install the pipeline
+3. Claude automatically decomposes tasks, writes specs, implements with TDD, tests, and deploys
+4. You approve at just 3 strategic checkpoints
 
-The installer **automatically checks and installs** all prerequisites for you!
+**No more manually orchestrating Claude through each development step.**
 
-```bash
-# Step 1: Clone to SYSTEM /tmp directory (NOT a local tmp folder!)
-cd /tmp                                    # ← System temp directory
-git clone -b deploy https://github.com/turbobeest/claude-dev-pipeline.git
+---
 
-# Step 2: Navigate to YOUR project directory
-cd /path/to/your-project                  # ← Where you want .claude/ installed
+## The 6-Phase System
 
-# Step 3: Run the installer (auto-checks & installs prerequisites)
-bash /tmp/claude-dev-pipeline/install.sh
+| Phase | What Happens | Your Role |
+|-------|--------------|-----------|
+| **1. Task Decomposition** | Your PRD is parsed into structured tasks. Complex tasks are broken into subtasks. | Approve task breakdown |
+| **2. Specification** | Tasks are analyzed for dependencies. OpenSpec proposals are generated for each work unit. | Review specs (optional) |
+| **3. TDD Implementation** | Tests are written first, then code to pass them. Enforced automatically—no skipping. | Approve start of implementation |
+| **4. Integration Testing** | Components are tested together. Architecture is validated. | None (automatic) |
+| **5. E2E Validation** | Full user workflows are tested end-to-end. | None (automatic) |
+| **6. Deployment** | Code is deployed with staged rollout and rollback triggers. | Approve production deployment |
 
-# Step 4: Done! (/tmp/claude-dev-pipeline is automatically removed)
-```
+**Only 3 manual approvals required:** Pipeline start → Implementation start → Production deploy
 
-**⚠️ IMPORTANT:** Clone to the **system `/tmp`** directory, not a local `tmp/` folder inside your project. The installer auto-removes `/tmp/claude-dev-pipeline` after installation to keep your system clean.
+---
 
-**What the installer does:**
-- ✅ Checks all prerequisites (Claude Code, Git, Bash, jq, TaskMaster, OpenSpec)
-- ✅ Auto-installs missing tools (jq, TaskMaster, OpenSpec)
-- ✅ Copies pipeline files to `.claude/` in your project
-- ✅ Initializes configuration
-- ✅ Verifies installation
-- ✅ Auto-removes installation directory from `/tmp`
+## Quick Start
 
-**Installation takes < 2 minutes with zero manual steps for most prerequisites!**
+### Prerequisites
 
-See [Quick Start Guide](docs/QUICK-START.md) for detailed instructions.
+- macOS, Linux, or WSL2
+- Bash 3.2+, Git 2.20+, jq
+- Node.js & npm (for TaskMaster and OpenSpec)
+- Claude Code CLI installed
 
-## Prerequisites (Auto-Installed)
+### Installation (2 minutes)
 
-| Tool | Auto-Install | Notes |
-|------|--------------|-------|
-| Claude Code | ❌ Manual | [Download](https://claude.ai/download) |
-| Git | ✅ Yes | Via brew/apt/yum |
-| Bash 3.2+ | ℹ️ Pre-installed | Typically available |
-| jq | ✅ Yes | JSON processor |
-| TaskMaster | ✅ Yes | [GitHub](https://github.com/eyaltoledano/claude-task-master) |
-| OpenSpec | ✅ Yes | [GitHub](https://github.com/Fission-AI/OpenSpec) |
-
-**Manual prerequisite check:**
-```bash
-# Check what's installed
-./.claude/lib/prerequisites-installer.sh
-
-# Auto-install missing tools
-./.claude/lib/prerequisites-installer.sh --fix-all
-```
-
-## Installation Structure
-
-After installation, your project will have:
-```
-your-project/              # Your project root (run 'claude' from HERE)
-├── .claude/              # Pipeline system (created by installer)
-│   ├── skills/          # 10 autonomous skills
-│   ├── hooks/           # Automation hooks (version checker, skill activator, etc)
-│   ├── commands/        # Slash commands (/parse-prd, etc) - workaround for hook bug
-│   ├── config/          # Configuration files (skill-rules.json)
-│   ├── lib/             # Support libraries (large-file-reader, state-manager, etc)
-│   └── settings.json    # Claude Code hook configuration
-├── .env                 # Environment variables (in project root, not .claude/)
-├── .taskmaster/         # TaskMaster workspace (created when used)
-├── .openspec/           # OpenSpec proposals (created when used)
-├── docs/                # Documentation directory
-│   └── PRD.md          # Your requirements document
-└── src/                # Your source code
-```
-
-**⚠️ IMPORTANT File Locations**:
-- `.env` goes in your PROJECT ROOT (not in `.claude/`)
-- `settings.json` goes in `.claude/` (hooks reference `.claude/hooks/`)
-- Always run `claude` from your project root directory
-- The hooks use relative paths from your project root
-
-## Configuration
-
-### Environment Variables (.env)
-
-The pipeline can use environment variables for configuration. Since TaskMaster also uses `.env` in the project root, we append pipeline-specific variables to your existing `.env` file:
+The installer automatically:
+- **Checks versions** of Node.js, npm, TaskMaster, and OpenSpec
+- **Installs or updates** any outdated dependencies
+- **Sets up** all 10 pipeline skills and 3 hooks
 
 ```bash
-# From your project root
+# Clone the pipeline
+git clone https://github.com/turbobeest/claude-dev-pipeline.git
+
+# Navigate to your project
 cd your-project
 
-# If you have an existing .env (from TaskMaster or other tools), append pipeline config:
-cat >> .env << 'EOF'
+# Install the pipeline (checks and updates all dependencies)
+bash /path/to/claude-dev-pipeline/install-pipeline.sh
 
-# === Claude Dev Pipeline Configuration ===
-# GitHub Repository (full URL - works with enterprise and personal GitHub)
-# Examples: https://github.com/user/repo or https://github.enterprise.com/org/repo
-GITHUB_REPO_URL=https://github.com/turbobeest/claude-dev-pipeline
-# Or for enterprise: GITHUB_REPO_URL=https://github.enterprise.com/org/repo
-GITHUB_BRANCH=deploy
+# Or auto-update without prompts
+bash /path/to/claude-dev-pipeline/install-pipeline.sh --auto
 
-# GitHub Token (optional - only needed for private repos)
-# Not required for enterprise GitHub with SSO authentication
-# GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+# Check dependency versions only (no install)
+bash /path/to/claude-dev-pipeline/install-pipeline.sh --check-only
 
-# TaskMaster Configuration (REQUIRED for TaskMaster features)
-# GitHub token with repo, project, issues, pull_requests permissions
-TASKMASTER_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-# Note: ANTHROPIC_API_KEY should already be at the top of your .env from TaskMaster
+# Skip tool installation if you manage dependencies separately
+bash /path/to/claude-dev-pipeline/install-pipeline.sh --no-tools
 
-# Pipeline Settings (optional - defaults work fine)
-AUTOMATION_LEVEL=95
-USE_WORKTREES=true
-WORKTREE_BASE_DIR=.worktrees
-LOG_LEVEL=INFO
-
-# Hook Configuration (optional)
-HOOK_DEBUG=false
-SKILL_ACTIVATION_DEBUG=false
-EOF
-
-# Or if you don't have an .env yet, copy the template:
-cp /tmp/claude-dev-pipeline/.env.template .env
-# Then edit .env with your preferences
-
-# Edit Claude Code settings if needed (optional)
-vim .claude/settings.json
+# Verify installation
+./health-check.sh
 ```
 
-**Note**: The pipeline works without any .env configuration using sensible defaults. Only add these if you need to customize behavior.
-
-## What This System Does
-
-This pipeline transforms your ideas into deployed, tested, production-ready software:
-
-1. **Planning & Design**: Analyzes your PRD, decomposes into tasks, identifies dependencies
-2. **Specification**: Generates detailed technical specifications and test strategies
-3. **Development**: Implements code using Test-Driven Development (TDD) methodology
-4. **Testing**: Executes component integration and end-to-end validation
-5. **Deployment**: Orchestrates staging, canary, and production deployments
-6. **Validation**: Ensures production readiness with automated quality gates
-
-### Complete Development Pipeline (6 Phases)
-- **Phase 1**: Task Decomposition & Planning (PRD → structured tasks)
-- **Phase 2**: Technical Specifications (OpenSpec proposals & test strategies)
-- **Phase 3**: TDD Implementation (tests first, then code)
-- **Phase 4**: Component Integration Testing (system-wide validation)
-- **Phase 5**: E2E Production Validation (user workflow testing)
-- **Phase 6**: Deployment & Rollout (staged production deployment)
-
-### Slash Commands (Hooks Disabled)
-**All hooks are disabled due to Claude Code v2.0.26-2.0.32 bugs.** Use slash commands instead:
-- `/parse-prd` - Phase 1: Task decomposition
-- `/generate-specs` - Phase 2: Specification generation
-- `/implement-tdd` - Phase 3: TDD implementation (enforces tests-first)
-- `/validate-integration` - Phase 4: Component integration testing
-- `/validate-e2e` - Phase 5: E2E validation
-- `/deploy` - Phase 6: Production deployment
-
-**Note:** Hooks will be re-enabled when Claude Code bug is fixed. Configuration preserved in `settings.json` with `_DISABLED` suffix.
-
-### Core Infrastructure
-- Atomic state management
-- Git worktree isolation
-- Error recovery with checkpoints
-- Connection pooling for tools
-- Structured JSON logging
-
-## Prerequisites for Operation
-
-### Required: Product Requirements Document (PRD)
-You must have a properly formatted PRD prepared before starting. Use the provided template to structure your requirements properly (see [PRD Template](templates/PRD-template.md)). This comprehensive template ensures all necessary information is captured for the autonomous pipeline to successfully transform your requirements into production-ready code.
-
-## Usage
-
-### Step 1: Place Your PRD
-Copy your prepared PRD to the docs directory for better organization:
-```bash
-# Create docs directory if it doesn't exist
-mkdir -p docs
-
-# Place your completed PRD in the docs directory
-cp ~/path/to/your/prepared-PRD.md ./docs/PRD.md
-
-# Or if using Claude Projects, export and place:
-cp ~/claude-projects/my-app/requirements.md ./docs/PRD.md
+**Dependency version table** (shown during install):
+```
+DEPENDENCY           INSTALLED       LATEST          STATUS
+----------           ---------       ------          ------
+Node.js              20.10.0         22.11.0         Update
+npm                  10.2.3          10.9.0          Update
+TaskMaster           1.2.0           1.2.0           ✓ OK
+OpenSpec             0.5.1           0.6.0           Update
 ```
 
-**Note**: We recommend `docs/PRD.md` instead of root to keep your project organized. TaskMaster doesn't use the PRD - it only works with `tasks.json` which the pipeline creates in `.taskmaster/`.
+This creates a `.claude/` directory with all skills, hooks, and configuration.
 
-**Large PRD Handling**: The PRD-to-Tasks skill automatically uses the large-file-reader utility to bypass Claude Code's 25,000 token Read tool limit. Your PRD can be any size.
+### Your First Pipeline Run
 
-**For Large PRDs (>25,000 tokens / >100KB):**
+**Step 1:** Create your PRD using the template:
 
-If your PRD is comprehensive and exceeds Claude Code's Read tool limit:
+📄 **[PRD Template](templates/PRD-template.md)** — Start here
+
+**Step 2:** Start Claude Code in your project directory:
 
 ```bash
-# Check if your PRD is large
-./.claude/lib/large-file-reader.sh docs/PRD.md --metadata
-
-# In Claude Code, use:
-# "Please use .claude/lib/large-file-reader.sh docs/PRD.md to read my PRD"
+claude
 ```
 
-The large-file-reader utility bypasses the 25,000 token limit and reads files of any size. See [Large File Reader Guide](docs/LARGE-FILE-READER.md) for details.
-
-### Step 2: Start the Autonomous Pipeline
-
-**Start the pipeline with slash commands:**
+**Step 3:** Kick off the pipeline:
 
 ```
-/parse-prd
+I've completed my PRD at docs/PRD.md. Begin automated development.
 ```
 
-After each phase completes, you'll be prompted to type the next command:
-- Phase 1 complete → `/generate-specs`
-- Phase 2 complete → `/implement-tdd`
-- Phase 3 complete → `/validate-integration`
-- Phase 4 complete → `/validate-e2e`
-- Phase 5 complete → `/deploy`
+**Step 4:** Approve the 3 gates when prompted, then watch it run.
 
-**Why Slash Commands?**
-- ✅ 100% reliable - no hook dependencies
-- ✅ Explicit control - you type each command
-- ✅ No errors - hooks completely bypassed
-- ✅ Clear workflow - you see each phase transition
+---
 
-See [COMMANDS.md](COMMANDS.md) for complete command reference.
+## How It Works
 
-### What Happens Next
-1. **Immediate PRD Processing**: The PRD-to-Tasks skill automatically analyzes your document
-2. **Task Generation**: Creates structured tasks.json with dependencies and coupling analysis
-3. **TaskMaster Activation**: Takes over task orchestration and management
-4. **Autonomous Progression**: Pipeline advances through all 6 phases with 95% automation
-5. **Human Approval**: You're prompted only at 3 strategic decision points
+The pipeline uses **hooks** to inject activation codewords that guarantee skill activation (100% reliability vs ~70% with keyword detection).
 
-The entire process from PRD to deployed code is managed autonomously.
+```
+Your Message → Hook analyzes context → Injects activation code → Skill executes → Phase completes → Next phase triggers
+```
 
-**Note:** The `/parse-prd` slash command is a workaround that bypasses the broken UserPromptSubmit hooks. When the bug is fixed, all three methods will work reliably.
+Three hooks power the system:
 
-## Real-Time Monitoring
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `skill-activation-prompt.sh` | Every user message | Detects context and activates the right skill |
+| `post-tool-use-tracker.sh` | After each tool use | Tracks progress and triggers phase transitions |
+| `pre-implementation-validator.sh` | Before file writes | Enforces TDD—blocks code without tests |
 
-### Option 1: Web Dashboard (Recommended) 🆕
+---
 
-Visual web-based monitoring with live updates:
+## Project Structure After Installation
+
+```
+your-project/
+└── .claude/
+    ├── skills/           # 10 autonomous development skills
+    ├── hooks/            # 3 automation hooks
+    ├── config/           # skill-rules.json, settings.json
+    ├── lib/              # Support libraries
+    ├── templates/        # PRD and architecture templates
+    └── docs/             # Full documentation
+```
+
+---
+
+## Skills Reference
+
+| Skill | Phase | What It Does |
+|-------|-------|--------------|
+| Pipeline Orchestration | 0 | Master controller coordinating all phases |
+| PRD-to-Tasks | 1 | Converts PRD into structured tasks.json |
+| Task Decomposer | 1 | Breaks complex tasks into subtasks |
+| Coupling Analysis | 1 | Determines task dependencies |
+| Spec Generator | 2 | Creates OpenSpec proposals |
+| Test Strategy | 2 | Designs test coverage (60/30/10 split) |
+| TDD Implementer | 3 | Implements code test-first |
+| Integration Validator | 4 | Tests component interactions |
+| E2E Validator | 5 | Validates full user workflows |
+| Deployment Orchestrator | 6 | Manages staged deployment |
+
+---
+
+## Verification
+
+After installation, verify everything works:
 
 ```bash
-# Start the web dashboard
-python3 .claude/monitor-dashboard.py
+# Check skills are installed
+ls .claude/skills/
 
-# Open browser to: http://localhost:8888
+# Check hooks are executable
+ls -la .claude/hooks/*.sh
+
+# Check configuration exists
+cat .claude/config/settings.json
+
+# Run health check
+./health-check.sh
 ```
 
-**Features:**
-- 📊 Visual task hierarchy (master tasks → subtasks)
-- 🟢 Real-time status indicators (pending/in-progress/complete)
-- 📝 Live log streaming with color coding
-- 📈 Progress statistics (completion %, task counts)
-- 🎨 VS Code-inspired dark theme
-- ⚡ Auto-updates every 0.5-2 seconds
+---
 
-**No dependencies required** - uses only Python standard library!
+## Troubleshooting
 
-See [MONITOR-DASHBOARD.md](MONITOR-DASHBOARD.md) for full documentation.
+| Problem | Solution |
+|---------|----------|
+| Skills not activating | Check `skill-rules.json` has correct trigger patterns |
+| Hooks not running | Verify hooks are executable: `chmod +x .claude/hooks/*.sh` |
+| State corruption | Reset: `rm .claude/.workflow-state.json` |
+| Git worktree conflicts | Clean up: `git worktree prune` |
+| Missing jq | Install: `brew install jq` (macOS) or `apt install jq` (Linux) |
 
-### Option 2: Command Line Monitor
+For detailed troubleshooting: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 
-Traditional CLI monitoring:
-
-```bash
-# In a separate terminal, run the monitor dashboard
-bash /tmp/claude-dev-pipeline/monitor-pipeline.sh
-
-# Or for live log streaming
-bash /tmp/claude-dev-pipeline/monitor-pipeline.sh --live
-
-# Check current phase
-bash /tmp/claude-dev-pipeline/monitor-pipeline.sh --phase
-```
-
-The monitor shows:
-- Current pipeline phase and progress
-- Active signals and skill activations
-- Real-time log streaming with color coding
-- Error tracking and performance metrics
-- Hook executions and codeword injections
+---
 
 ## Documentation
 
-### Getting Started
-- **[Quick Start Guide](docs/QUICK-START.md)** - Fast installation walkthrough
-- **[Manual Mode](docs/MANUAL-MODE.md)** - Explicit phase control (recommended)
-- **[Slash Commands](COMMANDS.md)** - Complete command reference
+- [Setup Guide](docs/SETUP-GUIDE.md) — Detailed installation instructions
+- [Architecture](docs/ARCHITECTURE.md) — How the system works internally
+- [Development Workflow](docs/DEVELOPMENT-WORKFLOW.md) — Phase-by-phase breakdown
+- [API Reference](docs/API.md) — Hook and skill interfaces
+- [Worktree Strategy](docs/WORKTREE-STRATEGY.md) — Git isolation approach
 
-### Core Features
-- **[Large File Reader](docs/LARGE-FILE-READER.md)** - Read PRDs >25K tokens
-- [Setup Guide](docs/SETUP-GUIDE.md) - Detailed setup instructions
-- [Architecture](docs/ARCHITECTURE.md) - System design overview
-- [Worktree Strategy](docs/WORKTREE-STRATEGY.md) - Isolation approach
+---
 
-### Reference
-- [API Reference](docs/API.md) - Library and function documentation
-- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
-- [Known Issues](KNOWN-ISSUES.md) - Current bugs and workarounds
+## Contributing
 
-## Features
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `./tests/run-tests.sh`
+5. Submit a pull request
 
-✅ **Fast Installation** - < 2 minutes with automatic prerequisite setup
-✅ **Slash Commands Only** - 7 commands covering all phases, no hook dependencies
-✅ **100% Reliability** - Hooks disabled, slash commands guarantee activation
-✅ **95% Automation** - Only 3 manual approval gates (GO/NO-GO, Prod deploy, Rollback)
-✅ **Large File Support** - Read PRDs >25K tokens (35K+ tokens tested)
-✅ **Complete Isolation** - Git worktrees for parallel development
-✅ **Production Ready** - Enterprise-grade error handling
-✅ **Tool Integration** - TaskMaster & OpenSpec ready
-✅ **No Hook Errors** - All hooks disabled until Claude Code bug is fixed
-✅ **Clear Workflow** - Explicit slash command at each phase transition
+---
 
 ## License
 
-MIT
-
-## Support
-
-For issues or questions, please check the [Troubleshooting Guide](docs/TROUBLESHOOTING.md) or open an issue on GitHub.
+MIT License — see [LICENSE](LICENSE) for details.
